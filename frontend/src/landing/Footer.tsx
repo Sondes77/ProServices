@@ -103,11 +103,11 @@ const Footer = () => {
             <ul className="space-y-2">
               <li className="flex items-center text-gray-400">
                 <MapPin size={16} className="mr-2" />
-                123 Rue de Paris, 75000 Paris
+                Tunis, Tunisie
               </li>
               <li className="flex items-center text-gray-400">
                 <Phone size={16} className="mr-2" />
-                01 23 45 67 89
+                (+216) 55 289 528
               </li>
               <li className="flex items-center text-gray-400">
                 <Mail size={16} className="mr-2" />
