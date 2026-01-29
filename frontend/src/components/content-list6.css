@@ -1,0 +1,250 @@
+.content-list6-container1 {
+  width: 100%;
+  height: auto;
+  display: flex;
+  position: relative;
+  align-items: center;
+  flex-direction: column;
+}
+ 
+.content-list6-max-width {
+  width: 100%;
+  display: flex;
+  max-width: var(--dl-layout-size-maxwidth);
+  align-items: flex-start;
+  flex-direction: row;
+}
+ 
+.content-list6-container2 {
+  flex: 0 0 auto;
+  width: auto;
+  display: flex;
+  align-items: stretch;
+  padding-top: var(--dl-layout-space-threeunits);
+  flex-direction: column;
+  justify-content: center;
+}
+ 
+.content-list6-container3 {
+  width: auto;
+  padding: var(--dl-layout-space-twounits);
+  align-items: flex-start;
+}
+ 
+.content-list6-container4 {
+  align-self: stretch;
+  align-items: flex-start;
+}
+ 
+.content-list6-ul1 {
+  align-items: flex-start;
+}
+ 
+.content-list6-li10 {
+  align-items: flex-start;
+}
+ 
+.content-list6-heading7 {
+  align-self: center;
+  text-align: center;
+}
+ 
+.content-list6-ul2 {
+  align-items: flex-start;
+  padding-left: var(--dl-layout-space-fiveunits);
+}
+ 
+.content-list6-container5 {
+  align-self: stretch;
+  align-items: flex-start;
+}
+ 
+.content-list6-li13 {
+  align-items: flex-start;
+}
+ 
+.content-list6-heading1 {
+  align-self: center;
+  text-align: center;
+}
+ 
+.content-list6-ul4 {
+  align-items: flex-start;
+  padding-left: var(--dl-layout-space-fiveunits);
+}
+ 
+.content-list6-container6 {
+  align-self: stretch;
+  align-items: flex-start;
+}
+ 
+.content-list6-ul5 {
+  align-items: flex-start;
+}
+ 
+.content-list6-li19 {
+  align-items: flex-start;
+}
+ 
+.content-list6-heading10 {
+  align-self: center;
+  text-align: center;
+}
+ 
+.content-list6-ul6 {
+  align-items: flex-start;
+  padding-left: var(--dl-layout-space-fiveunits);
+}
+ 
+.content-list6-text16 {
+  display: inline-block;
+}
+ 
+.content-list6-text17 {
+  display: inline-block;
+}
+ 
+.content-list6-text18 {
+  display: inline-block;
+}
+ 
+.content-list6-text19 {
+  display: inline-block;
+}
+ 
+.content-list6-text20 {
+  display: inline-block;
+}
+ 
+.content-list6-text21 {
+  display: inline-block;
+}
+ 
+.content-list6-text22 {
+  display: inline-block;
+}
+ 
+.content-list6-text23 {
+  display: inline-block;
+}
+ 
+.content-list6-text24 {
+  display: inline-block;
+}
+ 
+.content-list6-text25 {
+  display: inline-block;
+}
+ 
+.content-list6-text26 {
+  display: inline-block;
+}
+ 
+.content-list6-text27 {
+  display: inline-block;
+}
+ 
+.content-list6-text28 {
+  display: inline-block;
+}
+ 
+.content-list6-text29 {
+  display: inline-block;
+}
+ 
+.content-list6-text30 {
+  display: inline-block;
+}
+ 
+.content-list6-text31 {
+  display: inline-block;
+}
+ 
+.content-list6-text32 {
+  display: inline-block;
+}
+ 
+.content-list6-text33 {
+  display: inline-block;
+}
+ 
+.content-list6-text34 {
+  display: inline-block;
+}
+ 
+.content-list6-text35 {
+  display: inline-block;
+}
+ 
+.content-list6-text36 {
+  display: inline-block;
+}
+ 
+.content-list6-text37 {
+  display: inline-block;
+}
+ 
+.content-list6-text38 {
+  display: inline-block;
+}
+ 
+.content-list6-text39 {
+  display: inline-block;
+}
+ 
+.content-list6-text40 {
+  display: inline-block;
+}
+ 
+.content-list6-text41 {
+  display: inline-block;
+}
+ 
+.content-list6-text42 {
+  display: inline-block;
+}
+ 
+.content-list6-text43 {
+  display: inline-block;
+}
+ 
+@media(max-width: 767px) {
+  .content-list6-max-width {
+    align-items: center;
+    flex-direction: column;
+  }
+  .content-list6-container2 {
+    align-self: center;
+  }
+  .content-list6-container3 {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+  .content-list6-ul2 {
+    padding-left: var(--dl-layout-space-threeunits);
+  }
+  .content-list6-ul4 {
+    padding-left: var(--dl-layout-space-threeunits);
+  }
+  .content-list6-ul6 {
+    padding-left: var(--dl-layout-space-threeunits);
+  }
+}
+ 
+@media(max-width: 479px) {
+  .content-list6-max-width {
+    flex-direction: column;
+  }
+  .content-list6-container2 {
+    align-self: center;
+  }
+  .content-list6-ul2 {
+    padding-left: var(--dl-layout-space-oneandhalfunits);
+  }
+  .content-list6-ul4 {
+    padding-left: var(--dl-layout-space-oneandhalfunits);
+  }
+  .content-list6-ul6 {
+    padding-left: var(--dl-layout-space-oneandhalfunits);
+  }
+}

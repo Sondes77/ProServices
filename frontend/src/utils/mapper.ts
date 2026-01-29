@@ -1,0 +1,162 @@
+import { use } from 'react';
+import { User, Professional, Service } from './types';
+
+export function mapUserDataToUserModel(userData: any): User {
+
+  //console.log('Données brutes reçues depuis l’API :', userData);
+
+  const id = String(userData.id);
+  const firstName = userData.prenom || '';
+  const lastName = userData.nom || '';
+  const fullName = `${firstName} ${lastName}`;
+  const role = userData.role || '';
+  const email = userData.email;
+  const email_verified = userData.email_verified || false;
+  const phone_verified = userData.phone_verified || false;
+  const phone = userData.phone || '';
+  const city = userData.ville || '';
+  const region = userData.region || '';
+  const address = userData.adresse || '';
+  const apropos = userData.apropos || '';
+  const avatar = userData.photo || 'http://localhost:5000/uploads/ServicePro_avatar.png';
+  const memberSince = userData.date_creation?.split('T')[0] || '2024-01-01';
+  const stats = {
+    messagesSent: userData.nb_conversations  || 0,
+    reviewsPosted: userData.nb_reviews || 0,
+    servicesPublished: userData.nb_services || 0
+  };
+
+  return {
+   
+      id,
+      fullName,
+      firstName,
+      lastName,
+      role,
+      email,
+      email_verified,
+      phone,
+      phone_verified,
+      city,
+      region,
+      address,
+      apropos,
+      avatar,
+      memberSince,
+      stats
+  };
+}
+
+export function mapProfessionalsDataToUserModel(prosData: any): Professional {
+
+  //console.log('Données brutes reçues depuis l’API :', prosData);
+
+  const id = String(prosData.id);
+  const professional_id = String(prosData.professionnel_id)
+  const firstName = prosData.prenom || '';
+  const lastName = prosData.nom || '';
+  const name = `${firstName} ${lastName}`;
+  const profession = prosData.categorie || '';
+  const email = prosData.email;
+  const phone = prosData.phone || '';
+  const city = prosData.ville || '';
+  const region = prosData.region || '';
+  const address = prosData.adresse || '';
+  const rating = prosData.rating || 0;
+  const reviews = prosData.rating || 0;
+  const avatar = prosData.photo || 'http://localhost:5000/uploads/ServicePro_avatar.png';
+  const description = prosData.description || '';
+  const prix = prosData.prix || '';
+  const availability = prosData.availability || 'Disponible';
+  const verified = prosData.verified || false;
+  const sponsored = prosData.sponsored || false;
+
+  return {
+   
+      id,
+      professional_id,
+      name,
+      profession,
+      //email,
+      //phone,
+      city,
+      region,
+      //address,
+      rating,
+      reviews,
+      avatar,
+      description,
+      prix,
+      availability,
+      verified,
+      sponsored
+  };
+}
+
+export function mapServicesDataToUserModel(prosData: any): Service {
+
+  //console.log('Données brutes reçues depuis l’API :', prosData);
+
+  const id = String(prosData.id);
+  const pro_id = String(prosData.professionnel_id) || '';
+  const title = prosData.titre || '';
+  const description = prosData.description || '';
+  const status = prosData.statut || '';
+  const category = prosData.categorie || '';
+  const price = prosData.prix || '';
+  const duration = prosData.duration || ''
+  const createdAt = prosData.date_creation?.split('T')[0] || '2024-01-01';
+  const updatedAt = prosData.date_creation?.split('T')[0] || '2024-01-01';
+  const gallery: string[] = Array.isArray(prosData.images)
+  ? prosData.images.map((img: any) => img.url || img.path || '')
+  : [];
+  /*const provider = {
+    name: prosData.nom_prestataire || 'Prestataire inconnu',
+    avatar: prosData.avatar || '/default-avatar.png',
+    rating: parseFloat(prosData.note) || 0,
+    reviews: parseInt(prosData.avis) || 0,
+  };*/
+
+  return {
+   
+      id,
+      pro_id,
+      title,
+      description,
+      status,
+      category,
+      price,
+      duration,
+      createdAt,
+      updatedAt,
+      gallery
+  };
+}
+
+/*export function mapReviewsDataToUserModel(prosData: any): Review {
+
+    const id = String(prosData.id);
+    const author = {
+      id = String(prosData.author_id);
+      name = prosData.author_name;
+      avatar = prosData.author_photo;
+    };
+    const recipient: {
+      id = String(prosData.recipient_id);
+      name = prosData.recipient_name;
+      role = prosData.recipient_role;
+    };
+    const rating = prosData.rating;
+    const comment = prosData.comment;
+    const timestamp = prosData.created_at?.split('T')[0] || '2024-01-01';
+
+  return {
+   
+      id,
+      author,
+      recipient,
+      rating,
+      comment,
+      timestamp
+  };
+}*/

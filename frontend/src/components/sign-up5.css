@@ -1,0 +1,195 @@
+.sign-up5-container1 {
+  width: 100%;
+  display: flex;
+  position: relative;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+}
+ 
+.sign-up5-max-width {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+ 
+.sign-up5-container2 {
+  width: 50%;
+  height: 100%;
+  display: flex;
+  align-self: center;
+  align-items: flex-start;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+ 
+.sign-up5-sign-up-image {
+  width: 100%;
+  height: 100%;
+  max-height: 600px;
+}
+ 
+.sign-up5-form-root {
+  width: 50%;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+  align-items: center;
+  flex-shrink: 0;
+  justify-content: center;
+}
+ 
+.sign-up5-form {
+  gap: var(--dl-layout-space-twounits);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+ 
+.sign-up5-title-root {
+  gap: var(--dl-layout-space-halfunit);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+ 
+.sign-up5-text10 {
+  text-align: center;
+}
+ 
+.sign-up5-have-an-account-login1 {
+  gap: var(--dl-layout-space-halfunit);
+  display: flex;
+  align-items: flex-start;
+}
+ 
+.sign-up5-text11 {
+  text-align: center;
+}
+ 
+.sign-up5-container3 {
+  gap: var(--dl-layout-space-unit);
+  width: 100%;
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+ 
+.sign-up5-button1 {
+  gap: var(--dl-layout-space-halfunit);
+  width: 100%;
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  border-color: var(--dl-color-theme-primary1);
+  border-style: solid;
+  border-width: 1px;
+  justify-content: center;
+}
+ 
+.sign-up5-icon1 {
+  width: 24px;
+  height: 24px;
+}
+ 
+.sign-up5-button2 {
+  gap: var(--dl-layout-space-halfunit);
+  width: 100%;
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  border-color: var(--dl-color-theme-primary1);
+  border-style: solid;
+  border-width: 1px;
+  justify-content: center;
+}
+ 
+.sign-up5-icon3 {
+  width: 24px;
+  height: 24px;
+}
+ 
+.sign-up5-divider1 {
+  gap: var(--dl-layout-space-oneandhalfunits);
+  width: 100%;
+  height: auto;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  justify-content: center;
+}
+ 
+.sign-up5-divider2 {
+  flex: 1;
+  width: var(--dl-layout-size-medium);
+  height: 1px;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  background-color: var(--dl-color-theme-primary1);
+}
+ 
+.sign-up5-divider3 {
+  flex: 1;
+  width: auto;
+  height: 1px;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  background-color: var(--dl-color-theme-primary1);
+}
+ 
+.sign-up5-button3 {
+  width: 100%;
+}
+ 
+.sign-up5-text15 {
+  text-align: center;
+}
+ 
+.sign-up5-have-an-account-login2 {
+  gap: var(--dl-layout-space-halfunit);
+  display: flex;
+  align-items: flex-start;
+}
+ 
+.sign-up5-text17 {
+  display: inline-block;
+}
+ 
+.sign-up5-text18 {
+  display: inline-block;
+}
+ 
+.sign-up5-text19 {
+  display: inline-block;
+}
+ 
+.sign-up5-text20 {
+  display: inline-block;
+}
+ 
+.sign-up5-text21 {
+  display: inline-block;
+}
+ 
+@media(max-width: 991px) {
+  .sign-up5-container2 {
+    width: 100%;
+    height: var(--dl-layout-size-xxlarge);
+  }
+  .sign-up5-form-root {
+    width: 100%;
+  }
+}
+ 
+@media(max-width: 479px) {
+  .sign-up5-button3 {
+    width: 100%;
+  }
+}
