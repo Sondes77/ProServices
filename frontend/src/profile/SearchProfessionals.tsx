@@ -137,7 +137,7 @@ useEffect(() => {
   const regularProfessionals = resultatsSansDoublons.filter((pro) => !pro.sponsored);
 
   const currentsponsoredProfessionals = sponsoredProfessionals.slice();
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
   const totalPages = Math.ceil(regularProfessionals.length / itemsPerPage);
   const currentProfessionals = regularProfessionals.slice(
     (currentPage - 1) * itemsPerPage,
@@ -461,7 +461,7 @@ useEffect(() => {
           </div>
         </div>
       )}*/}
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
         <div className="lg:flex-grow">
           {/* Regular Professionals */}
           <div>
@@ -493,7 +493,11 @@ useEffect(() => {
                             )}
                           </div>
                           <p className="text-sm text-gray-600">{professional.profession}</p>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 sm:hidden">
+                            {professional.availability}
+                          </span>
                         </div>
+                        
                         <button
                           onClick={() => onViewProfile(professional.id)}
                           className="thq-button-filled text-sm"
@@ -503,9 +507,14 @@ useEffect(() => {
                         </button>
                       </div>
 
-                      <div className="mt-2">
-                        <p className="text-sm text-gray-600">{professional.description}</p>
-                      </div>
+                     <div className="mt-2">
+                      <p className="text-sm text-gray-600">
+                        {window.innerWidth < 640
+                          ? professional.description.slice(0, 50) + (professional.description.length > 50 ? "…" : "")
+                          : professional.description.slice(0, 150) + (professional.description.length > 150 ? "…" : "")
+                        }
+                      </p>
+                    </div>
 
                       <div className="mt-4 flex items-center justify-between">
                         <div className="flex items-center space-x-4">
@@ -521,7 +530,7 @@ useEffect(() => {
                           </div>
                           <span className="text-sm font-medium text-[#e0692d]">{professional.prix}</span>
                         </div>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                           {professional.availability}
                         </span>
                       </div>

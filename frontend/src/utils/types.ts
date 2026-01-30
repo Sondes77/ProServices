@@ -92,6 +92,8 @@ export interface Service {
   category: string;
   price?: string;
   duration: string;
+  verified: boolean;
+  sponsored: boolean;
   createdAt: string;
   updatedAt: string;
   gallery: string[];

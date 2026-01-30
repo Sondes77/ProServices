@@ -48,7 +48,7 @@ const SignUp = (props) => {
     if (res.ok) {
       console.log(data.user);
       console.log(token);
-      alert("Bienvenue " + data.user.nom);
+      //alert("Bienvenue " + data.user.nom);
   
       // Faire une requête pour obtenir l'utilisateur à partir de l'email
       const userRes = await fetch(`http://localhost:5000/api/utilisateur?email=${encodeURIComponent(data.user.email)}`, {

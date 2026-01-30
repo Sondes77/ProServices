@@ -98,7 +98,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 flex flex-col lg:flex-row gap-8">
+      <div className="grid grid-cols-1 max-w-7xl mx-auto px-4 lg:grid-cols-[1fr_320px] gap-8 items-start">
         <div className="lg:flex-grow">
           {/* Fil d'Ariane */}
           <nav className="flex items-center text-sm text-gray-500 mb-4">
@@ -188,7 +188,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
         </div>
 
         {/* Colonne droite (pub) */}
-        <div className="lg:w-80 space-y-8">
+        <div className="lg:w-80 space-y-8 pb-4">
           <div className="bg-white p-4 rounded-lg shadow-md">
             <p className="text-sm text-gray-500 mb-2">Publicité</p>
             <div className="h-[600px] flex items-center justify-center border border-dashed border-gray-300">

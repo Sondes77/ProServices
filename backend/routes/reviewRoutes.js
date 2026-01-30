@@ -9,6 +9,8 @@ const verifyToken = require('../middlewares/authMiddleware'); // 🔐
 router.get('/mes-reviews', verifyToken.verifyToken, reviewController.getMesReviews);
 //router.get('/service/:id', verifyToken.verifyToken, reviewController.getServicesById);
 router.get('/pro-review/:id', reviewController.getReviewsByProId);
+//router.post('/replay:id', reviewController.ReviewReplay);
+router.post('/review', verifyToken.verifyToken, reviewController.creerReview);
 //router.put('/services/:id', verifyToken.verifyToken, reviewController.updateService);
 //router.delete('/services/:id', verifyToken.verifyToken, reviewController.deleteService);
 

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { 
   MessageSquare, 
   Search, 
@@ -15,6 +15,7 @@ import { Conversation, Message, User } from '../utils/types';
 import { useNavigate } from 'react-router-dom';
 import socket from '../socket';
 import Swal from "sweetalert2";
+import EmojiPicker from "emoji-picker-react";
 
 //import { io } from "socket.io-client";
 //const socket = io("http://localhost:5000", { transports: ["websocket"] });
@@ -31,8 +32,12 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [readyToShow, setReadyToShow] = useState(false);
   const token = localStorage.getItem('token');
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  //const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const firstLoadRef = useRef(true);
   const navigate = useNavigate();
 
   // --- ⚡ Enregistrement socket pour cet utilisateur ---
@@ -103,13 +108,16 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
 
   // --- Charger les messages d'une conversation ---
   const openConversation = async (conversation: Conversation) => {
+    firstLoadRef.current = true;
+    setReadyToShow(false);
     setSelectedConversation(conversation);
     setLoadingMessages(true);
+
     try {
       const res = await fetch(`http://localhost:5000/api/messages/${conversation.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Erreur API messages');
+
       const data = await res.json();
       setMessages(data);
     } catch (err) {
@@ -118,6 +126,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
       setLoadingMessages(false);
     }
   };
+
 
   // --- Envoyer un message ---
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -145,11 +154,16 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
 
       // Mettre à jour la dernière conversation
       setConversations(prev =>
-        prev.map(conv =>
-          conv.id === selectedConversation.id
-            ? { ...conv, lastMessage: savedMessage, unreadCount: 0 }
-            : conv
-        )
+        prev
+          .map(c =>
+            c.id === selectedConversation.id
+              ? { ...c, lastMessage: savedMessage, unreadCount: 0 }
+              : c
+          )
+          .sort((a, b) =>
+            new Date(b.lastMessage.timestamp).getTime() -
+            new Date(a.lastMessage.timestamp).getTime()
+          )
       );
 
       setNewMessage('');
@@ -189,17 +203,68 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
     };
   }, [selectedConversation]);
 
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      const container = messagesEndRef.current;
-      container.scrollTop = container.scrollHeight; // positionner à la fin
+  /*useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container || messages.length === 0) return;
+
+    // 🧠 ouverture conversation → scroll instantané INVISIBLE
+    if (firstLoadRef.current) {
+      requestAnimationFrame(() => {
+        container.scrollTop = container.scrollHeight;
+        firstLoadRef.current = false;
+      });
+      return;
     }
-  }, [messages]); // déclenché après le chargement
-  
+
+    // 📨 nouveau message → scroll doux
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages]);*/
+  useEffect(() => {
+    const close = () => setShowEmojiPicker(false);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
+  }, []);
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container || messages.length === 0) return;
+
+    if (firstLoadRef.current) {
+      requestAnimationFrame(() => {
+        container.scrollTop = container.scrollHeight;
+
+        // ⏱️ micro délai pour laisser le DOM se stabiliser
+        setTimeout(() => {
+          requestAnimationFrame(() => {
+            setReadyToShow(true);
+            firstLoadRef.current = false;
+            setLoadingMessages(false);
+          });
+        }, 1500);
+        
+      });
+    } else {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
+
   // --- Filtrer les conversations ---
-  const filteredConversations = conversations.filter(conv =>
-    conv.participant.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredConversations = useMemo(() => {
+      return [...conversations]
+        .filter(c =>
+          c.participant.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.lastMessage.timestamp).getTime() -
+            new Date(a.lastMessage.timestamp).getTime()
+        );
+    }, [conversations, searchQuery]);
 
   // --- Affichage conversation ---
   if (selectedConversation) {
@@ -220,7 +285,9 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
         </div>
 
         <div className="flex flex-col h-[calc(100%-180px)] bg-gray-50">
-          <div ref={messagesEndRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div ref={messagesContainerRef} className={`flex-1 overflow-y-auto p-4 space-y-4 transition-opacity duration-150 ${
+              readyToShow ? "opacity-100" : "opacity-0"
+            }`}>
             {loadingMessages ? (
               <p>Chargement des messages...</p>
             ) : messages.length === 0 ? (
@@ -254,10 +321,22 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
             )}
            
           </div>
-
+            {showEmojiPicker && (
+              <div className="absolute bottom-12 left-0 z-50 shadow-xl rounded-lg overflow-hidden">
+                <EmojiPicker
+                  onEmojiClick={(emojiData) => {
+                    setMessage(prev => prev + emojiData.emoji);
+                  }}
+                  theme="light"
+                  height={350}
+                  width={300}
+                />
+              </div>
+            )} 
           <form onSubmit={handleSendMessage} className="p-4 bg-white border-t flex items-center space-x-2">
             <button type="button" className="p-2 text-gray-500 hover:text-[#e0692d] transition-colors duration-200"><Paperclip size={20} /></button>
             <button type="button" className="p-2 text-gray-500 hover:text-[#e0692d] transition-colors duration-200"><Image size={20} /></button>
+            <button type="button" onClick={() => setShowEmojiPicker(prev => !prev)} className="text-gray-400 hover:text-[#e0692d] transition">😊</button>
             <input type="text" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Écrivez votre message..." className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#e0692d] focus:border-transparent"/>
             <button type="submit" disabled={!newMessage.trim()} className="p-2 text-white bg-[#e0692d] rounded-lg hover:bg-[#f07e40] transition-colors duration-200"><Send size={20}/></button>
           </form>

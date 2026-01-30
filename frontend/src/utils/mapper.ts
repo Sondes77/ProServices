@@ -105,6 +105,8 @@ export function mapServicesDataToUserModel(prosData: any): Service {
   const category = prosData.categorie || '';
   const price = prosData.prix || '';
   const duration = prosData.duration || ''
+  const verified =  prosData.verified || false;
+  const sponsored =  prosData.sponsored || false;
   const createdAt = prosData.date_creation?.split('T')[0] || '2024-01-01';
   const updatedAt = prosData.date_creation?.split('T')[0] || '2024-01-01';
   const gallery: string[] = Array.isArray(prosData.images)
@@ -127,6 +129,8 @@ export function mapServicesDataToUserModel(prosData: any): Service {
       category,
       price,
       duration,
+      verified,
+      sponsored,
       createdAt,
       updatedAt,
       gallery

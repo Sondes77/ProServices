@@ -128,7 +128,7 @@ const SignIn = (props) => {
       return;
     }
   
-    alert("Bienvenue " + data.user.nom);
+    //alert("Bienvenue " + data.user.nom);
   
     const userRes = await fetch(
       `http://localhost:5000/api/utilisateur?email=${encodeURIComponent(data.user.email)}`,

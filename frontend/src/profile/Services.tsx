@@ -15,6 +15,7 @@ import {
 import { Service } from '../utils/types';
 import ServiceForm from './ServiceForm';
 import { mapServicesDataToUserModel } from '../utils/mapper';
+import Swal from "sweetalert2";
 
 interface ServicesProps {
   services: Service[];
@@ -37,6 +38,7 @@ const Services: React.FC<ServicesProps> = ({
   const [serviceToDelete, setServiceToDelete] = useState<string | null>(null);
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  //const [sponsored, setSponsored] = useState(false);
 
   const fetchUserData = async () => {
     try {
@@ -54,20 +56,40 @@ const Services: React.FC<ServicesProps> = ({
       });
 
       if (!response.ok) {
-        alert('Erreur lors de la récupération des données utilisateur');
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "error",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Erreur lors de la récupération des données utilisateur.",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
+        //alert('Erreur lors de la récupération des données utilisateur');
         return;
       }
         const prosData = await response.json();
         const mappedProfessionals = prosData.map((element: any) =>
           mapServicesDataToUserModel(element)
         );
-
+        
         setLocalServices(mappedProfessionals);
+      
 
       //alert(`Nombre de professionnels : ${localServices.length}`);
     } catch (error) {
       console.error('Erreur réseau :', error);
-      alert('Erreur de connexion au serveur');
+      //alert('Erreur de connexion au serveur');
     }
   };
 
@@ -80,7 +102,12 @@ const Services: React.FC<ServicesProps> = ({
     const title = service.title || '';
     const description = service.description || '';
     const status = service.status || '';
-  
+    const sponsored = !!(service.verified && service.sponsored);
+
+    console.log ("prosData = ", localServices);
+    console.log ("status = ", status );
+    console.log ("sponsored = ", sponsored );
+    
     const matchesSearch =
       title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -107,7 +134,25 @@ const Services: React.FC<ServicesProps> = ({
         {
            // Met à jour la liste locale
           setLocalServices(prev => prev.filter(service => service.id !== serviceId));
-          alert('Service supprimé avec succès');
+          Swal.fire({
+            toast: true, // active le mode toast
+            position: "top-end", // en haut à droite
+            showConfirmButton: false, // pas de bouton OK
+            timer: 1500, // durée d'affichage
+            timerProgressBar: true, // barre de progression
+            icon: "success",
+            //title: selectedService ? "Service mis à jour" : "Service créé",
+            text: "Service supprimé avec succès.",
+            showClass: {
+              popup: "animate__animated animate__slideInRight", // entrée animée
+            },
+            hideClass: {
+              popup: "animate__animated animate__slideOutRight", // sortie animée
+            },
+            customClass: {
+              popup: "rounded-2xl shadow-lg p-4", // style chic
+            },
+          });
          
         }else if (!response.ok) {
           const data = await response.json();
@@ -173,14 +218,33 @@ const Services: React.FC<ServicesProps> = ({
       }
   
       const updatedService = await response.json();
-      alert(selectedService ? 'Service mis à jour avec succès' : 'Service créé avec succès');
-  
+        Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "success",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: selectedService
+          ? "Le service a été mis à jour avec succès."
+          : "Le service a été créé avec succès.",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
       // Optionnel : mets à jour localement l’état
       await fetchUserData();
       
     } catch (error: any) {
       console.error(error);
-      alert(error.message || 'Erreur réseau');
+      //alert(error.message || 'Erreur réseau');
     }
   
     setShowServiceForm(false);
@@ -196,14 +260,23 @@ const Services: React.FC<ServicesProps> = ({
     });
   };
   
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, sponsored: boolean) => {
+    //setSponsored(service.verified && service.sponsored ? true : false);
     switch (status) {
       case 'active':
         return (
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            <CheckCircle size={12} className="mr-1" />
-            Actif
-          </span>
+          <>
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              Actif
+            </span>
+
+            {sponsored && (
+              <span className="inline-flex items-center px-2.5 py-1 ml-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                <CheckCircle size={12} className="mr-1" />
+                Sponsorisé
+              </span>
+            )}
+          </>
         );
       case 'paused':
         return (
@@ -279,56 +352,59 @@ const Services: React.FC<ServicesProps> = ({
           {/* Services List */}
           <div className="space-y-4">
             {filteredServices.length > 0 ? (
-              filteredServices.map(service => (
-                <div key={service.id} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                    <div className="flex-grow">
-                      <div className="flex items-center mb-2">
-                        <h3 className="text-xl font-semibold text-gray-900 mr-3">{service.title}</h3>
-                        {getStatusBadge(service.status)}
-                      </div>
-                      
-                      <p className="text-gray-600 mb-3">{service.description}</p>
-                      
-                      <div className="flex flex-wrap gap-3 mb-3">
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Tag size={14} className="mr-1" />
-                          {service.category}
+              filteredServices.map(service => {
+                const sponsored = !!(service.verified && service.sponsored);
+                return (
+                  <div key={service.id} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                      <div className="flex-grow">
+                        <div className="flex items-center mb-2">
+                          <h3 className="text-xl font-semibold text-gray-900 mr-3">{service.title}</h3>
+                          {getStatusBadge(service.status, sponsored)}
                         </div>
-                        {service.price && (
+                        
+                        <p className="text-gray-600 mb-3">{service.description}</p>
+                        
+                        <div className="flex flex-wrap gap-3 mb-3">
                           <div className="flex items-center text-sm text-gray-500">
-                            <span className="font-medium text-[#e0692d]">{service.price}</span>
+                            <Tag size={14} className="mr-1" />
+                            {service.category}
                           </div>
-                        )}
-                        <div className="flex items-center text-sm text-gray-500">
-                          <Calendar size={14} className="mr-1" />
-                          Créé le {formatDate(service.createdAt)}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <PenTool size={14} className="mr-1" />
-                          Modifié le {formatDate(service.updatedAt)}
+                          {service.price && (
+                            <div className="flex items-center text-sm text-gray-500">
+                              <span className="font-medium text-[#e0692d]">{service.price}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center text-sm text-gray-500">
+                            <Calendar size={14} className="mr-1" />
+                            Créé le {formatDate(service.createdAt)}
+                          </div>
+                          <div className="flex items-center text-sm text-gray-500">
+                            <PenTool size={14} className="mr-1" />
+                            Modifié le {formatDate(service.updatedAt)}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex flex-row md:flex-col space-x-3 md:space-x-2 md:space-y-2 mt-3 md:mt-0">
-                      <button
-                        onClick={() => handleEditClick(service)}
-                        className="flex items-center justify-center p-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-200"
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(service.id)}
-                        className="flex items-center justify-center p-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors duration-200"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      
+                      <div className="flex flex-row md:flex-col space-x-3 md:space-x-2 md:space-y-2 mt-3 md:mt-0">
+                        <button
+                          onClick={() => handleEditClick(service)}
+                          className="flex items-center justify-center p-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-200"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(service.id)}
+                          className="flex items-center justify-center p-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors duration-200"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
-            ) : (
+                );
+              })
+              ) : (
               <div className="text-center py-10">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
                   <Tag size={32} className="text-gray-400" />

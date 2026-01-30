@@ -4,7 +4,11 @@ import { Search, MapPin, Scissors, Car, ArrowRight, Star, Shield, Clock, Users, 
 import Navbar from '../landing/Navabr';
 import Footer from '../landing/Footer';
 import Hero17 from '../components/hero17';
-import image from '../img/photo.png';
+import image from '../img/photo.webp';
+import plombier from '../img/photo-1664301972519-506636f0245d.jpeg';
+import couture from '../img/photo-1682142705901-28c534528ce8.jpeg';
+import peintre from '../img/photo-1688372199140-cade7ae820fe.jfif';
+import jardinier from '../img/photo-1617576683096-00fc8eecb3af.jpeg';
 import '../components/hero17.css';
 import NavbarPro from '../layout/ProfessionalNavbar';
 import NavbarUser from '../layout/UserNavbar';
@@ -15,6 +19,8 @@ import ForProfessionals from '../profile/ForProfessionals';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/effect-fade';
 
 const Home = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -87,9 +93,12 @@ const Home = () => {
 
     // Données enrichies pour le slider avec images réelles
   const serviceSlides = [
-    { name: 'Plomberie', icon: Wrench, img: 'https://images.unsplash.com/photo-1581244276891-663f89de1312?auto=format&fit=crop&q=80', color: 'from-blue-500' },
+    { name: 'Plomberie', icon: Wrench, img: plombier, color: 'from-blue-500' },
+    { name: 'Couture', icon: Wrench, img: couture, color: 'from-blue-500' },
+    { name: 'Jardinier', icon: Wrench, img: jardinier, color: 'from-blue-500' },
     { name: 'Électricité', icon: Zap, img: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&q=80', color: 'from-yellow-500' },
     { name: 'Menuiserie', icon: Hammer, img: 'https://images.unsplash.com/photo-1601058268499-e52658b8bb88?auto=format&fit=crop&q=80', color: 'from-orange-800' },
+    { name: 'Peintre', icon: Car, img: peintre, color: 'from-slate-600' },
     { name: 'Mécanique', icon: Car, img: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&q=80', color: 'from-slate-600' },
     { name: 'Coiffure', icon: Scissors, img: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&q=80', color: 'from-pink-500' },
     { name: 'Bricolage', icon: Paintbrush, img: 'https://images.unsplash.com/photo-1581141849291-1125c7b692b5?auto=format&fit=crop&q=80', color: 'from-green-500' },
@@ -133,7 +142,10 @@ const Home = () => {
           <Swiper
             modules={[Autoplay, EffectFade]}
             effect="fade"
-            autoplay={{ delay: 1000 }}
+            autoplay={{
+              delay: 3000,
+              disableOnInteraction: false
+            }}
             loop={true}
             className="h-full w-full"
           >

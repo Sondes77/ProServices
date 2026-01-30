@@ -143,10 +143,7 @@ useEffect(() => {
       fetchService();
     }
   }, [id]);
-  
-  useEffect(() => {
-    
-    const fetchReviews = async () => {
+  const fetchReviews = async () => {
       
       try {  
         /*const token = localStorage.getItem('token');
@@ -179,7 +176,10 @@ useEffect(() => {
         alert('Erreur de connexion au serveur');
       }
     };
-
+  useEffect(() => {
+    
+    
+    
     if (id) {
       fetchReviews();
     }
@@ -215,6 +215,7 @@ useEffect(() => {
       </div>
     );
   };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -256,8 +257,23 @@ useEffect(() => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('Veuillez vous connecter pour envoyer un message.');
-        setShowLoginModal(true);
+         Swal.fire({
+          title: "Session expirée",
+          text: "Veuillez vous connecter pour envoyer un message.",
+          icon: "warning",
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          position: "center",
+          customClass: {
+            popup: "rounded-2xl shadow-lg", // style chic
+          }
+        });
+        //alert('Veuillez vous connecter pour envoyer un message.');
+        setTimeout(() => {
+          setShowMessageModal(false);
+          setShowLoginModal(true);
+        }, 1500);
         return;
       }
 
@@ -286,25 +302,132 @@ useEffect(() => {
       setShowMessageModal(false);
 
       // Optionnel : rediriger vers la conversation ou afficher confirmation
-      alert('Message envoyé avec succès !');
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "success",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Message envoyé avec succès!",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
+      //alert('Message envoyé avec succès !');
 
     } catch (error) {
-      console.error('Erreur envoi message:', error);
-      alert('Impossible d’envoyer le message. Veuillez réessayer.');
+      //console.error('Erreur envoi message:', error);
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "warning",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Impossible d’envoyer le message. Veuillez réessayer.",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
+      //alert('Impossible d’envoyer le message. Veuillez réessayer.');
     }
 
   };
 
-  const handleSubmitReview = (e: React.FormEvent) => {
+  const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rating === 0) {
-      alert('Veuillez attribuer une note');
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "warning",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Veuillez attribuer une note.",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
+      //alert('Veuillez attribuer une note');
       return;
     }
-    console.log('Review submitted:', { rating, comment: reviewComment });
-    setRating(0);
-    setReviewComment('');
-    setShowReviewModal(false);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        Swal.fire({
+          title: "Session expirée",
+          text: "Veuillez vous connecter pour laisser un avis.",
+          icon: "warning",
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+          position: "center",
+          customClass: {
+            popup: "rounded-2xl shadow-lg", // style chic
+          }
+        });
+        //alert('Veuillez vous connecter pour envoyer un message.');
+        setTimeout(() => {
+          setShowReviewModal(false);
+          setShowLoginModal(true);
+        }, 1500);
+        return;
+      }
+
+      // Crée ou récupère la conversation avec ce professionnel
+      const res = await fetch(`http://localhost:5000/api/review`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          recipientId: user?.id, // destinataire
+          content: reviewComment,
+          rating: rating
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error(`Erreur serveur: ${res.status}`);
+      }
+
+      const savedReview = await res.json();
+      console.log('Review envoyé:', savedReview);
+      console.log('Review submitted:', { rating, comment: reviewComment });
+      setRating(0);
+      setReviewComment('');
+      setShowReviewModal(false);
+      fetchReviews();
+      //alert('Review envoyé avec succès !');
+
+    } catch (error) {
+      console.error('Erreur envoi message:', error);
+      //alert('Impossible d’envoyer le message. Veuillez réessayer.');
+    }
   };
 
   const handleServiceClick = (serviceId: string) => {
@@ -360,7 +483,7 @@ useEffect(() => {
       </div>
 
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
         <div className="lg:flex-grow">
           {/* Profile Header */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
@@ -390,7 +513,7 @@ useEffect(() => {
 
             <div className="p-6">
               {!userMe && (
-                <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                <div className="flex flex-col sm:flex-row gap-4 max-w-md">
                   <button
                     onClick={() => {
                       if (token) {
@@ -433,7 +556,6 @@ useEffect(() => {
                   <div className="text-gray-600">Avis clients</div>
                 </div>
               </div>
-              
               <div className="mt-6 border-t pt-6">
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">À propos</h2>
                 <p className="text-gray-600">{user.apropos}</p>

@@ -3,6 +3,7 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 //const { te } = require('intl-tel-input/i18n');
 
 require('dotenv').config();
@@ -46,8 +47,46 @@ exports.creerService = async (req, res) => {
     console.error('Erreur lors de la création du sevice:', error);
     return res.status(500).json({ message: 'Erreur interne du serveur' });
     }
-  };
+};
+
+exports.creerReview = async (req, res) => {
+  try {
+      const authHeader = req.headers['authorization'];
+      if (!authHeader) return res.status(401).json({ message: 'Token manquant' });
   
+      const token = authHeader.split(' ')[1];
+      if (!token) return res.status(401).json({ message: 'Token invalide' });
+  
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const userId = decoded.id;
+  
+      const { recipientId, content, rating} = req.body;
+      const date_creation = new Date(); // Date actuelle
+      const reviewId = crypto.randomUUID();
+
+      const query = `
+          INSERT INTO reviews (id, author_id, recipient_id, rating, comment, created_at) VALUES (?, ?, ?, ?, ?, ?)`;
+
+        const values = [reviewId, userId, recipientId, rating, content, date_creation];
+
+        db.query(query, values, (err, results) => {
+          if (err) {
+            console.error('Erreur lors de la création :', err);
+            return res.status(500).json({ message: 'Erreur serveur' });
+          }
+          
+          res.status(200).json({ 
+            userId: userId,
+            message: 'Review créé avec succès' 
+          });
+        });
+  
+  } catch (error) {
+  console.error('Erreur lors de la création du review:', error);
+  return res.status(500).json({ message: 'Erreur interne du serveur' });
+  }
+};
+
 exports.updateService = async (req, res) => {
   try {
     const authHeader = req.headers['authorization'];
