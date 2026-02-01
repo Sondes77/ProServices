@@ -5,7 +5,7 @@ import { Menu as HeadlessMenu, Transition } from '@headlessui/react';
 import { 
   Briefcase, MessageSquare, User, Bell, 
   Settings, LayoutDashboard, LogOut, Sun, Moon, 
-  Menu as MenuIcon, X, Search
+  Menu as MenuIcon, X, Search, Message
 } from 'lucide-react';
 import logo from '../img/noBgColor5.png';
 import { User as UserType } from '../utils/types';
@@ -188,45 +188,62 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
                 </button>
 
                 {/* Notifications Dropdown */}
-                <Transition
-                  show={showNotifications}
-                  enter="transition ease-out duration-100"
-                  enterFrom="transform opacity-0 scale-95"
-                  enterTo="transform opacity-100 scale-100"
-                  leave="transition ease-in duration-75"
-                  leaveFrom="transform opacity-100 scale-100"
-                  leaveTo="transform opacity-0 scale-95"
-                >
-                  <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
-                    <div className="p-4">
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Notifications</h3>
-                        <button
-                          onClick={markAllAsRead}
-                          className="text-sm text-[#e0692d] hover:text-[#f07e40]"
-                        >
-                          Tout marquer comme lu
-                        </button>
-                      </div>
-                      <div className="space-y-3">
-                        {notifications.map(notification => (
-                          <div
-                            key={notification.id}
-                            className={`p-3 rounded-md ${
-                              notification.read
-                                ? 'bg-gray-50 dark:bg-gray-700'
-                                : 'bg-blue-50 dark:bg-blue-900'
-                            }`}
-                          >
-                            <p className="text-sm text-gray-800 dark:text-gray-200">
-                              {notification.text}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
+               <Transition
+                show={showNotifications}
+                enter="transition ease-out duration-100"
+                enterFrom="transform opacity-0 scale-95"
+                enterTo="transform opacity-100 scale-100"
+                leave="transition ease-in duration-75"
+                leaveFrom="transform opacity-100 scale-100"
+                leaveTo="transform opacity-0 scale-95"
+              >
+                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
+                  <div className="p-4">
+
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        Notifications
+                      </h3>
+
+                      <button
+                        onClick={markAllAsRead}
+                        className="text-sm text-[#e0692d] hover:text-[#f07e40]"
+                      >
+                        Tout marquer comme lu
+                      </button>
                     </div>
+
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {notifications.slice(0,5).map(notification => (
+                        <div
+                          key={notification.id}
+                          className={`p-3 rounded-md ${
+                            notification.read
+                              ? 'bg-gray-50 dark:bg-gray-700'
+                              : 'bg-blue-50 dark:bg-blue-900'
+                          }`}
+                        >
+                          <p className="text-sm text-gray-800 dark:text-gray-200">
+                            {notification.text}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* ✅ NOUVEAU — Voir toutes */}
+                    <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                      <Link
+                        to="/notifications"
+                        onClick={() => setShowNotifications(false)}
+                        className="block text-center text-sm font-medium text-[#e0692d] hover:text-[#f07e40]"
+                      >
+                        Afficher toutes les notifications →
+                      </Link>
+                    </div>
+
                   </div>
-                </Transition>
+                </div>
+              </Transition>
               </div>
         
             {/* User Dropdown */}
@@ -247,7 +264,8 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
                   <div className="p-2 space-y-1">
                     {[
                       ...(isProfessional ? [{ name: 'Profil Pro', path: '/profile', icon: User }] : []),
-                      { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+                      { name: 'Message', path: '/messages', icon: MessageSquare },
+                      { name: 'Dashboard', path: '/mon-profile', icon: LayoutDashboard },
                       { name: 'Paramètres', path: '/settings', icon: Settings },
                     ].map((item) => (
                       <HeadlessMenu.Item key={item.path}>

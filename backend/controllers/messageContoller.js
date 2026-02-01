@@ -139,8 +139,8 @@ exports.sendMessage = async (req, res) => {
       .query(
         `
         INSERT INTO notifications 
-        (user_id, type, title, text, link, is_read)
-        VALUES (?, ?, ?, ?, ?, FALSE);
+        (user_id, type, title, text, link, unread)
+        VALUES (?, ?, ?, ?, ?, true);
         `,
         [recipientId, "message_received", "Nouveau message", `${senderName} vous a envoyé un message`, `/messages/${conversationId}`]
       );

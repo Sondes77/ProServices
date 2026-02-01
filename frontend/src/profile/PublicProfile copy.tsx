@@ -13,7 +13,8 @@ import {
   CheckCircle,
   ExternalLink,
   Users,
-  Lock
+  Lock,
+  ArrowLeft
 } from 'lucide-react';
 import { User, Service, Review } from '../utils/types';
 import { mapUserDataToUserModel, mapServicesDataToUserModel } from '../utils/mapper';
@@ -489,7 +490,11 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
           {/* Profile Header */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
             <div className="bg-[#e0692d] p-6">
+              <button onClick={() => navigate(-1)} className="text-white mr-4 hover:bg-[#f07e40] p-2 rounded-full transition-colors duration-200">
+                  <ArrowLeft size={20} />
+                </button>
               <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0">
+                
                 <div className="relative">
                   <img 
                     src={user.avatar} 
@@ -651,7 +656,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
         </div>
 
         {/* Right Advertisement Column */}
-        <div className="lg:w-80 space-y-8">
+        <div className="hidden lg:block lg:w-80 space-y-8">
           <div className="bg-white p-4 rounded-lg shadow-md">
             <p className="text-sm text-gray-500 mb-2">Publicité</p>
             <div className="h-[600px] flex items-center justify-center border border-dashed border-gray-300">
@@ -776,7 +781,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                 <button
                   type="button"
                   onClick={() => setShowMessageModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                  className="thq-button-outline"
                 >
                   Annuler
                 </button>
@@ -833,7 +838,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                 <button
                   type="button"
                   onClick={() => setShowReviewModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                  className="thq-button-outline"
                 >
                   Annuler
                 </button>

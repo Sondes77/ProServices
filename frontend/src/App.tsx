@@ -66,6 +66,7 @@ import ForgotPassword from './profile/ForgotPassword';
 import socket from './socket';
 import './style.css';
 import './tailwind.css';
+import { Settings } from 'lucide-react';
 
 function App() {
   //const [currentUser, setCurrentUser] = useState<User>(user);
@@ -79,6 +80,7 @@ function App() {
   const [isPublicView, setIsPublicView] = useState(false);
   const token = localStorage.getItem('token');
   const [navbarType, setNavbarType] = useState<'pro' | 'user' | 'guest'>('guest');
+
   useEffect(() => {
     if (token && currentUser?.role === 'professional') {
       setNavbarType('pro');
@@ -88,6 +90,7 @@ function App() {
       setNavbarType('guest');
     }
   }, [token, currentUser]);
+
   //const socket = io("http://localhost:5000", { transports: ["websocket"] });
     // --- ⚡ Enregistrement socket pour cet utilisateur ---
   useEffect(() => {
@@ -214,6 +217,8 @@ function App() {
             onDeleteService={handleDeleteService}
           />
         );
+      case 'notifications':
+        return <Notifications user={currentUser} />;
         /*case 'stats':
         return (
           <Statistics user={currentUser} />
@@ -261,8 +266,7 @@ function App() {
         <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
         <Route path="/business" element={<Inscription />} />
         <Route path="/recherche" element={<Recherche />} />
-        <Route path="/messages" element={<Messages user={currentUser} conversations={conversations} />} />
-        <Route path="/notifications" element={<Notifications user={currentUser} notifications={notifications} />} />
+        
         <Route path="/recherche" element={<Recherche />} />
         {/*<Route path="/advertisement-request" element={<AdvertisementRequest />} />
         <Route path="/admin/advertisements" element={<AdvertisementAdmin />} />*/}
@@ -307,7 +311,7 @@ function App() {
             </div>
           </div>
         }/>
-        <Route path="/mon-profile" element={
+        {/*<Route path="/mon-profile" element={
           <div className="flex items-center justify-center min-h-screen" style={{ minHeight: '120vh' }}>
             <div className="w-full max-w-2xl mx-4">
               <ProfileOverview 
@@ -316,7 +320,7 @@ function App() {
               />
             </div>
           </div>
-        }/>
+        }/>*/}
         <Route path="/service" element={
           <div className="flex items-center justify-center min-h-screen" style={{ minHeight: '120vh' }}>
           <FirstService 
@@ -345,17 +349,46 @@ function App() {
           />
         }/>
         <Route path="/settings" element={
-          <div className="flex-1">
-            <DashboardLayout 
-              activeSection={"privacy"}
-              setActiveSection={setActiveSection} 
-              user={currentUser}
-              onViewPublicProfile={toggleView}
-              >
-              {renderActiveSection()}
-            </DashboardLayout>
-        </div>
-        }/>
+          <DashboardLayout
+            activeSection={activeSection}    // ✅ state
+            setActiveSection={setActiveSection}
+            user={currentUser}
+            onViewPublicProfile={toggleView}
+          >
+            {renderActiveSection()}
+          </DashboardLayout>
+        } />
+        
+        <Route path="/notifications" element={
+          <DashboardLayout
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            user={currentUser}
+            onViewPublicProfile={toggleView}
+          >
+            {renderActiveSection()}
+          </DashboardLayout>
+        } />
+        <Route path="/mon-profile" element={
+          <DashboardLayout
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            user={currentUser}
+            onViewPublicProfile={toggleView}
+          >
+            {renderActiveSection()}
+          </DashboardLayout>
+        } />
+        <Route path="/messages" element={
+          <DashboardLayout
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            user={currentUser}
+            onViewPublicProfile={toggleView}
+          >
+            {renderActiveSection()}
+          </DashboardLayout>
+        } />
         {/* <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} /> */}
         {/* <Route path="/nouveau-mot-de-passe" element={<NouveauMotDePasse />} /> */}
         {/* <Route path="/confirmation-email" element={<ConfirmationEmail />} /> */}

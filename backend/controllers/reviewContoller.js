@@ -92,8 +92,8 @@ exports.creerReview = async (req, res) => {
     // 🔔 Notification destinataire
     await db.promise().query(
       `INSERT INTO notifications
-       (user_id, type, title, text, link, is_read, created_at)
-       VALUES (?, ?, ?, ?, ?, FALSE, NOW())`,
+       (user_id, type, title, text, link, unread, created_at)
+       VALUES (?, ?, ?, ?, ?, true, NOW())`,
       [
         recipientId,
         "review_received",

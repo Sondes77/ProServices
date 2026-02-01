@@ -1,8 +1,9 @@
 // Sidebar.tsx
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { User, Home, Settings, Lock, MessageSquare, Star, Briefcase, LogOut, Shield, Eye, Camera } from 'lucide-react';
 import { User as UserType } from '../utils/types';
 import { mapUserDataToUserModel } from '../utils/mapper';
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface SidebarProps {
   activeSection: string;
@@ -21,6 +22,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [hovered, setHovered] = useState(false);
   const defaultAvatar = '../img/ServicePro_Avatar.png'; // accessible via le dossier public
   const [avatarPreview, setAvatarPreview] = useState(user.avatar || defaultAvatar); // local preview
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -112,6 +115,29 @@ const Sidebar: React.FC<SidebarProps> = ({
     navigationItems.push({ id: 'services', label: 'Mes services', icon: <Briefcase size={20} /> });
     //navigationItems.push({ id: 'stats', label: 'Statistiques', icon: <Shield size={20} /> });
   }
+
+
+
+  useEffect(() => {
+
+    if (location.pathname === "/settings") {
+      setActiveSection("privacy");
+    }
+
+    if (location.pathname === "/notifications") {
+      setActiveSection("notifications");
+    }
+
+    if (location.pathname === "/mon-profile") {
+      setActiveSection("overview");
+    }
+
+    if (location.pathname === "/messages") {
+      setActiveSection("messages");
+    }
+
+    navigate('/dashboard', { replace: true });
+  }, [location.pathname, navigate]);
 
   return (
     

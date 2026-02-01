@@ -127,7 +127,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       {/* Main Content */}
       <div className={`flex-1 ${isMobileMenuOpen ? 'hidden' : 'block'} md:block`}>
-        <main className="p-4 md:p-8 sm:mt-4 md:mt-0">
+        <main className="p-4 md:p-8 sm:mt-4 md:mt-2">
           {children}
         </main>
       </div>
