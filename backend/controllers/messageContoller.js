@@ -127,6 +127,24 @@ exports.sendMessage = async (req, res) => {
         [conversationId, senderId, recipientId, content]
       );
 
+    const [userName] = await db.promise().query(
+      `SELECT nom FROM utilisateurs WHERE id = ?`,
+      [senderId]
+    );
+    const senderName = userName[0].nom;
+
+    // 4️⃣ Créer notification pour le destinataire
+    await db
+      .promise()
+      .query(
+        `
+        INSERT INTO notifications 
+        (user_id, type, title, text, link, is_read)
+        VALUES (?, ?, ?, ?, ?, FALSE);
+        `,
+        [recipientId, "message_received", "Nouveau message", `${senderName} vous a envoyé un message`, `/messages/${conversationId}`]
+      );
+
     res.status(201).json({ message: "Message envoyé", conversationId });
 
   } catch (err) {

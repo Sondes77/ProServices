@@ -114,9 +114,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   }
 
   return (
-    <div className="h-full flex flex-col">
+    
+    <div className="h-full flex flex-col w-20 md:w-64">
       {/* User Profile Section */}
-      <div className="p-6 flex flex-col items-center border-b border-gray-200">
+      <div className="md:p-6 md:mt-4  flex flex-col items-center border-b border-gray-200">
         <div 
           className="relative group w-20 h-20"
           onMouseEnter={() => setHovered(true)}
@@ -126,14 +127,14 @@ const Sidebar: React.FC<SidebarProps> = ({
             src={avatarPreview} 
             alt={user.fullName}
             id="user-avatar" 
-            className="w-20 h-20 rounded-full object-cover border-2 border-[#e0692d]"
+            className="hidden md:flex w-20 h-20 rounded-full object-cover border-2 border-[#e0692d]"
           />
-          <span className="absolute bottom-0 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></span>
+          <span className="hidden md:flex absolute bottom-0 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></span>
 
           {/* Overlay appareil photo */}
           {hovered && (
             <div 
-              className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center cursor-pointer"
+              className="hidden md:flex absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
             >
               <Camera className="text-white w-6 h-6" />
@@ -148,14 +149,14 @@ const Sidebar: React.FC<SidebarProps> = ({
           />
         </div>
 
-        <h2 className="mt-4 font-semibold text-lg text-gray-800">{user.fullName}</h2>
-        <p className="text-sm text-gray-500">{user.role === 'professional' ? 'Professionnel' : 'Utilisateur'}</p>
-        <p className="text-xs text-gray-500">{user.city}, {user.region}</p>
+        <h2 className="hidden md:flex mt-4 font-semibold text-lg text-gray-800">{user.fullName}</h2>
+        <p className="hidden md:flex text-sm text-gray-500">{user.role === 'professional' ? 'Professionnel' : 'Utilisateur'}</p>
+        <p className="hidden md:flex text-xs text-gray-500">{user.city}, {user.region}</p>
 
         {user.role === 'professional' && (
           <button
             onClick={onViewPublicProfile}
-            className="mt-4 flex items-center text-sm text-[#e0692d] hover:text-[#f07e40] transition-colors duration-200"
+            className="hidden md:flex mt-4 flex items-center text-sm text-[#e0692d] hover:text-[#f07e40] transition-colors duration-200"
           >
             <Eye size={16} className="mr-1" />
             Voir mon profil public
@@ -164,20 +165,23 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4">
-        <ul className="space-y-1">
+      <nav className="flex-1 mt-2">
+        <ul className="space-y-1 items-center">
           {navigationItems.map((item) => (
             <li key={item.id}>
               <button
-                className={`w-full flex items-center px-4 py-3 text-left text-sm rounded-lg transition-colors duration-200 ${
+                className={`sm:ml-2 w-full justify-center md:justify-start flex items-center px-3 md:px-4 py-3 text-left text-sm rounded-lg transition-colors duration-200 
+                  ${
                   activeSection === item.id
                     ? 'text-white bg-[#e0692d]'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
                 onClick={() => setActiveSection(item.id)}
               >
-                <span className="mr-3">{item.icon}</span>
-                {item.label}
+                <span className="sm:py-2 md:mr-3">{item.icon}</span>
+                <span className="hidden md:inline sm:ml-3">
+                  {item.label}
+                </span>
               </button>
             </li>
           ))}
@@ -188,10 +192,10 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="p-4 border-t border-gray-200">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center px-4 py-3 text-left text-sm text-gray-700 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+          className="w-full flex items-center md:px-4 md:py-3 text-left text-sm text-gray-700 rounded-lg hover:bg-gray-100 transition-colors duration-200"
         >
           <span className="mr-3 text-red-500"><LogOut size={20} /></span>
-          <span className="text-red-500">Se déconnecter</span>
+          <span className="hidden md:block text-red-500">Se déconnecter</span>
         </button>
       </div>
     </div>

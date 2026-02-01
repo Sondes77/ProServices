@@ -23,6 +23,8 @@ router.get('/utilisateurs', verifyToken.verifyToken, utilisateurController.getUt
 //send email code pour vérifier mail & phone
 router.post('/send-verification-code', verifyToken.verifyToken, utilisateurController.sendVerificationCode);
 router.post('/send-phone-code', verifyToken.verifyToken, utilisateurController.sendPhoneCode);
+router.post('/forgot-password', utilisateurController.sendForgotPasswordlink);
+router.post("/reset-password/:token", utilisateurController.resetPassword);
 
 //vérifier email code pour vérifier mail & phone
 router.post('/verify-email-code', verifyToken.verifyToken, utilisateurController.VerifyRmailCode);

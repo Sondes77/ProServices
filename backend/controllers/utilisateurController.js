@@ -384,6 +384,179 @@ exports.VerifyRmailCode = (req, res) => {
   }
 };
 
+// ⬅️ Envoyer un lien à l'utilisateur pour réinitialiser le mot de passe
+exports.sendForgotPasswordlink = (req, res) => {
+  try {
+    const { email } = req.body;
+    console.log("Email reçu pour réinitialisation :", email);
+    if (!email)
+      return res.status(400).json({ message: "Email manquant" });
+
+    // 1️⃣ Vérifier si l'utilisateur existe
+    db.query(
+      "SELECT id FROM utilisateurs WHERE email = ?",
+      [email],
+      (err, rows) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ message: "Erreur serveur SQL" });
+        }
+
+        if (!rows || rows.length === 0) {
+          return res.status(400).json({ message: "Utilisateur non trouvé" });
+        }
+
+     const user = rows[0];
+
+    // 2️⃣ Générer un token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    // 3️⃣ Hasher le token
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    // 4️⃣ Expiration (15 min)
+    const expires = new Date(Date.now() + 15 * 60 * 1000);
+
+    // 5️⃣ Sauvegarder en DB
+    db.query(
+      `UPDATE utilisateurs
+       SET reset_password_token = ?, reset_password_expires = ?
+       WHERE id = ?`,
+      [hashedToken, expires, user.id]
+    );
+
+    // 6️⃣ Lien frontend
+    const resetLink = `http://localhost:3000/reset-password/${resetToken}`;
+    console.log("Lien de réinitialisation :", resetLink);
+    
+     const transporter = nodemailer.createTransport({
+      //host: "ssl0.ovh.net",
+      host: "smtp.mail.ovh.net",
+      port: 465,
+      secure: true,
+      auth: {
+        user: "contact@servicepro.tn",
+        pass: "Sondes610.P###",
+      },
+    });
+    
+    console.log(transporter.verify());
+    transporter.verify((error, success) => {
+      if (error) {
+        console.log("❌ Erreur SMTP :", error);
+      } else {
+        console.log("✅ SMTP prêt à envoyer");
+      }
+    });
+
+     transporter.sendMail({
+      from: `"SERVICEPRO" <contact@servicepro.tn>`,
+      to: email,
+      subject: "Réinitialisation de mot de passe",
+     //text: `Votre code de vérification est : ${code}`,
+      html: `
+          <!DOCTYPE html>
+          <html>
+            <body style="font-family: Arial, sans-serif;">
+              <p>Vous avez demandé une réinitialisation de mot de passe.</p>
+
+              <p>
+                <a 
+                  href="${resetLink}"
+                  style="
+                    display:inline-block;
+                    padding:12px 20px;
+                    background:#2563eb;
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:6px;
+                    font-weight:bold;
+                  "
+                  target="_blank"
+                >
+                  Cliquez ici pour réinitialiser votre mot de passe
+                </a>
+              </p>
+
+              <p style="font-size:12px;color:#666;">
+                Ce lien expire dans 15 minutes.
+              </p>
+
+              <p style="font-size:12px;">
+                Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br/>
+                <span>${resetLink}</span>
+              </p>
+            </body>
+          </html>`,
+    });
+
+    res.json({ message: "Lien de réinitialisation envoyé" });
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
+// ⬅️ Réinitialiser le mot de passe avec le token
+exports.resetPassword = async (req, res) => {
+  try{
+    const { token } = req.params;
+    const { password } = req.body;
+    console.log("Token reçu pour réinitialisation :", req.params);
+    if (!password)
+      return res.status(400).json({ message: "Mot de passe requis" });
+
+    // 1️⃣ Hasher le token reçu
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+    // 2️⃣ Vérifier token + expiration
+    db.query(
+      `SELECT id FROM utilisateurs
+      WHERE reset_password_token = ?
+      AND reset_password_expires > NOW()`,
+      [hashedToken],
+      
+      (err, rows) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ message: "Erreur serveur SQL" });
+        }
+
+        if (!rows || rows.length === 0) {
+          return res.status(400).json({ message: "Utilisateur non trouvé" });
+        }
+
+        const user = rows[0];
+        console.log("Utilisateur pour réinitialisation :", user);
+        // 3️⃣ Hasher le nouveau mot de passe
+        // HASH du mot de passe avec callback
+        bcrypt.hash(password, 10, (err, hashedPassword) => {
+          if (err) return res.status(500).json({ error: "Erreur hashing" });
+          console.log("Nouveau mot de passe hashé :", hashedPassword);
+
+        // 4️⃣ Mettre à jour + nettoyer le token
+          db.query(
+            `UPDATE utilisateurs
+            SET mot_de_passe = ?, reset_password_token = NULL, reset_password_expires = NULL
+            WHERE id = ?`,
+            [hashedPassword, user.id]
+          );
+          res.json({ message: "Mot de passe réinitialisé avec succès" });
+        });
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+
 // ⬅️ Envoyer un code à l'utilisateur pour Phone
 exports.sendPhoneCode = (req, res) => {
   try {

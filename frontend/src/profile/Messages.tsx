@@ -15,7 +15,7 @@ import { Conversation, Message, User } from '../utils/types';
 import { useNavigate } from 'react-router-dom';
 import socket from '../socket';
 import Swal from "sweetalert2";
-import EmojiPicker from "emoji-picker-react";
+import EmojiPicker, { Theme } from "emoji-picker-react";
 
 //import { io } from "socket.io-client";
 //const socket = io("http://localhost:5000", { transports: ["websocket"] });
@@ -37,6 +37,8 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
   //const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef<HTMLDivElement | null>(null);
+  const emojiButtonRef = useRef<HTMLButtonElement | null>(null);
   const firstLoadRef = useRef(true);
   const navigate = useNavigate();
 
@@ -222,11 +224,24 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
       behavior: "smooth",
     });
   }, [messages]);*/
+  
   useEffect(() => {
-    const close = () => setShowEmojiPicker(false);
-    document.addEventListener("click", close);
-    return () => document.removeEventListener("click", close);
+    const handleClickOutside = (event: MouseEvent) => {
+      // Si le click n'est pas sur le picker ET pas sur le bouton emoji
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target as Node) &&
+        emojiButtonRef.current &&
+        !emojiButtonRef.current.contains(event.target as Node)
+      ) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
+
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container || messages.length === 0) return;
@@ -321,22 +336,37 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
             )}
            
           </div>
-            {showEmojiPicker && (
-              <div className="absolute bottom-12 left-0 z-50 shadow-xl rounded-lg overflow-hidden">
-                <EmojiPicker
-                  onEmojiClick={(emojiData) => {
-                    setMessage(prev => prev + emojiData.emoji);
-                  }}
-                  theme="light"
-                  height={350}
-                  width={300}
-                />
-              </div>
-            )} 
+            
           <form onSubmit={handleSendMessage} className="p-4 bg-white border-t flex items-center space-x-2">
             <button type="button" className="p-2 text-gray-500 hover:text-[#e0692d] transition-colors duration-200"><Paperclip size={20} /></button>
             <button type="button" className="p-2 text-gray-500 hover:text-[#e0692d] transition-colors duration-200"><Image size={20} /></button>
-            <button type="button" onClick={() => setShowEmojiPicker(prev => !prev)} className="text-gray-400 hover:text-[#e0692d] transition">😊</button>
+            <div className="relative">
+              <button
+                ref={emojiButtonRef}
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation(); // important pour ne pas fermer directement
+                  setShowEmojiPicker(prev => !prev);
+                }}
+                className="text-gray-400 hover:text-[#e0692d]"
+              >
+                😊
+              </button>
+
+              {showEmojiPicker && (
+                <div
+                  ref={emojiPickerRef}
+                  className="absolute bottom-12 left-0 z-50 shadow-xl rounded-lg overflow-hidden"
+                >
+                  <EmojiPicker
+                    onEmojiClick={(emojiData) => setNewMessage(prev => prev + emojiData.emoji)}
+                    theme={Theme.LIGHT}
+                    height={350}
+                    width={300}
+                  />
+                </div>
+              )}
+            </div>
             <input type="text" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Écrivez votre message..." className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#e0692d] focus:border-transparent"/>
             <button type="submit" disabled={!newMessage.trim()} className="p-2 text-white bg-[#e0692d] rounded-lg hover:bg-[#f07e40] transition-colors duration-200"><Send size={20}/></button>
           </form>

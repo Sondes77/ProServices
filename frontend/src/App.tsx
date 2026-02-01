@@ -35,6 +35,7 @@ import PrivacySettings from './profile/PrivacySettings';
 import Security from './profile/Security';
 import Messages from './profile/Messages';
 import Reviews from './profile/Reviews';
+import Notifications from './profile/Notifications';
 import Services from './profile/Services';
 import ServiceDetail from './profile/ServiceDetail';
 import FirstService from './profile/FirstService';
@@ -50,6 +51,7 @@ import Contact from './profile/Contact';
 import Blog from './profile/Blog';
 import EmailConfirmation from './profile/EmailConfirmation';
 import PhoneConfirmation from './profile/PhoneConfirmation';
+import ResetPassword from './profile/ResetPassword';
 import AdvertisementRequest from './profile/AdvertisementRequest';
 import AdvertisementAdmin from './profile/AdvertisementAdmin';
 import LiveChat from './chat/LiveChat';
@@ -59,6 +61,7 @@ import { User, PrivacySettings as PrivacySettingsType, Service } from './utils/t
 import {  mapUserDataToUserModel } from './utils/mapper';
 import ThreeCXChat from "./chat/ThreeCXChat";
 import Statistics from './profile/Statistics';
+import ForgotPassword from './profile/ForgotPassword';
 //import { io } from "socket.io-client";
 import socket from './socket';
 import './style.css';
@@ -75,7 +78,16 @@ function App() {
   const [activeSection, setActiveSection] = useState('overview');
   const [isPublicView, setIsPublicView] = useState(false);
   const token = localStorage.getItem('token');
-  
+  const [navbarType, setNavbarType] = useState<'pro' | 'user' | 'guest'>('guest');
+  useEffect(() => {
+    if (token && currentUser?.role === 'professional') {
+      setNavbarType('pro');
+    } else if (token && currentUser?.role === 'user') {
+      setNavbarType('user');
+    } else {
+      setNavbarType('guest');
+    }
+  }, [token, currentUser]);
   //const socket = io("http://localhost:5000", { transports: ["websocket"] });
     // --- ⚡ Enregistrement socket pour cet utilisateur ---
   useEffect(() => {
@@ -211,21 +223,27 @@ function App() {
     }
   };
   
-  
-  const verifNavbar = () => {
-    if (token && currentUser.role === 'professional')  {
-      return <div className="pb-16"><NavbarPro2 user={currentUser}/></div>;
-      //return <div className="pb-16"><NavbarPro /></div>;
-    } else if (token && currentUser.role === 'user') {
-      return <div className="pb-16"><NavbarUser /></div>;
-    } else if (!token) {
-      return <div className="pb-20"><Navbar2 /></div>;
-    }
-  };
+  /*useEffect(() => { 
+      const verifNavbar = () => {
+        if (token && currentUser.role === 'professional')  {
+          return <div className="pb-16"><NavbarPro2 user={currentUser}/></div>;
+          //return <div className="pb-16"><NavbarPro /></div>;
+        } else if (token && currentUser.role === 'user') {
+          return <div className="pb-16"><NavbarUser /></div>;
+        } else if (!token) {
+          return <div className="pb-20"><Navbar2 /></div>;
+        }
+      };
+    });*/
+
   return (
     
     <Router>
-      {verifNavbar()}
+      {<div className="pb-16">
+        {(navbarType === 'pro' || navbarType === 'user') && <NavbarPro2 user={currentUser} />}
+        {navbarType === 'guest' && <Navbar2 />}
+      </div>}
+      {/*{verifNavbar()}*/}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/test2" element={<Test2 />} />
@@ -240,12 +258,14 @@ function App() {
         {/* <Route path="/conditions-generales" element={<ConditionsGenerales />} /> */}
         <Route path="/connexion" element={<Connexion />} />
         <Route path="/inscription" element={<Inscription />} />
+        <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
         <Route path="/business" element={<Inscription />} />
         <Route path="/recherche" element={<Recherche />} />
         <Route path="/messages" element={<Messages user={currentUser} conversations={conversations} />} />
+        <Route path="/notifications" element={<Notifications user={currentUser} notifications={notifications} />} />
         <Route path="/recherche" element={<Recherche />} />
-        <Route path="/advertisement-request" element={<AdvertisementRequest />} />
-        <Route path="/admin/advertisements" element={<AdvertisementAdmin />} />
+        {/*<Route path="/advertisement-request" element={<AdvertisementRequest />} />
+        <Route path="/admin/advertisements" element={<AdvertisementAdmin />} />*/}
 
         <Route path="/search" element={<SearchProfessionals onViewProfile={(id) => console.log('View profile:', id)} />} />
         <Route path="/service/:id" element={<ServiceDetail user2={currentUser}/>} />
@@ -257,7 +277,7 @@ function App() {
             reviews={reviews}
           />
         }/>
-        <Route path="/admin" element={<AdminDashboard />} />
+        {/*<Route path="/admin" element={<AdminDashboard />} />*/}
         <Route path="/confirm-email" element={
           <div className="flex items-center justify-center min-h-screen" style={{ minHeight: '120vh' }}>
             <div className="w-full max-w-2xl mx-4">
@@ -268,6 +288,12 @@ function App() {
           <div className="flex items-center justify-center min-h-screen" style={{ minHeight: '120vh' }}>
             <div className="w-full max-w-2xl mx-4">
               <PhoneConfirmation />
+            </div>
+          </div>} />
+        <Route path="/reset-password/:token" element={
+          <div className="flex items-center justify-center min-h-screen" style={{ minHeight: '120vh' }}>
+            <div className="w-full max-w-2xl mx-4">
+              <ResetPassword />
             </div>
           </div>} />
          {/* <Route path="/" element={<Dashboard />} />*/}

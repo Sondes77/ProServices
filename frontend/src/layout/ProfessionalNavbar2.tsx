@@ -23,6 +23,8 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const notificationRef = useRef<HTMLDivElement>(null);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const mobileSearchRef = useRef<HTMLDivElement>(null);
 
   const [notifications, setNotifications] = useState([
     { id: 1, text: "Nouveau message de Marie L.", read: false, time: "Il y a 2 min" },
@@ -31,11 +33,37 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
   const unreadNotifications = notifications.filter(n => !n.read).length;
   const unreadCount = notifications.filter(n => !n.read).length;
   const avatar = user?.avatar || 'https://ui-avatars.com/api/?name=' + user?.nom + '&background=e0692d&color=fff';
+  const isProfessional = user?.role === 'professional';
 
   const markAllAsRead = () => {
     setNotifications(notifications.map(n => ({ ...n, read: true })));
   };
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        mobileSearchRef.current &&
+        !mobileSearchRef.current.contains(e.target as Node)
+      ) {
+        setShowMobileSearch(false);
+        setSearchQuery("");
+      }
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(e.target as Node)
+      ) {
+        setShowNotifications(false);
+      }
+    };
+
+    if (showMobileSearch || showNotifications) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMobileSearch, showNotifications]);
+  
   useEffect(() => {
     if (isDarkMode) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
@@ -66,7 +94,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
           {/* --- GAUCHE : LOGO --- */}
           <div className="flex items-center shrink-0">
             <Link to="/" className="transition-transform hover:scale-105">
-              <img src={logo} alt="Profinder" className="h-9 w-auto" />
+              <img src={logo} alt="ServicePro" className="h-9 w-auto" />
             </Link>
           </div>
 
@@ -107,7 +135,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
             
             {/* Nav Links Desktop */}
             <div className="hidden lg:flex items-center space-x-1 mr-2 border-r border-slate-200 dark:border-gray-700 pr-4">
-              <span className="text-center text-[#e0692d] text-sm font-bold transition-all italic  hidden md:block">Contactez-nous : +216 55 289 528 </span>
+              <span className="text-center text-[#e0692d] text-sm font-bold transition-all italic hidden md:block">Contactez-nous : +216 55 289 528 </span>
               {/*{navLinks.map((link) => (
                 <Link
                   key={link.path}
@@ -135,8 +163,20 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
             {/* Notifications */}
             
               <div className="relative" ref={notificationRef}>
+               {currentPath !== "/search" && currentPath !== "/" && (
+                  <button
+                    onClick={() => setShowMobileSearch(prev => !prev)}
+                    className="lg:hidden p-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    <Search size={20} />
+                  </button>
+                )}
+                 
                 <button
-                  onClick={() => setShowNotifications(!showNotifications)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowNotifications(prev => !prev);
+                  }}
                   className="p-2 text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full relative"
                 >
                   <Bell className="w-5 h-5" />
@@ -206,7 +246,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
                 <HeadlessMenu.Items className="absolute right-0 mt-3 w-56 origin-top-right bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 focus:outline-none overflow-hidden">
                   <div className="p-2 space-y-1">
                     {[
-                      { name: 'Profil Pro', path: '/profile', icon: User },
+                      ...(isProfessional ? [{ name: 'Profil Pro', path: '/profile', icon: User }] : []),
                       { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
                       { name: 'Paramètres', path: '/settings', icon: Settings },
                     ].map((item) => (
@@ -230,19 +270,59 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
                 </HeadlessMenu.Items>
               </Transition>
             </HeadlessMenu>
-
-            {/* Mobile Menu Button */}
+            {/* --- MOBILE SEARCH BAR --- */}
+            {showMobileSearch && currentPath !== "/search" && (
+              <div
+                ref={mobileSearchRef}
+                className="lg:hidden fixed top-20 left-0 right-0 z-[99] bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 px-4 py-3 shadow-sm"
+              >
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (searchQuery.trim()) {
+                      setShowMobileSearch(false);
+                      navigate(`/search?motcle=${encodeURIComponent(searchQuery.trim().toLowerCase())}`);
+                    }
+                  }}
+                  className="relative"
+                >
+                  <Search
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    autoFocus
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Rechercher un service, un pro..."
+                    className="
+                      w-full
+                      bg-slate-100 dark:bg-gray-800
+                      rounded-2xl
+                      py-3 pl-11 pr-4
+                      text-sm font-medium
+                      focus:ring-2 focus:ring-[#e0692d]/50
+                      outline-none
+                      text-slate-900 dark:text-white
+                    "
+                  />
+                </form>
+              </div>
+            )}
+          
+            {/* Mobile Menu Button 
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="lg:hidden p-2.5 rounded-xl bg-slate-100 dark:bg-gray-800 text-slate-900 dark:text-white"
             >
               {isMobileMenuOpen ? <X size={24} /> : <MenuIcon size={24} />}
-            </button>
+            </button>*/}
           </div>
         </div>
       </div>
 
-      {/* --- MOBILE SIDEBAR --- */}
+      {/* --- MOBILE SIDEBAR --- 
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -250,11 +330,11 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             className="lg:hidden fixed inset-y-0 right-0 w-full max-w-xs bg-white dark:bg-gray-900 shadow-2xl z-[101] p-6 flex flex-col"
-          >
-            {/* Contenu mobile identique à la version précédente */}
+          >*/}
+            {/* Contenu mobile identique à la version précédente 
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>*/}
     </nav>
   );
 };

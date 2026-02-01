@@ -84,18 +84,18 @@ const SignIn4 = (props) => {
             </div>
 
             {/* Boutons Sociaux */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="grid grid-cols-1 gap-4 mb-8">
               {/*<button className="flex items-center justify-center gap-2 py-3 px-4 border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all font-bold text-slate-700 text-sm">
                 <Facebook size={18} className="text-blue-600 fill-blue-600" /> Facebook
               </button>*/}
-              <button className="flex items-center justify-center gap-2 py-3 px-4 border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all font-bold text-slate-700 text-sm" id="google-sign-in-button">
-                <svg
+              <button className="flex items-center justify-center gap-2 py-3 px-4 border border-transparent rounded-2xl hover:bg-slate-50 transition-all font-bold text-slate-700 text-sm" id="google-sign-in-button">
+                {/*<svg
                   viewBox="0 0 860.0137142857142 1024"
                   className="sign-in4-icon3"
                 >
                   <path d="M438.857 449.143h414.286c4 22.286 6.857 44 6.857 73.143 0 250.286-168 428.571-421.143 428.571-242.857 0-438.857-196-438.857-438.857s196-438.857 438.857-438.857c118.286 0 217.714 43.429 294.286 114.857l-119.429 114.857c-32.571-31.429-89.714-68-174.857-68-149.714 0-272 124-272 277.143s122.286 277.143 272 277.143c173.714 0 238.857-124.571 249.143-189.143h-249.143v-150.857z"></path>
                 </svg>
-                <span className="thq-body-small">Continue with Google</span>
+                <span className="thq-body-small">Continue with Google</span>*/}
               </button>
             </div>
 
@@ -124,7 +124,7 @@ const SignIn4 = (props) => {
               <div>
                 <div className="flex justify-between mb-2">
                   <label className="block text-sm font-bold text-slate-700">Mot de passe</label>
-                  <a href="#" className="text-xs font-bold text-[#e0692d] hover:underline">Oublié ?</a>
+                  <a href="/mot-de-passe-oublie" className="text-xs font-bold text-[#e0692d] hover:underline">Oublié ?</a>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -249,7 +249,7 @@ const SignIn4 = (props) => {
           </h3>
           
           <p className="font-medium text-white/90 leading-relaxed text-lg max-w-sm">
-            Particulier ou Professionnel, gérez vos échanges et vos paiements en toute sérénité sur notre plateforme.
+            Particulier ou Professionnel, gérez vos échanges et vos activités en toute sérénité sur notre plateforme.
           </p>
 
           {/* Stats rapides */}

@@ -79,11 +79,12 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
         return;
       }; 
   }, [token, navigate]);*/
-useEffect(() => {
-  if (!routeParams.id) {
-    navigate('/connexion');
-  }
-}, [routeParams.id, navigate]);
+
+  /*useEffect(() => {
+    if (!token) {
+      navigate('/connexion');
+    }
+  }, [token, navigate]);*/
 
   useEffect(() => {
     

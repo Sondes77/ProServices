@@ -75,7 +75,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
  
     <div className="flex min-h-screen bg-gray-100">
       {/* Desktop Sidebar */}
-      <div className="hidden md:block w-64 bg-white shadow-md">
+      <div className="md:block md:w-64 bg-white shadow-md">
         <Sidebar 
           activeSection={activeSection} 
           setActiveSection={setActiveSection} 
@@ -84,16 +84,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         />
       </div>
 
-      {/* Mobile Sidebar Toggle */}
+      {/* Mobile Sidebar Toggle
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow-md p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <img 
               src="https://images.pexels.com/photos/3760514/pexels-photo-3760514.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" 
-              alt="Profinder" 
+              alt="ServicePro" 
               className="h-8 w-auto mr-2" 
             />
-            <span className="font-bold text-[#e0692d]">Profinder</span>
+            <span className="font-bold text-[#e0692d]">ServicePro</span>
           </div>
           <button 
             onClick={toggleMobileMenu}
@@ -108,10 +108,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </svg>
           </button>
         </div>
-      </div>
+      </div> 
 
-      {/* Mobile Sidebar */}
-      {isMobileMenuOpen && (
+      {/* Mobile Sidebar 
+      {!isMobileMenuOpen && (
         <div className="md:hidden fixed top-16 left-0 right-0 bottom-0 z-40 bg-white shadow-md overflow-y-auto">
           <Sidebar 
             activeSection={activeSection} 
@@ -123,11 +123,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             onViewPublicProfile={onViewPublicProfile}
           />
         </div>
-      )}
+      )}*/}
 
       {/* Main Content */}
       <div className={`flex-1 ${isMobileMenuOpen ? 'hidden' : 'block'} md:block`}>
-        <main className="p-4 md:p-8 mt-16 md:mt-0">
+        <main className="p-4 md:p-8 sm:mt-4 md:mt-0">
           {children}
         </main>
       </div>

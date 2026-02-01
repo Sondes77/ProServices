@@ -187,8 +187,38 @@ const SignIn = (props) => {
   return (
     <div className="">
       <Helmet>
-        <title>Sign-In - Adored Grumpy Reindeer</title>
-        <meta property="og:title" content="Sign-In - Adored Grumpy Reindeer" />
+        {/* Title SEO */}
+        <title>SERVICEPRO | Plateforme n°1 de services professionnels en Tunisie</title>
+
+        {/* Meta description */}
+        <meta
+          name="description"
+          content="Accédez à votre compte ServicePro.tn pour gérer vos services, contacter des professionnels en Tunisie et développer votre activité."
+        />
+
+        {/* Canonical */}
+        <link
+          rel="canonical"
+          href="https://www.servicepro.tn/connexion"
+        />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Connexion | ServicePro.tn" />
+        <meta
+          property="og:description"
+          content="Connectez-vous à ServicePro.tn et accédez à la plateforme n°1 de services professionnels en Tunisie."
+        />
+        <meta property="og:url" content="https://www.servicepro.tn/connexion" />
+        <meta property="og:site_name" content="ServicePro.tn" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Connexion | ServicePro.tn" />
+        <meta
+          name="twitter:description"
+          content="Gérez vos services et trouvez des professionnels qualifiés partout en Tunisie avec ServicePro.tn."
+        />
       </Helmet>
       <SignIn4
         action1={

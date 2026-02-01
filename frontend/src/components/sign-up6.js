@@ -262,12 +262,12 @@ const handleSubmit = async (e) => {
                   <div className="flex-grow border-t border-slate-100"></div>
                 </div>
     
-                <div className="grid grid-cols-2 gap-4">
-                  <button className="flex items-center justify-center gap-2 py-3 border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all font-bold text-slate-700">
+                <div className="grid grid-cols-1 gap-4 mb-8">
+                  {/*<button className="flex items-center justify-center gap-2 py-3 border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all font-bold text-slate-700">
                     <Facebook size={18} className="text-blue-600 fill-blue-600" /> Facebook
-                  </button>
-                  <button id="google-sign-in-button" className="sign-up6-button3 thq-button-outline">
-                    <svg
+                  </button>*/}
+                  <button className="flex items-center justify-center gap-2 py-3 px-4 border border-transparent rounded-2xl hover:bg-slate-50 transition-all font-bold text-slate-700 text-sm" id="google-sign-in-button">
+                    {/*<svg
                       viewBox="0 0 860.0137142857142 1024"
                       className="sign-up6-icon5"
                     >
@@ -281,7 +281,7 @@ const handleSubmit = async (e) => {
                           </span>
                         </Fragment>
                       )}
-                    </span>
+                    </span>*/}
                   </button>
                 </div>
               </div>
