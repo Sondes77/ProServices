@@ -1,7 +1,7 @@
 // Fichier : serviceController.js
 // backend/controllers/serviceController.js
 const db = require('../config/db');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 //const { te } = require('intl-tel-input/i18n');
@@ -92,10 +92,11 @@ exports.creerReview = async (req, res) => {
     // 🔔 Notification destinataire
     await db.promise().query(
       `INSERT INTO notifications
-       (user_id, type, title, text, link, unread, created_at)
-       VALUES (?, ?, ?, ?, ?, true, NOW())`,
+       (user_id, user_id2, type, title, text, link, unread, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, true, NOW())`,
       [
         recipientId,
+        userId,
         "review_received",
         "Nouvel avis",
         `${senderName} vous a laissé un avis`,

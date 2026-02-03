@@ -1,6 +1,6 @@
 // backend/models/utilisateurModel.js
 const db = require('../config/db');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 exports.findOrCreateUser = async (userInfo, callback) => {
     console.log("Données complètes reçues de Google :", userInfo);

@@ -15,6 +15,8 @@ import {
 import { User } from '../utils/types';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
+import Swal from "sweetalert2";
 
 // Données simulées (Mock Data)
 /*const INITIAL_NOTIFICATIONS = [
@@ -148,7 +150,7 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [loading, setLoading] = useState(true);
-
+  const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
   const timeAgo = (dateString: string) => {
@@ -166,9 +168,34 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
         }
       });
       
+      if (res.status === 401 || res.status === 403) {
+
+      Swal.fire({
+        title: "Session expirée",
+        text: "Vous allez être redirigé vers la page de connexion.",
+        icon: "warning",
+        timer: 2000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        position: "center",
+        customClass: {
+          popup: "rounded-2xl shadow-lg",
+        }
+      });
+
+      setTimeout(() => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("currentUser");
+        window.location.href = "/connexion";
+      }, 2000);
+      
+      return;
+    }
+
       const data = await res.json();
 
       setNotifications(data);
+     
     } catch (err) {
       console.error(err);
     } finally {
@@ -186,13 +213,13 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
 
   const markAsRead = async (id: string) => {
     try {
-      await fetch(`http://localhost:5000/api/notifications/${id}/read`, {
+      await fetch(`http://localhost:5000/api/notifications/read/${id}`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` }
       });
 
       setNotifications(prev =>
-        prev.map(n => n._id === id ? { ...n, read: true } : n)
+        prev.map(n => n.id === id ? { ...n, unread: false } : n)
       );
     } catch (err) {
       console.error(err);
@@ -206,7 +233,7 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
     } catch (err) {
       console.error(err);
     }
@@ -219,7 +246,7 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      setNotifications(prev => prev.filter(n => n._id !== id));
+      setNotifications(prev => prev.filter(n => n.id !== id));
     } catch (err) {
       console.error(err);
     }
@@ -229,11 +256,11 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
   // FILTER
   // =========================
   const filteredNotifications = notifications.filter(n => {
-    if (filter === 'unread') return !n.read;
+    if (filter === 'unread') return n.unread;
     return true;
   });
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter(n => n.unread).length;
 
   // =========================
   // HELPERS
@@ -265,6 +292,13 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
     }
   };
 
+  const handleNotificationClick = async (notif) => {
+    await markAsRead(notif.id);
+
+    if (notif.link) {
+      navigate(notif.link);
+    }
+  };
   // =========================
   // RENDER
   // =========================
@@ -349,7 +383,7 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
                         ? 'bg-orange-50/30 border-orange-100 hover:border-orange-200' 
                         : 'bg-white border-slate-100 hover:border-slate-200 hover:shadow-md'
                     }`}
-                    onClick={() => markAsRead(notif.id)}
+                    onClick={() => handleNotificationClick(notif)}
                   >
                     <div className="flex gap-4 items-start">
                       {/* Icone */}
@@ -373,7 +407,7 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
                       </div>
 
                       {/* Indicateur Unread */}
-                      {notif.unread === true &&  (
+                      {notif.unread == true &&  (
                         <div className="absolute top-6 right-4 w-2 h-2 rounded-full bg-[#e0692d]" />
                       )}
 

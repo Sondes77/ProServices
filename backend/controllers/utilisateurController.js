@@ -3,7 +3,7 @@
 const db = require('../config/db');
 const { OAuth2Client } = require('google-auth-library');
 const { findOrCreateUser } = require('../models/utilisateurModel');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 //const { te } = require('intl-tel-input/i18n');
 const crypto = require("crypto");
@@ -49,6 +49,7 @@ exports.creerUtilisateur = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10); // 🔐
     const source = 'formulaire'; // Source de l'inscription
     const email_verified = false;
+    const photo = "http://localhost:5000/uploads/ServicePro_Avatar.png"; // Avatar par défaut
     console.log("je suis role dans exports.creerUtilisateur = ", role);
     /*if (isPro) {
       role = 'professional';  
@@ -57,8 +58,8 @@ exports.creerUtilisateur = async (req, res) => {
     }*/
 
   db.query(
-    'INSERT INTO utilisateurs (nom, prenom, email, role, phone, source, mot_de_passe, date_creation, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [nom, prenom, email, role, tel, source, hashedPassword, date_creation, email_verified],
+    'INSERT INTO utilisateurs (nom, prenom, email, role, phone, source, mot_de_passe, date_creation, photo, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [nom, prenom, email, role, tel, source, hashedPassword, date_creation, photo, email_verified],
     (err, result) => {
       if (err) {
         console.error('Erreur lors de la création de l\'utilisateur:', err);
@@ -69,6 +70,10 @@ exports.creerUtilisateur = async (req, res) => {
         process.env.JWT_SECRET,
         { expiresIn: '1h' }
       );
+      /*const refreshToken = jwt.sign({ id: user.id, email }, process.env.REFRESH_SECRET, { expiresIn: '1h' });
+
+      // Cookie httpOnly pour le refresh
+      res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 3600 * 1000 });*/
 
       // ✅ Une seule réponse
       res.status(201).json({
@@ -137,8 +142,12 @@ exports.login = (req, res) => {
       if (!match) return res.status(401).json({ error: "Mot de passe incorrect" });
   
       // ✅ Génère un token
-      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '2h' });
-  
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      /*const refreshToken = jwt.sign({ id: user.id, email }, process.env.REFRESH_SECRET, { expiresIn: '1h' });
+
+        // Cookie httpOnly pour le refresh
+        res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 3600 * 1000 });*/
+
       // ✅ Retourne le token et l'utilisateur
       res.json({ token, user });
     });
@@ -247,6 +256,11 @@ exports.googleAuth = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
+        /*const refreshToken = jwt.sign({ id: user.id, email: user.email }, process.env.REFRESH_SECRET, { expiresIn: '1h' });
+
+        // Cookie httpOnly pour le refresh
+        res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 3600 * 1000 });*/
+
         //console.log("Token généré:", token); // Affiche le token généré
         //console.log("Utilisateur récupéré:", user); // Affiche l'utilisateur récupéré
         res.json({ token, user });

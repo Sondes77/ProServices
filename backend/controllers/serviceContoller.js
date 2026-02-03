@@ -1,7 +1,7 @@
 // Fichier : serviceController.js
 // backend/controllers/serviceController.js
 const db = require('../config/db');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 //const { te } = require('intl-tel-input/i18n');
 
@@ -69,7 +69,7 @@ exports.updateService = async (req, res) => {
           console.error('Erreur lors de la mise à jour :', err);
           return res.status(500).json({ message: 'Erreur serveur' });
         }
-        console.error('okijjjjjjjjjjjjjjjjjjjj', results);
+        //console.error('okijjjjjjjjjjjjjjjjjjjj', results);
         res.status(200).json({ message: 'Service mis à jour avec succès' });
       });
 

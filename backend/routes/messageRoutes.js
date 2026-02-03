@@ -8,6 +8,6 @@ const verifyToken = require('../middlewares/authMiddleware'); // 🔐
 router.get('/conversations/:id', verifyToken.verifyToken, messageContoller.getConversations);
 router.post('/message', verifyToken.verifyToken, messageContoller.sendMessage);
 router.post('/messagecontainer', verifyToken.verifyToken, messageContoller.sendMessageContainer);
-router.get('/messages/:id', verifyToken.verifyToken, messageContoller.getMessages);
+router.get('/messages/:id', messageContoller.getMessages);
 
 module.exports = router;

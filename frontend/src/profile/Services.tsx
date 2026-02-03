@@ -202,7 +202,7 @@ const Services: React.FC<ServicesProps> = ({
         : 'http://localhost:5000/api/service'; // Create
   
       const method = selectedService ? 'PUT' : 'POST';
-      console.log(serviceData);
+      //console.log(serviceData);
       const response = await fetch(url, {
         method,
         headers: {

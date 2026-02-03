@@ -5,10 +5,12 @@ import { Menu as HeadlessMenu, Transition } from '@headlessui/react';
 import { 
   Briefcase, MessageSquare, User, Bell, 
   Settings, LayoutDashboard, LogOut, Sun, Moon, 
-  Menu as MenuIcon, X, Search, Message
+  Menu as MenuIcon, X, Search, Message, ShieldCheck
 } from 'lucide-react';
 import logo from '../img/noBgColor5.png';
 import { User as UserType } from '../utils/types';
+import { formatDistanceToNow, parseISO } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface ProfessionalNavbarProps {
   user: UserType;
@@ -26,18 +28,42 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
 
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: "Nouveau message de Marie L.", read: false, time: "Il y a 2 min" },
-    { id: 2, text: "Nouvel avis 5 étoiles reçu", read: false, time: "Il y a 1h" },
-  ]);
-  const unreadNotifications = notifications.filter(n => !n.read).length;
+  const [notifications, setNotifications] = useState([]);
+  const unreadNotifications = notifications.filter(
+    n => n.unread && n.type !== "message_received"
+  ).length;
+  const unreadMessages = notifications.filter(
+    n => n.unread && n.type === "message_received"
+  ).length;
   const unreadCount = notifications.filter(n => !n.read).length;
   const avatar = user?.avatar || 'https://ui-avatars.com/api/?name=' + user?.nom + '&background=e0692d&color=fff';
   const isProfessional = user?.role === 'professional';
+  const [showMessages, setShowMessages] = useState(false);
+  const messageRef = useRef(null);
+  //const [unreadMessages, setUnreadMessages] = useState(7); // Exemple
+  const token = localStorage.getItem('token');
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  const timeAgo = (dateString: string) => {
+    const date = parseISO(dateString); // si created_at est en ISO
+    return formatDistanceToNow(date, { addSuffix: true, locale: fr });
   };
+
+  // Fonction pour jouer le son
+  const playNotificationSound = () => {
+    const audio = new Audio('/sounds/notification_message.wav');
+    audio.play().catch(err => console.log("Audio play blocked", err));
+  };
+
+  // Simulation : jouer le son quand un message arrive
+  useEffect(() => {
+    if (unreadMessages > 0) {
+      playNotificationSound();
+    }
+  }, [unreadMessages]);
+
+  /*const markAllAsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, unread: true })));
+  };*/
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -64,10 +90,10 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
     };
   }, [showMobileSearch, showNotifications]);
   
-  useEffect(() => {
+  /*useEffect(() => {
     if (isDarkMode) document.documentElement.classList.add('dark');
     else document.documentElement.classList.remove('dark');
-  }, [isDarkMode]);
+  }, [isDarkMode]);*/
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -80,23 +106,90 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
       window.location.replace('/connexion');
     };
   };
+  // Exemple : polling toutes les 5 secondes
+useEffect(() => {
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/notifications", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const data = await res.json();
+      const newUnread = data.filter((n: any) => !n.read).length;
 
-  const navLinks = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Mes Services', path: '/mes-services', icon: Briefcase },
-  ];
+      // Jouer le son seulement si nouvelles notifications
+      if (newUnread > unreadNotifications) playNotificationSound();
 
+      setNotifications(data);
+    } catch (err) { console.log(err); }
+  };
+
+  const fetchMessages = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/messages/unread", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        const data = await res.json();
+        if (data.count > unreadMessages) playNotificationSound();
+        setUnreadMessages(data.count);
+      } catch (err) { console.log(err); }
+    };
+
+    fetchNotifications();
+    fetchMessages();
+
+    const interval = setInterval(() => {
+      //fetchNotifications();
+      fetchMessages();
+    }, 1000); // toutes les 5 secondes
+
+    return () => clearInterval(interval);
+  }, [unreadNotifications, unreadMessages]);
+
+  const markAllAsRead = async () => {
+    try {
+      await fetch(`http://localhost:5000/api/notifications/read-all`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const markAsRead = async (id: string) => {
+    try {
+      await fetch(`http://localhost:5000/api/notifications/read/${id}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      setNotifications(prev =>
+        prev.map(n => n.id === id ? { ...n, unread: false } : n)
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  const handleNotificationClick = async (notif) => {
+    await markAsRead(notif.id);
+
+    if (notif.link) {
+      navigate(notif.link);
+    }
+  };
   return (
     <nav className="fixed w-full z-[100] transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           
-          {/* --- GAUCHE : LOGO --- */}
-          <div className="flex items-center shrink-0">
-            <Link to="/" className="transition-transform hover:scale-105">
-              <img src={logo} alt="ServicePro" className="h-9 w-auto" />
-            </Link>
-          </div>
+         {/* --- GAUCHE : LOGO --- */}
+        <div className="flex items-center shrink-0">
+          <Link to="/" className="transition-transform hover:scale-105 flex items-center" >
+            <img src={logo} alt="ServicePro" className="h-7 sm:h-8 md:h-9 lg:h-10 w-auto object-contain select-none" />
+          </Link>
+        </div>
 
           {/* --- CENTRE : BARRE DE RECHERCHE (DESKTOP SEULEMENT) --- */}
           {/* --- CENTRE : BARRE DE RECHERCHE (DESKTOP) --- */}
@@ -159,19 +252,17 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
             >
               {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>*/}
-
+              {currentPath !== "/search" && currentPath !== "/" && (
+                <button
+                  onClick={() => setShowMobileSearch(prev => !prev)}
+                  className="lg:hidden p-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <Search size={20} />
+                </button>
+              )}
             {/* Notifications */}
             
               <div className="relative" ref={notificationRef}>
-               {currentPath !== "/search" && currentPath !== "/" && (
-                  <button
-                    onClick={() => setShowMobileSearch(prev => !prev)}
-                    className="lg:hidden p-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <Search size={20} />
-                  </button>
-                )}
-                 
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -181,56 +272,81 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
                 >
                   <Bell className="w-5 h-5" />
                   {unreadNotifications > 0 && (
-                    <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-[#e0692d] text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white dark:border-gray-900">
                       {unreadNotifications}
                     </span>
                   )}
                 </button>
 
-                {/* Notifications Dropdown */}
-               <Transition
-                show={showNotifications}
-                enter="transition ease-out duration-100"
-                enterFrom="transform opacity-0 scale-95"
-                enterTo="transform opacity-100 scale-100"
-                leave="transition ease-in duration-75"
-                leaveFrom="transform opacity-100 scale-100"
-                leaveTo="transform opacity-0 scale-95"
-              >
-                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
-                  <div className="p-4">
+                <Transition
+                  show={showNotifications}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-xl ring-1 ring-black ring-opacity-5 z-50 overflow-hidden border border-gray-100 dark:border-gray-700">
+                    <div className="p-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Notifications</h3>
+                        <button onClick={markAllAsRead} className="text-xs text-[#e0692d] font-bold">Tout marquer comme lu</button>
+                      </div>
 
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                        Notifications
-                      </h3>
-
-                      <button
-                        onClick={markAllAsRead}
-                        className="text-sm text-[#e0692d] hover:text-[#f07e40]"
-                      >
-                        Tout marquer comme lu
-                      </button>
-                    </div>
-
-                    <div className="space-y-3 max-h-64 overflow-y-auto">
-                      {notifications.slice(0,5).map(notification => (
-                        <div
-                          key={notification.id}
-                          className={`p-3 rounded-md ${
-                            notification.read
-                              ? 'bg-gray-50 dark:bg-gray-700'
-                              : 'bg-blue-50 dark:bg-blue-900'
+                      <div className="space-y-1 max-h-80 overflow-y-auto">
+                        {/* Exemple de liste de messages */}
+                        {notifications
+                        .filter(n => n.type !== "message_received")
+                        .slice(0, 5)
+                        .map(notification => (
+                          <Link 
+                            key = {notification.id} 
+                            to = {notification.link} 
+                            className={`flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-50 dark:border-gray-700 last:border-0" ${
+                            notification.unread 
+                              ? 'bg-orange-50/30 border-orange-100 hover:border-orange-200' 
+                              : 'bg-white border-slate-100 hover:border-slate-200 hover:shadow-md'
                           }`}
-                        >
-                          <p className="text-sm text-gray-800 dark:text-gray-200">
-                            {notification.text}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
+                          onClick={() => handleNotificationClick(notification)}
+                          >
+                            <div className="w-12 h-12 rounded-full center bg-orange-100 flex-shrink-0" >
+                              
+                              {notification?.user2_role === "professional" ? (
+                                <div className="relative w-12 h-12">
+                                  <img
+                                    src={notification.photo}
+                                    alt="Profile"
+                                    className="w-12 h-12 rounded-full object-cover"
+                                  />
 
-                    {/* ✅ NOUVEAU — Voir toutes */}
+                                  <ShieldCheck size={12}
+                                    className="flex absolute bottom-0 right-0
+                                              bg-[#e0692d] w-4 h-4 text-white rounded-full 
+                                              border-2 border-[#e0692d] shadow"
+                                  />
+                                </div>
+                              ) : (
+                                <img
+                                  src={notification.photo}
+                                  alt="Profile"
+                                  className="w-12 h-12 rounded-full object-cover"
+                                />
+                              )}
+                             
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{notification.title}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{notification.text}</p>
+                              <p className="text-xs text-orange-500 dark:text-orange-400 truncate">{notification.created_at && timeAgo(notification.created_at)}</p>
+                            </div>
+                            {notification.unread == true &&  (
+                            <div className="w-2 h-2 bg-[#e0692d] rounded-full" />
+                            )}
+                          </Link>
+                        ))}
+                      </div>
+                      {/* ✅ NOUVEAU — Voir toutes */}
                     <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
                       <Link
                         to="/notifications"
@@ -240,17 +356,106 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
                         Afficher toutes les notifications →
                       </Link>
                     </div>
-
+                    </div>
                   </div>
-                </div>
-              </Transition>
+                </Transition>
               </div>
-        
+              {/* Messages Dropdown */}
+              <div className="relative" ref={messageRef}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMessages(prev => !prev);
+                  }}
+                  className="p-2 text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full relative"
+                >
+                  <MessageSquare className="w-5 h-5" />
+                  {unreadMessages > 0 && (
+                    <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-[#e0692d] text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white dark:border-gray-900">
+                      {unreadMessages}
+                    </span>
+                  )}
+                </button>
+
+                <Transition
+                  show={showMessages}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-2xl shadow-xl ring-1 ring-black ring-opacity-5 z-50 overflow-hidden border border-gray-100 dark:border-gray-700">
+                    <div className="p-4">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Messages</h3>
+                        <Link to="/messages" onClick={markAllAsRead} className="text-xs text-[#e0692d] font-bold">Ouvrir tout</Link>
+                      </div>
+
+                      <div className="space-y-1 max-h-80 overflow-y-auto">
+                        {/* Exemple de liste de messages */}
+                        {notifications.slice(0,10).map(notification => (
+                          <Link 
+                            key = {notification.id} 
+                            to = {notification.link} 
+                            className={`flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-50 dark:border-gray-700 last:border-0" ${
+                            notification.unread 
+                              ? 'bg-orange-50/30 border-orange-100 hover:border-orange-200' 
+                              : 'bg-white border-slate-100 hover:border-slate-200 hover:shadow-md'
+                          }`}
+                          onClick={() => handleNotificationClick(notification)}
+                          >
+                            <div className="w-12 h-12 rounded-full center bg-orange-100 flex-shrink-0" >
+                               {notification?.user2_role === "professional" ? (
+                                <div className="relative w-12 h-12">
+                                  <img
+                                    src={notification.photo}
+                                    alt="Profile"
+                                    className="w-12 h-12 rounded-full object-cover"
+                                  />
+
+                                  <ShieldCheck size={12}
+                                    className="flex absolute bottom-0 right-0
+                                              bg-[#e0692d] w-4 h-4 text-white rounded-full 
+                                              border-2 border-[#e0692d] shadow"
+                                  />
+                                  {/*<span className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-gradient-to-r from-[#e0692d] to-yellow-400 shadow-xl animate-ping"></span>
+                                  <span className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-[#e0692d] shadow-md"></span>*/}
+                                </div>
+                              ) : (
+                                <img
+                                  src={notification.photo}
+                                  alt="Profile"
+                                  className="w-12 h-12 rounded-full object-cover"
+                                />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{notification.title}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{notification.text}</p>
+                              <p className="text-xs text-orange-500 dark:text-orange-400 truncate">{notification.created_at && timeAgo(notification.created_at)}</p>
+                            </div>
+                            {notification.unread == true &&  (
+                            <div className="w-2 h-2 bg-[#e0692d] rounded-full" />
+                            )}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </Transition>
+              </div>
+
             {/* User Dropdown */}
             <HeadlessMenu as="div" className="relative ml-2">
               <HeadlessMenu.Button className="flex items-center gap-2 p-1 pr-3 rounded-2xl bg-gray-50 dark:bg-gray-800 border border-slate-100 dark:border-gray-700 hover:shadow-md transition-all">
                 <img src={avatar} alt="Profile" className="w-8 h-8 rounded-xl object-cover" />
-                <p className="hidden md:block text-xs font-black text-gray-900 dark:text-white uppercase tracking-tighter">Pro</p>
+                {user?.role === 'professional' && (
+                  <p className="hidden md:block text-xs font-black text-gray-900 dark:text-white uppercase tracking-tighter">
+                    Pro
+                  </p>
+                )}
               </HeadlessMenu.Button>
               <Transition
                 enter="transition duration-100 ease-out"
@@ -337,6 +542,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
               {isMobileMenuOpen ? <X size={24} /> : <MenuIcon size={24} />}
             </button>*/}
           </div>
+
         </div>
       </div>
 

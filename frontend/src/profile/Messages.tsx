@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import socket from '../socket';
 import Swal from "sweetalert2";
 import EmojiPicker, { Theme } from "emoji-picker-react";
+import { useParams } from "react-router-dom";
 
 //import { io } from "socket.io-client";
 //const socket = io("http://localhost:5000", { transports: ["websocket"] });
@@ -41,6 +42,8 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
   const emojiButtonRef = useRef<HTMLButtonElement | null>(null);
   const firstLoadRef = useRef(true);
   const navigate = useNavigate();
+  const { conversationId } = useParams();
+  const [isopen, setIsOpen] = useState(false);
 
   // --- ⚡ Enregistrement socket pour cet utilisateur ---
  /*useEffect(() => {
@@ -49,6 +52,23 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
     socket.emit("user_connected", user.id);
   });
 }, [user.id]);*/
+
+
+useEffect(() => {
+  if (!conversationId) return;
+  if (conversations.length === 0) return;
+
+  const conv = conversations.find(c => String(c.id) === String(conversationId));
+  
+  if (conv && isopen === false) {
+    openConversation(conv);
+    setIsOpen(true);
+  }
+  else {
+    setIsOpen(false);
+  }
+
+}, [conversationId, conversations]);
 
   // --- Formatter timestamp ---
   const formatTimestamp = (timestamp: string) => {
@@ -205,26 +225,6 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
     };
   }, [selectedConversation]);
 
-  /*useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container || messages.length === 0) return;
-
-    // 🧠 ouverture conversation → scroll instantané INVISIBLE
-    if (firstLoadRef.current) {
-      requestAnimationFrame(() => {
-        container.scrollTop = container.scrollHeight;
-        firstLoadRef.current = false;
-      });
-      return;
-    }
-
-    // 📨 nouveau message → scroll doux
-    container.scrollTo({
-      top: container.scrollHeight,
-      behavior: "smooth",
-    });
-  }, [messages]);*/
-  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       // Si le click n'est pas sur le picker ET pas sur le bouton emoji
@@ -287,7 +287,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
      
       <div className="bg-white rounded-lg shadow-md overflow-hidden h-[calc(100vh-2rem)]">
         <div className="bg-[#e0692d] p-4 flex items-center">
-          <button onClick={() => setSelectedConversation(null)} className="text-white mr-4 hover:bg-[#f07e40] p-2 rounded-full transition-colors duration-200">
+          <button onClick={() => { setSelectedConversation(null); navigate("/messages"); }} className="text-white mr-4 hover:bg-[#f07e40] p-2 rounded-full transition-colors duration-200">
             <ArrowLeft size={20} />
           </button>
           <img src={selectedConversation.participant.avatar} alt={selectedConversation.participant.name} className="w-10 h-10 rounded-full object-cover mr-3"/>

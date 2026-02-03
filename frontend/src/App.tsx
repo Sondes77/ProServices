@@ -389,6 +389,16 @@ function App() {
             {renderActiveSection()}
           </DashboardLayout>
         } />
+        <Route path="/messages/:conversationId" element={
+          <DashboardLayout
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            user={currentUser}
+            onViewPublicProfile={toggleView}
+          >
+            {renderActiveSection()}
+          </DashboardLayout>
+        } />
         {/* <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} /> */}
         {/* <Route path="/nouveau-mot-de-passe" element={<NouveauMotDePasse />} /> */}
         {/* <Route path="/confirmation-email" element={<ConfirmationEmail />} /> */}

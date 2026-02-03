@@ -1,7 +1,7 @@
 // Fichier : serviceController.js
 // backend/controllers/serviceController.js
 const db = require('../config/db');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 //const { te } = require('intl-tel-input/i18n');
@@ -74,9 +74,94 @@ exports.creerReview = async (req, res) => {
   }
 };
 
-// Récupérer tous les utilisateurs
+// Récupérer les notifications de l'utilisateur connecté
 exports.getMesNotifications = (req, res) => {
   const authHeader = req.headers['authorization'];
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Token manquant' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded token:", decoded);
+
+    const userId = decoded.id;
+
+    db.query(
+      `SELECT 
+        n.id,
+        n.user_id,
+        n.user_id2,
+        n.type,
+        n.title,
+        n.text,
+        n.link,
+        n.unread,
+        n.created_at,
+        u2.photo AS photo,
+        u2.role AS user2_role
+
+      FROM notifications n
+
+      -- utilisateur destinataire
+      JOIN utilisateurs u ON n.user_id = u.id
+
+      -- utilisateur secondaire (expéditeur / lié)
+      LEFT JOIN utilisateurs u2 ON n.user_id2 = u2.id
+
+      WHERE u.id = ?
+      ORDER BY n.created_at DESC;`,
+      [userId],
+      (err, result) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).send('Erreur serveur');
+        }
+
+        res.status(200).json(result);
+      }
+    );
+
+  } catch (err) {
+    console.log("JWT error:", err.name);
+
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token expiré" });
+    }
+
+    return res.status(403).json({ message: "Token invalide" });
+  }
+};
+
+// Marquer les notifications comme lues pour un utilisateur
+exports.markRead = (req, res) => {
+  const authHeader = req.headers['authorization'];
+  
+  if (!authHeader) return res.status(401).json({ message: 'Token manquant' });
+
+  const token = authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Token invalide' });
+
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const { id } = req.params;
+
+  db.query('UPDATE notifications SET unread = FALSE WHERE id = ?', [id], (err, result) => {
+    if (err) {
+      console.error('Erreur lors de la mise à jour de la notification:', err);
+      return res.status(500).send('Erreur serveur');
+    }
+   
+    res.status(200).json(result);
+  });
+};
+
+// Marquer les notifications comme lues pour un utilisateur
+exports.markAllRead = (req, res) => {
+  const authHeader = req.headers['authorization'];
+  
   if (!authHeader) return res.status(401).json({ message: 'Token manquant' });
 
   const token = authHeader.split(' ')[1];
@@ -84,34 +169,37 @@ exports.getMesNotifications = (req, res) => {
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   const userId = decoded.id;
-
-  db.query('SELECT * FROM notifications n JOIN utilisateurs u on n.user_id = u.id where u.id = ? order by n.created_at DESC', [userId], (err, result) => {
+  
+  console.log("User ID for markAllRead:", userId);
+  db.query('UPDATE notifications SET unread = FALSE WHERE user_id = ?', [userId], (err, result) => {
     if (err) {
-      console.error('Erreur lors de la récupération des services:', err);
+      console.error('Erreur lors de la mise à jour de la notification:', err);
       return res.status(500).send('Erreur serveur');
     }
-  console.log(result);
+   
     res.status(200).json(result);
   });
 };
 
-// Récupérer tous les utilisateurs
-exports.getReviewsByProId = (req, res) => {
-  //const authHeader = req.headers['authorization'];
+// Marquer les notifications comme lues pour un utilisateur
+exports.deleteNotification = (req, res) => {
+  const authHeader = req.headers['authorization'];
+  
+  if (!authHeader) return res.status(401).json({ message: 'Token manquant' });
+
+  const token = authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'Token invalide' });
+
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
   const { id } = req.params;
-  //if (!authHeader) return res.status(401).json({ message: 'Token manquant' });
-
-  //const token = authHeader.split(' ')[1];
-  //if (!token) return res.status(401).json({ message: 'Token invalide' });
-
-  //const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  //console.log("dfdf",id);
-  db.query('SELECT r.id AS review_id, r.rating, r.comment, r.created_at, u.id AS author_id, u.nom AS author_nom, u.photo AS author_photo, ur.id AS recipient_id, ur.nom AS recipient_nom, ur.photo AS recipient_photo FROM reviews r JOIN utilisateurs u ON r.author_id = u.id JOIN utilisateurs ur ON r.recipient_id = ur.id WHERE r.recipient_id = ?', [id], (err, result) => {
+  
+  console.log("User ID for deleteNotification:", decoded.id);
+  db.query('DELETE FROM notifications WHERE id = ?', [id], (err, result) => {
     if (err) {
-      console.error('Erreur lors de la récupération des reviews:', err);
+      console.error('Erreur lors de la suppression de la notification:', err);
       return res.status(500).send('Erreur serveur');
     }
-    console.log(result.length);
+   
     res.status(200).json(result);
   });
 };

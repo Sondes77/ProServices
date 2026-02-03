@@ -132,11 +132,13 @@ const Sidebar: React.FC<SidebarProps> = ({
       setActiveSection("overview");
     }
 
-    if (location.pathname === "/messages") {
+    if (location.pathname === "/messages" || location.pathname.startsWith("/messages/")) {
       setActiveSection("messages");
     }
 
-    navigate('/dashboard', { replace: true });
+    if (!location.pathname.startsWith("/messages/")) {
+      navigate('/dashboard', { replace: true });
+    }
   }, [location.pathname, navigate]);
 
   return (
