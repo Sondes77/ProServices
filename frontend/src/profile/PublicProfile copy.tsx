@@ -52,7 +52,11 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
   const [loginError, setLoginError] = useState('');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const userMe = user?.id === user2?.id;
-  
+  const [reviewsOpen, setReviewsOpen] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(5);
+  const visibleReviews = reviews.slice(0, visibleCount);
+  const hasMore = visibleCount < reviews.length;
+
   /*useEffect(() => {
       if (!token){
         localStorage.removeItem("currentUser");
@@ -114,6 +118,9 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
         const data = await response.json();
         console.log("data = ",data);
         const service = Array.isArray(data) ? data[0] : data;
+        if (data[0].role === "user"){
+          navigate(`/user/${id}`);
+        }
         const mapped = mapUserDataToUserModel(service);
         setUser(mapped);
         const resp = await fetch(`http://localhost:5000/api/pro-service/${id}`, {
@@ -386,7 +393,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
           timer: 1500,
           timerProgressBar: true,
           showConfirmButton: false,
-          position: "center",
+          position: "top-end",
           customClass: {
             popup: "rounded-2xl shadow-lg", // style chic
           }
@@ -416,7 +423,25 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
       if (!res.ok) {
         throw new Error(`Erreur serveur: ${res.status}`);
       }
-
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "success",
+        title: "Merci !",
+        text: "Votre avis a été publié.",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
       const savedReview = await res.json();
       console.log('Review envoyé:', savedReview);
       console.log('Review submitted:', { rating, comment: reviewComment });
@@ -484,15 +509,16 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
         </div>
       </div>
 
+      <button onClick={() => navigate(-1)} className="mb-6 flex items-center text-gray-500 hover:text-black transition-colors">
+        <ArrowLeft size={18} className="mr-2" /> Retour
+      </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start">
         <div className="lg:flex-grow">
           {/* Profile Header */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
             <div className="bg-[#e0692d] p-6">
-              <button onClick={() => navigate(-1)} className="text-white mr-4 hover:bg-[#f07e40] p-2 rounded-full transition-colors duration-200">
-                  <ArrowLeft size={20} />
-                </button>
+             
               <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0">
                 
                 <div className="relative">
@@ -590,7 +616,9 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                         Disponible
                       </span>
                     </div>
-                    <p className="text-gray-600 mb-3">{service.description}</p>
+                    <p className="text-gray-600 mb-3">{service.description.length > 50
+                        ? service.description.slice(0, 150) + '...'
+                        : service.description}</p>
                     <div className="flex flex-wrap gap-2">
                       <span className="inline-flex items-center text-sm text-gray-500">
                         <Tag size={14} className="mr-1" />
@@ -612,8 +640,8 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-gray-800">Avis clients</h2>
-                {!userMe && (
+                <h2 className="text-xl font-semibold text-gray-800">Avis clients {!reviewsOpen && `(${reviews.length})`}</h2>
+                {/*!userMe && (
                   <button
                     onClick={() => {
                       if (token) {
@@ -627,30 +655,59 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                     <Star size={18} className="mr-2" />
                     Donner un avis
                   </button>
-                )}
+                )*/}
+                <button
+                onClick={() => setReviewsOpen(prev => !prev)}
+                className="text-sm font-medium text-orange-600 hover:text-orange-700"
+              >
+                {reviewsOpen ? "Masquer" : "Afficher"}
+              </button>
               </div>
-              <div className="space-y-6">
-                {reviews.map(review => (
-                  <div key={review.review_id} className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-start">
-                      <img 
-                        src={review.author_photo}
-                        alt={review.author_nom}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                      <div className="ml-4">
-                        <div className="flex items-center">
-                          <h4 className="font-medium text-gray-900">{review.author_nom}</h4>
-                          <span className="mx-2 text-gray-300">•</span>
-                          <span className="text-sm text-gray-500">{formatDate(review.created_at)}</span>
+              {reviewsOpen && (
+                <div className="space-y-6">
+                  
+                  {visibleReviews.map((review) => (
+                    <div key={review.review_id} className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-start">
+                        <img 
+                          src={review.author_photo}
+                          alt={review.author_nom}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                        <div className="ml-4">
+                          <div className="flex items-center">
+                            <h4 className="font-medium text-gray-900">{review.author_nom}</h4>
+                            <span className="mx-2 text-gray-300">•</span>
+                            <span className="text-sm text-gray-500">{formatDate(review.created_at)}</span>
+                          </div>
+                          {renderStars(review.rating)}
+                          <p className="mt-2 text-gray-600">{review.comment}</p>
                         </div>
-                        {renderStars(review.rating)}
-                        <p className="mt-2 text-gray-600">{review.comment}</p>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+
+                  {/* Aucun avis */}
+                  {reviews.length === 0 && (
+                    <p className="text-center text-gray-400">
+                      Aucun avis pour le moment.
+                    </p>
+                  )}
+
+                  {/* Bouton afficher plus */}
+                  {hasMore && (
+                    <div className="text-center pt-4">
+                      <button
+                        onClick={() => setVisibleCount(v => v + 10)}
+                        className="px-5 py-2 rounded-xl bg-orange-600 text-white hover:bg-orange-700 transition"
+                      >
+                        Afficher plus
+                      </button>
+                    </div>
+                  )}
+
+                </div>
+              )}
             </div>
           </div>
         </div>

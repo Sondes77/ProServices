@@ -1,4 +1,4 @@
-// routes/upload.js selon ton architecture
+// backend/routes/upload.js
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
@@ -59,6 +59,18 @@ router.post('/upload-avatar', upload.single('avatar'), (req, res) => {
       res.status(200).json({userId: userId, avatarUrl: fileUrl, message: 'Avatar mis à jour avec succès' });
     }
   );
+});
+
+router.post('/upload-gallery', upload.array('images', 5), (req, res) => {
+
+  const imageUrls = req.files.map(file =>
+    `http://localhost:5000/uploads/${file.filename}`
+  );
+
+  res.json({
+    urls: imageUrls
+  });
+
 });
 
 module.exports = router;

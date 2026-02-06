@@ -281,6 +281,20 @@ useEffect(() => {
         );
     }, [conversations, searchQuery]);
 
+    const handleProfileClick = (professionalId: string, role: string) => {
+      if(role === 'professional') {
+        navigate(`/professional/${professionalId}`);}
+      else if(role === 'user'){
+        navigate(`/user/${professionalId}`);
+      }
+    
+    if(token){
+      
+    } else {
+
+    }
+  };
+
   // --- Affichage conversation ---
   if (selectedConversation) {
     return (
@@ -292,7 +306,7 @@ useEffect(() => {
           </button>
           <img src={selectedConversation.participant.avatar} alt={selectedConversation.participant.name} className="w-10 h-10 rounded-full object-cover mr-3"/>
           <div>
-            <h2 className="text-lg font-semibold text-white">{selectedConversation.participant.name}</h2>
+            <h2 className="text-lg font-semibold text-white cursor-pointer" onClick={() => handleProfileClick(selectedConversation.participant.id, selectedConversation.participant.role)}>{selectedConversation.participant.name}</h2>
             <p className="text-white text-opacity-80 text-sm">
               {selectedConversation.participant.role === 'professional' ? 'Professionnel' : 'Utilisateur'}
             </p>

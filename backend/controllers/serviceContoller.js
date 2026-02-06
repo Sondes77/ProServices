@@ -21,14 +21,14 @@ exports.creerService = async (req, res) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.id;
     
-        const { title, description, category, price, status} = req.body;
+        const { title, description, category, price, status, duration, gallery, included, notIncluded } = req.body;
         const date_creation = new Date(); // Date actuelle
 
         const query = `
-            INSERT INTO services (professionnel_id, titre, description, categorie, prix, statut, date_creation) VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO services (professionnel_id, titre, description, categorie, prix, statut, availability, gallery, included, notIncluded, date_creation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `;
     
-          const values = [userId, title, description, category, price, status, date_creation];
+          const values = [userId, title, description, category, price, status, duration, JSON.stringify(gallery), JSON.stringify(included), JSON.stringify(notIncluded), date_creation];
     
           db.query(query, values, (err, results) => {
             if (err) {
@@ -58,11 +58,11 @@ exports.updateService = async (req, res) => {
 
     const serviceId = req.params.id;
 
-    const { title, description, category, price, status} = req.body;
+    const { title, description, category, price, status, duration, gallery, included, notIncluded} = req.body;
 
-    const query = `UPDATE services SET titre = ?, description = ?, categorie = ?, prix = ?, statut = ? WHERE id = ?`;
+    const query = `UPDATE services SET titre = ?, description = ?, categorie = ?, prix = ?, statut = ?, availability = ?, gallery = ?, included = ?, notIncluded = ?, date_modification = ? WHERE id = ?`;
 
-      const values = [title, description, category, price, status, serviceId];
+      const values = [title, description, category, price, status, duration, JSON.stringify(gallery), JSON.stringify(included), JSON.stringify(notIncluded), new Date(), serviceId];
 
       db.query(query, values, (err, results) => {
         if (err) {

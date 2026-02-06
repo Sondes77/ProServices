@@ -363,7 +363,11 @@ const Services: React.FC<ServicesProps> = ({
                           {getStatusBadge(service.status, sponsored)}
                         </div>
                         
-                        <p className="text-gray-600 mb-3">{service.description}</p>
+                        <p className="text-gray-600 mb-3">
+                          {service.description.length > 100
+                        ? service.description.slice(0, 100) + '...'
+                        : service.description}
+                        </p>
                         
                         <div className="flex flex-wrap gap-3 mb-3">
                           <div className="flex items-center text-sm text-gray-500">

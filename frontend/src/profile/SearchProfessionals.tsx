@@ -3,12 +3,15 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { villesEtRegions } from '../components/villesRegions';
-import { Search, MapPin, Filter, Star, MessageSquare, ChevronDown, ChevronUp, ChevronRight, BadgeCheck } from 'lucide-react';
+import { Search, MapPin, Filter, Star, MessageSquare, ChevronDown, ChevronUp, ChevronRight, BadgeCheck,
+  Users, Link, X, Send, Lock
+ } from 'lucide-react';
 import { Professional } from '../utils/types';
-import { mapProfessionalsDataToUserModel } from '../utils/mapper';
+import { mapProfessionalsDataToUserModel, mapUserDataToUserModel } from '../utils/mapper';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
+import Swal from "sweetalert2";
 
 interface SearchProfessionalsProps {
   onViewProfile: (professionalId: string) => void;
@@ -27,6 +30,12 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
     availability: 'all',
   });
   const token = localStorage.getItem('token');
+  const id = token ? JSON.parse(atob(token.split('.')[1])).id : null;
+  //alert("id = "+ id);
+  const [user, setUser] = useState<{ id: string } | null>(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
   //alert(token);  
   const categories = [
     'Plombier',
@@ -41,7 +50,10 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
   ];
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [resultats, setResultats] = useState<Professional[]>([]);
-
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [message, setMessage] = useState('');
+  
   const navigate = useNavigate();
   const location = useLocation();
   const query = new URLSearchParams(location.search);
@@ -86,6 +98,68 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
     fetchUserData();
   }, []);
 
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) return Swal.fire("Connexion requise", "Connectez-vous pour envoyer un message", "info");
+
+    try {
+      const res = await fetch(`http://localhost:5000/api/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ recipientId: user?.id, content: message })
+      });
+      if (res.ok) {
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "success",
+          title: "Succès",
+          text: "Message envoyé !",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
+        setMessage('');
+        setShowMessageModal(false);
+      }
+    } catch (error) {
+      Swal.fire("Erreur", "L'envoi a échoué", "error");
+    }
+  };
+  const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+          const response = await fetch('http://localhost:5000/api/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+          });
+    
+          if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem('token', data.token);
+            const user = mapUserDataToUserModel(data.user);
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            setShowLoginModal(false);
+            window.location.reload();
+          } else {
+            setLoginError('Email ou mot de passe incorrect');
+          }
+        } catch (error) {
+          setLoginError('Erreur de connexion au serveur');
+        }
+      };
 
 useEffect(() => {
   if (!professionals.length) return;
@@ -374,13 +448,24 @@ useEffect(() => {
                       <Star className="h-4 w-4 mr-1 fill-[#e0692d]" />
                       Sponsorisé
                     </span>
-                    <button
-                      onClick={() => onViewProfile(professional.id)}
-                      className="thq-button-filled text-sm"
-                    >
-                      <MessageSquare className="h-4 w-4 mr-1" />
-                      Contacter
-                    </button>
+                    {id !== professional.professional_id && (
+                      <div className="flex flex-col sm:flex-row gap-4 max-w-md">
+                        <button
+                          onClick={() => {
+                            if (token) {
+                              setShowMessageModal(true);
+                              setUser({ id: professional.professional_id });
+                            } else {
+                              setShowLoginModal(true);
+                            }
+                          }}
+                          className="thq-button-filled text-sm"
+                        >
+                          <MessageSquare className="h-4 w-4 mr-1" />
+                          Contacter
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </SwiperSlide>
@@ -498,13 +583,24 @@ useEffect(() => {
                           </span>
                         </div>
                         
-                        <button
-                          onClick={() => onViewProfile(professional.id)}
-                          className="thq-button-filled text-sm"
-                        >
-                          <MessageSquare className="h-4 w-4 mr-1" />
-                          Contacter
-                        </button>
+                        {professional && Number(id) !== Number(professional.professional_id) && (
+                          <div className="flex flex-col sm:flex-row gap-4 max-w-md">
+                            <button
+                              onClick={() => {
+                                if (token) {
+                                  setShowMessageModal(true);
+                                  setUser({ id: professional.professional_id });
+                                } else {
+                                  setShowLoginModal(true);
+                                }
+                              }}
+                              className="thq-button-filled text-sm"
+                            >
+                              <MessageSquare className="h-4 w-4 mr-1" />
+                              Contacter
+                            </button>
+                          </div>
+                        )}
                       </div>
 
                      <div className="mt-2">
@@ -604,8 +700,109 @@ useEffect(() => {
             </div>
         </div>
       </div>
-    </div>
+
+       {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-md mx-4 relative">
+            
+            {/* Croix de fermeture */}
+            <button
+              onClick={() => setShowLoginModal(false)}
+              className="absolute top-3 right-3 text-white hover:text-gray-200 z-10"
+              aria-label="Fermer"
+            >
+              <span className="text-2xl font-bold">&times;</span>
+            </button>
   
+            <div className="bg-[#e0692d] p-4 rounded-t-lg">
+              <h3 className="text-xl font-semibold text-white">Connexion requise</h3>
+            </div>
+            
+            <form onSubmit={handleLogin} className="p-6">
+              {loginError && (
+                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+                  {loginError}
+                </div>
+              )}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <div className="relative">
+                    <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#e0692d] focus:border-transparent"
+                      placeholder="Votre email"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Mot de passe
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#e0692d] focus:border-transparent"
+                      placeholder="Votre mot de passe"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 flex flex-col gap-3">
+                <button
+                  type="submit"
+                  className="w-full bg-[#e0692d] text-white px-4 py-2 rounded-md hover:bg-[#f07e40] transition-colors duration-200"
+                >
+                  Se connecter
+                </button>
+                <Link
+                  to="/inscription"
+                  className="w-full text-center px-4 py-2 border border-[#e0692d] text-[#e0692d] rounded-md hover:bg-[#e0692d] hover:text-white transition-colors duration-200"
+                >
+                  Créer un compte
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL MESSAGE --- */}
+      {showMessageModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="bg-[#e0692d] p-4 text-white flex justify-between items-center">
+              <h3 className="font-bold">Nouveau message</h3>
+              <button onClick={() => setShowMessageModal(false)}><X size={20}/></button>
+            </div>
+            <form onSubmit={handleSendMessage} className="p-6">
+              <textarea 
+                className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-orange-200 outline-none" 
+                rows={4} 
+                placeholder="Bonjour..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                required
+              />
+              <button className="w-full mt-4 bg-[#e0692d] text-white py-3 rounded-xl flex justify-center items-center gap-2 hover:bg-[#f07e40]">
+                <Send size={18} /> Envoyer le message
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>  
   );
 };
 

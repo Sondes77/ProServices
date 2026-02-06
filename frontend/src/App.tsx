@@ -41,6 +41,7 @@ import ServiceDetail from './profile/ServiceDetail';
 import FirstService from './profile/FirstService';
 import PublicProfile from './profile/PublicProfile';
 import PublicProfile2 from './profile/PublicProfile copy';
+import UserProfile from './profile/UserProfile';
 import SearchProfessionals from './profile/SearchProfessionals';
 import AdminDashboard from './admin/AdminDashboard';
 import Home from './pages/Home';
@@ -62,6 +63,8 @@ import {  mapUserDataToUserModel } from './utils/mapper';
 import ThreeCXChat from "./chat/ThreeCXChat";
 import Statistics from './profile/Statistics';
 import ForgotPassword from './profile/ForgotPassword';
+import ProQuote from './profile/ProQuotesManager';
+import UserQuote from './profile/ClientQuotesTracker';
 //import { io } from "socket.io-client";
 import socket from './socket';
 import './style.css';
@@ -219,6 +222,12 @@ function App() {
         );
       case 'notifications':
         return <Notifications user={currentUser} />;
+      case 'quotes':
+        if (currentUser.role === 'professional') {
+          return <ProQuote user={currentUser} />;
+        } else {
+          return <UserQuote user={currentUser} />;
+        }
         /*case 'stats':
         return (
           <Statistics user={currentUser} />
@@ -274,8 +283,18 @@ function App() {
         <Route path="/search" element={<SearchProfessionals onViewProfile={(id) => console.log('View profile:', id)} />} />
         <Route path="/service/:id" element={<ServiceDetail user2={currentUser}/>} />
         <Route path="/blog/:id" element={<ArticleDetail />} />
+        <Route path="/proquote" element={<ProQuote />} />
+        <Route path="/userquote" element={<UserQuote />} />
+        <Route path="/blog/:id" element={<ArticleDetail />} />
         <Route path="/professional/:id" element={
           <PublicProfile2
+            user2={currentUser}
+            //services={currentServices}
+            reviews={reviews}
+          />
+        }/>
+        <Route path="/user/:id" element={
+          <UserProfile
             user2={currentUser}
             //services={currentServices}
             reviews={reviews}

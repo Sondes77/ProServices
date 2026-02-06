@@ -97,6 +97,8 @@ export interface Service {
   createdAt: string;
   updatedAt: string;
   gallery: string[];
+  included: string[];
+  notIncluded: string[];
   /*provider: {
     name: string;
     avatar: string;
@@ -150,4 +152,15 @@ export interface Advertisement {
   isActive: boolean;
   clicks: number;
   impressions: number;
+}
+
+export interface Quote {
+  id: string;
+  proName: string;
+  proAvatar: string;
+  serviceTitle: string;
+  status: 'pending' | 'accepted' | 'declined';
+  proposedPrice?: number;
+  proMessage?: string;
+  dateSent: string;
 }

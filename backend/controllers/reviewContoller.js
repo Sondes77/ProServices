@@ -275,3 +275,24 @@ exports.getReviewsByProId = (req, res) => {
     res.status(200).json(result);
   });
 };
+
+// Récupérer tous les utilisateurs
+exports.getReviewsByUserId = (req, res) => {
+  //const authHeader = req.headers['authorization'];
+  const { id } = req.params;
+  //if (!authHeader) return res.status(401).json({ message: 'Token manquant' });
+
+  //const token = authHeader.split(' ')[1];
+  //if (!token) return res.status(401).json({ message: 'Token invalide' });
+
+  //const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  //console.log("dfdf",id);
+  db.query('SELECT r.id AS review_id, r.rating, r.comment, r.created_at, u.id AS author_id, u.nom AS author_nom, u.photo AS author_photo, ur.id AS recipient_id, ur.nom AS recipient_nom, ur.photo AS recipient_photo FROM reviews r JOIN utilisateurs u ON r.author_id = u.id JOIN utilisateurs ur ON r.recipient_id = ur.id WHERE r.recipient_id = ?', [id], (err, result) => {
+    if (err) {
+      console.error('Erreur lors de la récupération des reviews:', err);
+      return res.status(500).send('Erreur serveur');
+    }
+    console.log(result.length);
+    res.status(200).json(result);
+  });
+};

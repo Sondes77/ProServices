@@ -86,7 +86,7 @@ exports.getMesNotifications = (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded token:", decoded);
+    //console.log("Decoded token:", decoded);
 
     const userId = decoded.id;
 
@@ -161,7 +161,9 @@ exports.markRead = (req, res) => {
 // Marquer les notifications comme lues pour un utilisateur
 exports.markAllRead = (req, res) => {
   const authHeader = req.headers['authorization'];
-  
+  const  type  = req.body.type;
+  //const fullType = type +"_received";
+  console.log("Type received in markAllRead:", type);
   if (!authHeader) return res.status(401).json({ message: 'Token manquant' });
 
   const token = authHeader.split(' ')[1];
@@ -171,14 +173,24 @@ exports.markAllRead = (req, res) => {
   const userId = decoded.id;
   
   console.log("User ID for markAllRead:", userId);
-  db.query('UPDATE notifications SET unread = FALSE WHERE user_id = ?', [userId], (err, result) => {
-    if (err) {
-      console.error('Erreur lors de la mise à jour de la notification:', err);
-      return res.status(500).send('Erreur serveur');
-    }
-   
-    res.status(200).json(result);
-  });
+    if (type === "message_received"){
+      db.query('UPDATE notifications SET unread = FALSE WHERE user_id = ? and type = ?', [userId, type], (err, result) => {
+      if (err) {
+        console.error('Erreur lors de la mise à jour de la notification:', err);
+        return res.status(500).send('Erreur serveur');
+      }
+    
+      res.status(200).json(result);
+    });
+  } else if (type === "notifications"){
+    db.query('UPDATE notifications SET unread = FALSE WHERE user_id = ? and type != ?', [userId, "message_received"], (err, result) => {
+      if (err) {
+        console.error('Erreur lors de la mise à jour de la notification:', err);
+        return res.status(500).send('Erreur serveur');
+      }
+      res.status(200).json(result);
+    });
+  }
 };
 
 // Marquer les notifications comme lues pour un utilisateur

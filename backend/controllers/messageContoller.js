@@ -433,7 +433,7 @@ exports.getMessages = (req, res) => {
   
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log("Decoded token:", decoded);
+      //console.log("Decoded token:", decoded);
   
       const userId = decoded.id;
   
@@ -486,7 +486,9 @@ exports.getMessages = (req, res) => {
         db.query('UPDATE messages SET is_read = TRUE WHERE conversation_id = ? AND recipient_id = ? AND is_read = FALSE', [id, userId], (err) => {
           if (err) console.error('Erreur mise à jour is_read :', err);
         });
-
+        db.query('UPDATE notifications SET unread = FALSE WHERE link LIKE ? AND user_id = ? AND unread = TRUE', [`%${id}%`, userId], (err) => {
+          if (err) console.error('Erreur mise à jour unread :', err);
+        });
         res.json(formatted);
       });
     } catch (err) {

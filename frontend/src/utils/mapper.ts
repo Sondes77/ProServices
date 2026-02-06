@@ -108,9 +108,15 @@ export function mapServicesDataToUserModel(prosData: any): Service {
   const verified =  prosData.verified || false;
   const sponsored =  prosData.sponsored || false;
   const createdAt = prosData.date_creation?.split('T')[0] || '2024-01-01';
-  const updatedAt = prosData.date_creation?.split('T')[0] || '2024-01-01';
-  const gallery: string[] = Array.isArray(prosData.images)
-  ? prosData.images.map((img: any) => img.url || img.path || '')
+  const updatedAt = prosData.date_modification?.split('T')[0] || '2024-01-01';
+  const gallery: string[] = Array.isArray(prosData.gallery)
+  ? prosData.gallery.map((img: any) => img || '')
+  : [];
+  const included: string[] = Array.isArray(prosData.included)
+  ? prosData.included.map((item: any) => item || '')
+  : [];
+  const notIncluded: string[] = Array.isArray(prosData.notIncluded)
+  ? prosData.notIncluded.map((item: any) => item || '')
   : [];
   /*const provider = {
     name: prosData.nom_prestataire || 'Prestataire inconnu',
@@ -133,7 +139,9 @@ export function mapServicesDataToUserModel(prosData: any): Service {
       sponsored,
       createdAt,
       updatedAt,
-      gallery
+      gallery,
+      included,
+      notIncluded
   };
 }
 

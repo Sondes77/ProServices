@@ -5,7 +5,7 @@ import { Menu as HeadlessMenu, Transition } from '@headlessui/react';
 import { 
   Briefcase, MessageSquare, User, Bell, 
   Settings, LayoutDashboard, LogOut, Sun, Moon, 
-  Menu as MenuIcon, X, Search, Message, ShieldCheck
+  Menu as MenuIcon, X, Search, Message, ShieldCheck, CheckCircle
 } from 'lucide-react';
 import logo from '../img/noBgColor5.png';
 import { User as UserType } from '../utils/types';
@@ -20,26 +20,22 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
   const location = useLocation();
   const currentPath = location.pathname;
   const navigate = useNavigate();
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const notificationRef = useRef<HTMLDivElement>(null);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
-
+  const [showMessages, setShowMessages] = useState(false);
+  const messageRef = useRef<HTMLDivElement>(null);
   const [notifications, setNotifications] = useState([]);
-  const unreadNotifications = notifications.filter(
-    n => n.unread && n.type !== "message_received"
-  ).length;
-  const unreadMessages = notifications.filter(
-    n => n.unread && n.type === "message_received"
-  ).length;
-  const unreadCount = notifications.filter(n => !n.read).length;
+  //const [markAllAsReadType, setMarkAllAsReadType] = useState<'all' | 'messages' | 'notifications'>('all');
+
+  const unreadNotifications = notifications.filter(n => n.unread && n.type !== "message_received").length;
+  const unreadMessages = notifications.filter(n => n.unread && n.type === "message_received").length;
+
   const avatar = user?.avatar || 'https://ui-avatars.com/api/?name=' + user?.nom + '&background=e0692d&color=fff';
   const isProfessional = user?.role === 'professional';
-  const [showMessages, setShowMessages] = useState(false);
-  const messageRef = useRef(null);
+  
   //const [unreadMessages, setUnreadMessages] = useState(7); // Exemple
   const token = localStorage.getItem('token');
 
@@ -56,10 +52,13 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
 
   // Simulation : jouer le son quand un message arrive
   useEffect(() => {
-    if (unreadMessages > 0) {
+    if (unreadMessages > 0 && !currentPath.startsWith("/messages/")) {
       playNotificationSound();
     }
-  }, [unreadMessages]);
+    if (unreadNotifications > 0) {
+      playNotificationSound();
+    }
+  }, [unreadMessages, unreadNotifications]);
 
   /*const markAllAsRead = () => {
     setNotifications(notifications.map(n => ({ ...n, unread: true })));
@@ -80,15 +79,21 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
       ) {
         setShowNotifications(false);
       }
+      if (
+        messageRef.current &&
+        !messageRef.current.contains(e.target as Node)
+      ) {
+        setShowMessages(false);
+      }
     };
 
-    if (showMobileSearch || showNotifications) {
+    if (showMobileSearch || showNotifications || showMessages) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showMobileSearch, showNotifications]);
+  }, [showMobileSearch, showNotifications, showMessages]);
   
   /*useEffect(() => {
     if (isDarkMode) document.documentElement.classList.add('dark');
@@ -106,7 +111,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
       window.location.replace('/connexion');
     };
   };
-  // Exemple : polling toutes les 5 secondes
+  
 useEffect(() => {
   const fetchNotifications = async () => {
     try {
@@ -114,8 +119,8 @@ useEffect(() => {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       const data = await res.json();
-      const newUnread = data.filter((n: any) => !n.read).length;
-
+      const newUnread = data.filter((n: any) => n.unread && n.type !== "message_received").length;
+      console.log("New unread notifications count:", newUnread);
       // Jouer le son seulement si nouvelles notifications
       if (newUnread > unreadNotifications) playNotificationSound();
 
@@ -129,27 +134,37 @@ useEffect(() => {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         const data = await res.json();
-        if (data.count > unreadMessages) playNotificationSound();
-        setUnreadMessages(data.count);
+        /*if (data.count > unreadMessages) {
+          playNotificationSound();
+        }*/
+        //setUnreadMessages(data.count);
       } catch (err) { console.log(err); }
     };
 
-    fetchNotifications();
-    fetchMessages();
+    //fetchNotifications();
+    //fetchMessages();
 
     const interval = setInterval(() => {
-      //fetchNotifications();
+      fetchNotifications();
       fetchMessages();
+           
     }, 1000); // toutes les 5 secondes
 
     return () => clearInterval(interval);
   }, [unreadNotifications, unreadMessages]);
 
-  const markAllAsRead = async () => {
+  const markAllAsRead = async (type: string) => {
     try {
+      console.log("Sending type:", type);
       await fetch(`http://localhost:5000/api/notifications/read-all`, {
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` }
+        body: JSON.stringify({
+          type: type
+        }),
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
@@ -165,20 +180,90 @@ useEffect(() => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      setNotifications(prev =>
-        prev.map(n => n.id === id ? { ...n, unread: false } : n)
-      );
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
     } catch (err) {
       console.error(err);
     }
   };
   const handleNotificationClick = async (notif) => {
-    await markAsRead(notif.id);
+      await markAsRead(notif.id);
 
-    if (notif.link) {
-      navigate(notif.link);
-    }
-  };
+      if (notif.link) {
+        navigate(notif.link);
+      }
+    };
+
+const groupedMessageNotifs = Object.values(
+  notifications
+    .filter(n => n.type === "message_received")
+    .reduce((acc: any, notif: any) => {
+      const key = notif.user_id2;
+
+      if (!acc[key]) {
+        acc[key] = {
+          ...notif,
+          count: 1,
+          unreadCount: notif.unread ? 1 : 0,
+          lastDate: notif.created_at
+        };
+      } else {
+        acc[key].count += 1;
+
+        if (notif.unread) {
+          acc[key].unreadCount += 1;
+          //playNotificationSound();
+        }
+
+        // garder le + récent
+        if (new Date(notif.created_at) > new Date(acc[key].lastDate)) {
+          acc[key].lastDate = notif.created_at;
+          acc[key].text = notif.text;
+          acc[key].title = notif.title;
+          acc[key].photo = notif.photo;
+          acc[key].link = notif.link;
+        }
+      }
+
+      return acc;
+    }, {})
+)
+.sort(
+  (a: any, b: any) =>
+    new Date(b.lastDate).getTime() - new Date(a.lastDate).getTime()
+);
+
+  /*const groupedMessageNotifs = React.useMemo(() => {
+      const map = new Map();
+
+      notifications
+        .filter(n => n.type === "message_received")
+        .forEach(n => {
+          const key = n.user_id2; // ID de la personne
+
+          if (!map.has(key)) {
+            map.set(key, {
+              ...n,
+              count: 1,
+              unreadCount: n.unread ? 1 : 0
+            });
+          } else {
+            const existing = map.get(key);
+            existing.count += 1;
+            if (n.unread) existing.unreadCount += 1;
+
+            // garder le plus récent
+            if (new Date(n.created_at) > new Date(existing.created_at)) {
+              existing.created_at = n.created_at;
+              existing.text = n.text;
+            }
+          }
+        });
+
+      return Array.from(map.values())
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }, [notifications]);*/
+
+
   return (
     <nav className="fixed w-full z-[100] transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -291,7 +376,7 @@ useEffect(() => {
                     <div className="p-4">
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white">Notifications</h3>
-                        <button onClick={markAllAsRead} className="text-xs text-[#e0692d] font-bold">Tout marquer comme lu</button>
+                        <button onClick={() => markAllAsRead("notifications")} className="text-xs text-[#e0692d] font-bold">Tout marquer comme lu</button>
                       </div>
 
                       <div className="space-y-1 max-h-80 overflow-y-auto">
@@ -308,7 +393,10 @@ useEffect(() => {
                               ? 'bg-orange-50/30 border-orange-100 hover:border-orange-200' 
                               : 'bg-white border-slate-100 hover:border-slate-200 hover:shadow-md'
                           }`}
-                          onClick={() => handleNotificationClick(notification)}
+                          onClick={() => {
+                            handleNotificationClick(notification);
+                            setShowNotifications(false);
+                          }}
                           >
                             <div className="w-12 h-12 rounded-full center bg-orange-100 flex-shrink-0" >
                               
@@ -320,7 +408,7 @@ useEffect(() => {
                                     className="w-12 h-12 rounded-full object-cover"
                                   />
 
-                                  <ShieldCheck size={12}
+                                  <CheckCircle size={12}
                                     className="flex absolute bottom-0 right-0
                                               bg-[#e0692d] w-4 h-4 text-white rounded-full 
                                               border-2 border-[#e0692d] shadow"
@@ -370,11 +458,15 @@ useEffect(() => {
                   className="p-2 text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full relative"
                 >
                   <MessageSquare className="w-5 h-5" />
-                  {unreadMessages > 0 && (
+                  {unreadMessages > 0 && unreadMessages <= 99 ? (
                     <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-[#e0692d] text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white dark:border-gray-900">
                       {unreadMessages}
                     </span>
-                  )}
+                  ) : unreadMessages > 99 ? (
+                    <span className="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-[#e0692d] text-white text-[10px] font-bold rounded-full w-7 h-5 flex items-center justify-center border-2 border-white dark:border-gray-900">
+                      99+
+                    </span>
+                  ) : null}
                 </button>
 
                 <Transition
@@ -390,12 +482,12 @@ useEffect(() => {
                     <div className="p-4">
                       <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white">Messages</h3>
-                        <Link to="/messages" onClick={markAllAsRead} className="text-xs text-[#e0692d] font-bold">Ouvrir tout</Link>
+                        <Link to="/messages" onClick={() => { markAllAsRead("message_received");}} className="text-xs text-[#e0692d] font-bold">Ouvrir tout</Link>
                       </div>
 
                       <div className="space-y-1 max-h-80 overflow-y-auto">
                         {/* Exemple de liste de messages */}
-                        {notifications.slice(0,10).map(notification => (
+                        {groupedMessageNotifs.slice(0, 10).map(notification => (
                           <Link 
                             key = {notification.id} 
                             to = {notification.link} 
@@ -404,7 +496,10 @@ useEffect(() => {
                               ? 'bg-orange-50/30 border-orange-100 hover:border-orange-200' 
                               : 'bg-white border-slate-100 hover:border-slate-200 hover:shadow-md'
                           }`}
-                          onClick={() => handleNotificationClick(notification)}
+                          onClick={() => {
+                            handleNotificationClick(notification);
+                            setShowMessages(false);
+                          }}
                           >
                             <div className="w-12 h-12 rounded-full center bg-orange-100 flex-shrink-0" >
                                {notification?.user2_role === "professional" ? (
@@ -415,7 +510,7 @@ useEffect(() => {
                                     className="w-12 h-12 rounded-full object-cover"
                                   />
 
-                                  <ShieldCheck size={12}
+                                  <CheckCircle size={12}
                                     className="flex absolute bottom-0 right-0
                                               bg-[#e0692d] w-4 h-4 text-white rounded-full 
                                               border-2 border-[#e0692d] shadow"
@@ -436,9 +531,14 @@ useEffect(() => {
                               <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{notification.text}</p>
                               <p className="text-xs text-orange-500 dark:text-orange-400 truncate">{notification.created_at && timeAgo(notification.created_at)}</p>
                             </div>
-                            {notification.unread == true &&  (
+                            {notification.unreadCount > 0 && (
+                                <span className="bg-[#e0692d] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                                  {notification.unreadCount }
+                                </span>
+                              )}
+                            {/*{notification.unread == true &&  (
                             <div className="w-2 h-2 bg-[#e0692d] rounded-full" />
-                            )}
+                            )}*/}
                           </Link>
                         ))}
                       </div>

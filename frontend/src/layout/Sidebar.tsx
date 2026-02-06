@@ -1,6 +1,6 @@
 // Sidebar.tsx
 import React, { useRef, useState, useEffect } from 'react';
-import { User, Home, Settings, Lock, MessageSquare, Star, Briefcase, LogOut, Shield, Eye, Camera } from 'lucide-react';
+import { User, Home, Settings, Lock, MessageSquare, Star, Briefcase, LogOut, Shield, Eye, Camera, FileText } from 'lucide-react';
 import { User as UserType } from '../utils/types';
 import { mapUserDataToUserModel } from '../utils/mapper';
 import { useLocation, useNavigate } from "react-router-dom";
@@ -109,11 +109,15 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: 'security', label: 'Mot de passe & sécurité', icon: <Lock size={20} /> },
     { id: 'messages', label: 'Historique des messages', icon: <MessageSquare size={20} /> },
     { id: 'reviews', label: 'Avis et évaluations', icon: <Star size={20} /> },
+    
   ];
 
   if (user.role === 'professional') {
     navigationItems.push({ id: 'services', label: 'Mes services', icon: <Briefcase size={20} /> });
+    navigationItems.push({ id: 'quotes', label: 'Gestion des devis', icon: <FileText size={20} /> });
     //navigationItems.push({ id: 'stats', label: 'Statistiques', icon: <Shield size={20} /> });
+  } else if (user.role === 'user') {
+    navigationItems.push({ id: 'quotes', label: 'Mes demandes de devis', icon: <FileText size={20} /> });
   }
 
 

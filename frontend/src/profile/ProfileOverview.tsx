@@ -67,7 +67,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({ user, onEditProfile }
             />
             <span className="absolute bottom-1 right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></span>
           </div>
-          <div className="md:ml-6 text-center md:text-left">
+          <div className="md:ml-6 text-center md:text-left lg:text-left">
             <h1 className="text-2xl font-bold text-white">{user.fullName}</h1>
             <p className="text-white opacity-90">
               {user.role === 'professional' ? 'Professionnel' : 'Utilisateur'} • {user.city}, {user.region}
