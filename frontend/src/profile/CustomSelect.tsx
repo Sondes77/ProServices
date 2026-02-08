@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ChevronDown } from "lucide-react";
 
 interface Option {
@@ -11,71 +11,133 @@ interface Props {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  name?: string; // pour le form
+  className?: string; // pour styles personnalisés
 }
 
 export default function CustomSelect({
   options,
   value,
   onChange,
-  placeholder = "Sélectionner"
+  placeholder = "Sélectionner",
+  required = false,
+  disabled = false,
+  name = "custom-select",
+  className = ""
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [touched, setTouched] = useState(false);
 
   const selected = options.find(o => o.value === value);
+  const showError = required && touched && !value;
+  const containerRef = useRef<HTMLDivElement>(null);
+  // 🔹 Fermer dropdown quand clic en dehors
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
+      
+      {/* input caché pour validation HTML required */}
+      {required && (
+        <input
+          tabIndex={-1}
+          autoComplete="off"
+          value={value}
+          onChange={() => {}}
+          name={name}
+          required
+          className="absolute opacity-0 pointer-events-none h-0 w-0"
+        />
+      )}
+
       {/* Button */}
       <button
         type="button"
-        onClick={() => setOpen(!open)}
-        className="
-          w-full p-4 rounded-2xl
-          bg-gray-50 border border-gray-200
-          hover:bg-white hover:border-orange-200
-          focus:ring-2 focus:ring-orange-200
-          transition-all
-          flex justify-between items-center
-          text-left
-        "
+        onClick={() => {
+          setOpen(!open);
+          setTouched(true);
+        }}
+        className={`
+          w-full p-3 rounded-2xl
+          border
+          transition-all flex justify-between items-center text-left
+          ${disabled
+            ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
+            : "bg-gray-50 border-gray-200 hover:bg-white hover:border-orange-200 focus:ring-2 focus:ring-orange-200"
+          }
+          ${className}
+          
+        `}
       >
+       {/*${showError ? "border-red-400 ring-2 ring-red-200" : "border-gray-200"}*/}
         <span className={selected ? "text-gray-800" : "text-gray-400"}>
           {selected ? selected.label : placeholder}
         </span>
-
-        <ChevronDown
-          size={18}
-          className={`transition-transform ${open ? "rotate-180" : ""}`}
-        />
+        {disabled ? 
+          <ChevronDown
+            size={18}
+            className={`transition-transform ${!open}`}
+          />
+        :   
+          <ChevronDown
+            size={18}
+            className={`transition-transform ${open ? "rotate-180" : ""}`}
+          />
+        }
       </button>
 
       {/* Dropdown */}
-      {open && (
-        <div className="
-          absolute z-50 mt-2 w-full
-          bg-white rounded-2xl shadow-xl border border-gray-100
-          overflow-hidden
-          animate-in fade-in zoom-in duration-150
-        ">
-          {options.map(opt => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => {
-                onChange(opt.value);
-                setOpen(false);
-              }}
-              className="
-                w-full px-4 py-3 text-left
-                hover:bg-orange-50 hover:text-orange-700
-                transition
-              "
-            >
-              {opt.label}
-            </button>
-          ))}
+      {open && !disabled && (
+        <div
+          className="
+            absolute z-50 mt-2 w-full
+            bg-white rounded-2xl shadow-xl border border-gray-100
+            overflow-hidden
+            animate-in fade-in zoom-in duration-150
+          "
+        >
+          <div className="max-h-60 overflow-y-auto">
+            {options.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  onChange(opt.value);
+                  setOpen(false);
+                  setTouched(true);
+                }}
+                className="
+                  w-full px-4 py-3 text-left
+                  hover:bg-orange-50 hover:text-orange-700
+                  transition
+                "
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
+      
+      {/* message erreur 
+      {showError && (
+        <p className="text-red-500 text-xs mt-2">
+          Ce champ est obligatoire
+        </p>
+      )}*/}
     </div>
   );
 }

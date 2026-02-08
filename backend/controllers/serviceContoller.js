@@ -21,14 +21,14 @@ exports.creerService = async (req, res) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.id;
     
-        const { title, description, category, price, status, duration, gallery, included, notIncluded } = req.body;
+        const { title, description, category, metier, price, status, duration, gallery, included, notIncluded } = req.body;
         const date_creation = new Date(); // Date actuelle
 
         const query = `
-            INSERT INTO services (professionnel_id, titre, description, categorie, prix, statut, availability, gallery, included, notIncluded, date_creation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO services (professionnel_id, titre, description, categorie, metier, prix, statut, availability, gallery, included, notIncluded, date_creation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           `;
     
-          const values = [userId, title, description, category, price, status, duration, JSON.stringify(gallery), JSON.stringify(included), JSON.stringify(notIncluded), date_creation];
+          const values = [userId, title, description, category, metier, price, status, duration, JSON.stringify(gallery), JSON.stringify(included), JSON.stringify(notIncluded), date_creation];
     
           db.query(query, values, (err, results) => {
             if (err) {
@@ -58,11 +58,11 @@ exports.updateService = async (req, res) => {
 
     const serviceId = req.params.id;
 
-    const { title, description, category, price, status, duration, gallery, included, notIncluded} = req.body;
+    const { title, description, category, metier, price, status, duration, gallery, included, notIncluded} = req.body;
 
-    const query = `UPDATE services SET titre = ?, description = ?, categorie = ?, prix = ?, statut = ?, availability = ?, gallery = ?, included = ?, notIncluded = ?, date_modification = ? WHERE id = ?`;
+    const query = `UPDATE services SET titre = ?, description = ?, categorie = ?, metier = ?, prix = ?, statut = ?, availability = ?, gallery = ?, included = ?, notIncluded = ?, date_modification = ? WHERE id = ?`;
 
-      const values = [title, description, category, price, status, duration, JSON.stringify(gallery), JSON.stringify(included), JSON.stringify(notIncluded), new Date(), serviceId];
+      const values = [title, description, category, metier, price, status, duration, JSON.stringify(gallery), JSON.stringify(included), JSON.stringify(notIncluded), new Date(), serviceId];
 
       db.query(query, values, (err, results) => {
         if (err) {
@@ -137,7 +137,8 @@ exports.getUtilisateur = (req, res) => {
 
 // Récupérer tous les utilisateurs
 exports.getServices = (req, res) => {
-  db.query('SELECT * FROM utilisateurs, services where utilisateurs.id = services.professionnel_id and services.statut = "active"', (err, result) => {
+  //db.query('SELECT * FROM utilisateurs, services where utilisateurs.id = services.professionnel_id and services.statut = "active"', (err, result) => {
+  db.query('SELECT u.id as professional_id, u.nom, u.prenom, u.ville, u.region, u.photo, u.availability, u.apropos, s.id as service_id, s.titre, s.description, s.categorie, s.metier, s.availability, s.prix, s.sponsored, s.verified FROM utilisateurs u, services s where u.id = s.professionnel_id and s.statut = "active"', (err, result) => {
     if (err) {
       console.error('Erreur lors de la récupération des services:', err);
       return res.status(500).send('Erreur serveur');

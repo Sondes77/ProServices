@@ -4,7 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { villesEtRegions } from '../components/villesRegions';
 import { Search, MapPin, Filter, Star, MessageSquare, ChevronDown, ChevronUp, ChevronRight, BadgeCheck,
-  Users, Link, X, Send, Lock
+  Users, Link, XCircle, Send, Lock
  } from 'lucide-react';
 import { Professional } from '../utils/types';
 import { mapProfessionalsDataToUserModel, mapUserDataToUserModel } from '../utils/mapper';
@@ -12,6 +12,7 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import Swal from "sweetalert2";
+import CustomSelect from './CustomSelect';
 
 interface SearchProfessionalsProps {
   onViewProfile: (professionalId: string) => void;
@@ -27,16 +28,14 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
     minRating: 0,
     maxPrice: '',
     categories: [] as string[],
-    availability: 'all',
+    availability: 'Tous',
   });
   const token = localStorage.getItem('token');
   const id = token ? JSON.parse(atob(token.split('.')[1])).id : null;
-  //alert("id = "+ id);
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  //alert(token);  
   const categories = [
     'Plombier',
     'Plomberie',
@@ -85,7 +84,7 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
           const mappedProfessionals = prosData.map((element: any) =>
             mapProfessionalsDataToUserModel(element)
           );
-
+          console.log('Professionals fetched:', mappedProfessionals);
           setProfessionals(mappedProfessionals);
       }
         //alert(`Nombre de professionnels : ${mappedProfessionals.length}`);
@@ -161,27 +160,27 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
         }
       };
 
-useEffect(() => {
-  if (!professionals.length) return;
-  if (professionals.length) {
-    const filtres = professionals.filter((item) =>
-      (!ville || item.city.toLowerCase().includes(ville.toLowerCase())) &&
-      (!motCle || item.profession.toLowerCase().includes(motCle.toLowerCase()) || item.description.toLowerCase().includes(motCle.toLowerCase()) || item.name.toLowerCase().includes(motCle.toLowerCase())) &&
-      (!region || item.region.toLowerCase().includes(region.toLowerCase())) &&
-      (filters.minRating === 0 || item.rating >= filters.minRating) &&
-      (
-        (!filters.categories.length || filters.categories.includes(item.profession)) &&
-        !filters.categories.includes("Toutes les catégories")
-      )&&
-      (
-        filters.availability === 'all' ||
-        (filters.availability === 'available' && item.availability)
-      )
-    );
+  useEffect(() => {
+    if (!professionals.length) return;
+    if (professionals.length) {
+      const filtres = professionals.filter((item) =>
+        (!ville || item.city.toLowerCase().includes(ville.toLowerCase())) &&
+        (!motCle || item.profession.toLowerCase().includes(motCle.toLowerCase()) || item.description.toLowerCase().includes(motCle.toLowerCase()) || item.name.toLowerCase().includes(motCle.toLowerCase())) &&
+        (!region || item.region.toLowerCase().includes(region.toLowerCase())) &&
+        (filters.minRating === 0 || item.rating >= filters.minRating) &&
+        (
+          (!filters.categories.length || filters.categories.includes(item.profession)) &&
+          !filters.categories.includes("Toutes les catégories")
+        )&&
+        (
+          filters.availability === 'Tous' ||
+          (filters.availability === item.availability)
+        )
+      );
 
-    setResultats(filtres);
-  }
-}, [professionals, ville, region, motCle, filters.minRating, filters.categories, filters.availability]);
+      setResultats(filtres);
+    }
+  }, [professionals, ville, region, motCle, filters.minRating, filters.categories, filters.availability]);
 
 
   const handleSearch = (e: React.FormEvent) => {
@@ -197,11 +196,6 @@ useEffect(() => {
 
   const handleProfileClick = (professionalId: string) => {
     navigate(`/professional/${professionalId}`);
-    if(token){
-      
-    } else {
-
-    }
   };
 
   const resultatsSansDoublons = Array.from(
@@ -235,58 +229,73 @@ useEffect(() => {
         <form onSubmit={handleSearch}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" />
               </div>
+
               <input
                 type="text"
                 placeholder="Rechercher un professionnel..."
-                className="pl-10 w-full pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring focus:ring-[#e0692d] focus:border-[#e0692d]"
+                className="
+                  w-full
+                  py-3 pr-4 pl-12   /* ✅ padding gauche augmenté */
+                  bg-gray-50
+                  border border-transparent
+                  focus:ring-2 focus:ring-orange-200
+                  focus:bg-white
+                  rounded-2xl
+                  outline-none
+                  transition-all
+                "
                 value={motCle}
                 onChange={(e) => setMotCle(e.target.value)}
               />
             </div>
 
+
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <MapPin className="h-5 w-5 text-gray-400" />
               </div>
-              <select
-                className="pl-10 pr-3 py-2 w-full rounded-lg border border-gray-300 focus:outline-none focus:ring focus:ring-[#e0692d] focus:border-[#e0692d]"
+              <CustomSelect
                 value={ville}
-                onChange={(e) => {
-                  setVille(e.target.value);
+                onChange={(value: string) => {
+                  setVille(value);
                   setRegion('');
                 }}
                 required
-              >
-                <option value="">Sélectionner une ville</option>
-                {Object.keys(villesEtRegions).map((v) => (
-                    <option key={v} value={v}>
-                      {v}
-                    </option>
-                  ))}
-              </select>
+                name="ville"
+                placeholder='-- Sélectionner une ville --'
+                options={[
+                  ...Object.keys(villesEtRegions).map((v) => ({
+                    value: v,
+                    label: v
+                  }))
+                ]}
+              />
+                  
             </div>
 
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <MapPin className="h-5 w-5 text-gray-400" />
               </div>
-              <select
-                className="pl-10 w-full pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring focus:ring-[#e0692d] focus:border-[#e0692d]"
+              <CustomSelect
                 value={region}
-                onChange={(e) => setRegion(e.target.value)}
+                onChange={(value: string) => {
+                  setRegion(value);
+                }}
                 disabled={!ville}
                 required
-              >
-                <option value="">Sélectionner une région</option>
-                {ville && villesEtRegions[ville as Ville].map((r) => (
-                      <option key={r} value={r}>
-                        {r}
-                      </option>
-                    ))}
-              </select>
+                name="region"
+                placeholder='-- Sélectionner une région --'
+                options={[
+                  ...(ville ? villesEtRegions[ville as keyof typeof villesEtRegions].map((r: string) => ({
+                    value: r,
+                    label: r
+                  })) : [])
+                ]}
+              />
             </div>
           </div>
 
@@ -311,46 +320,52 @@ useEffect(() => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Note minimum
                   </label>
-                  <select
-                    className="w-full pr-3 py-2 rounded-lg border border-gray-300 focus:ring focus:ring-[#e0692d] focus:border-[#e0692d]"
-                    value={filters.minRating}
-                    onChange={(e) => setFilters({ ...filters, minRating: Number(e.target.value) })}
-                  >
-                    <option value="0">Toutes les notes</option>
-                    <option value="4">4+ étoiles</option>
-                    <option value="4.5">4.5+ étoiles</option>
-                  </select>
+                  <CustomSelect
+                    value={String(filters.minRating)}
+                    onChange={(value: string) => setFilters({ ...filters, minRating: Number(value) })}
+                    options={[
+                      { value: "0", label: "Toutes les notes" },
+                      { value: "4", label: "4+ étoiles" },
+                      { value: "4.5", label: "4.5+ étoiles" }
+                    ]}
+                  />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Catégorie
                   </label>
-                  <select
-                    className="w-full pr-3 py-2 rounded-lg border border-gray-300 focus:ring focus:ring-[#e0692d] focus:border-[#e0692d]"
+                  <CustomSelect
                     value={filters.categories[0] || ''}
-                    onChange={(e) => setFilters({ ...filters, categories: [e.target.value] })}
-                  >
-                    <option value="">Toutes les catégories</option>
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
+                    onChange={(value: string) => setFilters({ ...filters, categories: [value] })}
+                    options={[
+                      { value: '', label: 'Toutes les catégories' },
+                      ...categories.map(category => ({
+                        value: category,
+                        label: category
+                      }))
+                    ]}
+                  />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Disponibilité
                   </label>
-                  <select
-                    className="w-full pr-3 py-2 rounded-lg border border-gray-300 focus:ring focus:ring-[#e0692d] focus:border-[#e0692d]"
+                  <CustomSelect
                     value={filters.availability}
-                    onChange={(e) => setFilters({ ...filters, availability: e.target.value })}
-                  >
-                    <option value="all">Tous</option>
-                    <option value="available">Disponible maintenant</option>
-                    <option value="this-week">Disponible cette semaine</option>
-                  </select>
+                    placeholder='Séctionner une disponibilité'
+                    onChange={(value: string) => setFilters({ ...filters, availability: value })}
+                    options={[
+                      { value: "Tous", label: "Tous" },
+                      { value: "Immédiat", label: "Immédiat" },
+                      { value: "24h à 48h", label: "24h à 48h" },
+                      { value: "Sous 1 semaine", label: "Sous 1 semaine" },
+                      { value: "Plus d'une semaine", label: "Plus d'une semaine" },
+                      { value: "Disponible", label: "Disponible (flexible)" },
+                      { value: "Sur devis", label: "Sur devis" },
+                    ]}
+                  />
                 </div>
               </div>
             )}
@@ -784,7 +799,9 @@ useEffect(() => {
           <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="bg-[#e0692d] p-4 text-white flex justify-between items-center">
               <h3 className="font-bold">Nouveau message</h3>
-              <button onClick={() => setShowMessageModal(false)}><X size={20}/></button>
+              <button onClick={() => setShowMessageModal(false)} className="bg-white/20 p-2 rounded-full hover:bg-white/30">
+                <XCircle size={24} />
+              </button>
             </div>
             <form onSubmit={handleSendMessage} className="p-6">
               <textarea 

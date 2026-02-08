@@ -118,6 +118,11 @@ useEffect(() => {
       const res = await fetch("http://localhost:5000/api/notifications", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
+      if (res.status === 401) {
+        handleLogout();
+        return;
+      }
+      if (res.status === 403) throw new Error("Access denied");
       const data = await res.json();
       const newUnread = data.filter((n: any) => n.unread && n.type !== "message_received").length;
       console.log("New unread notifications count:", newUnread);

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Star, MessageSquare, Search, Filter, Loader2 } from 'lucide-react';
 import { Review, User } from '../utils/types';
 import { useNavigate } from 'react-router-dom';
+import CustomSelect from './CustomSelect';
 
 interface ReviewsProps {
   user: User;
@@ -122,7 +123,7 @@ const Reviews: React.FC<ReviewsProps> = ({ user }) => {
   /* =========================
      REPLY TO REVIEW (API)
   ========================== */
-  const submitReply = async (reviewId: string) => {
+  /*const submitReply = async (reviewId: string) => {
     if (!replyText.trim()) return;
 
     try {
@@ -189,10 +190,10 @@ const Reviews: React.FC<ReviewsProps> = ({ user }) => {
 
     setShowServiceForm(false);
     setSelectedService(null);
-  };
+  };*/
 
   const calculateAverageRating = () => {
-    if (reviews.length === 0) return 0;
+    if (reviews.length === 0) return '0';
     const sum = reviews.reduce((total, review) => total + review.rating, 0);
     return (sum / reviews.length).toFixed(1);
   };
@@ -251,8 +252,17 @@ const Reviews: React.FC<ReviewsProps> = ({ user }) => {
                   <input
                     type="text"
                     placeholder="Rechercher..."
-                    className="w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-[#e0692d] focus:border-transparent transition-colors duration-200"
-                    value={searchQuery}
+                    className="
+                    w-full
+                    py-4 pr-4 pl-12   /* ✅ padding gauche augmenté */
+                    bg-gray-50
+                    border border-transparent
+                    focus:ring-2 focus:ring-orange-200
+                    focus:bg-white
+                    rounded-2xl
+                    outline-none
+                    transition-all
+                  "                    value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
@@ -261,24 +271,26 @@ const Reviews: React.FC<ReviewsProps> = ({ user }) => {
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
                     <Filter size={16} />
                   </div>
-                  <select
-                    className="w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-[#e0692d] focus:border-transparent transition-colors duration-200 bg-white"
+                  <CustomSelect
                     value={filter}
-                    onChange={(e) => setFilter(e.target.value as 'all' | 'positive' | 'negative')}
-                  >
-                    <option value="all">Tous les avis</option>
-                    <option value="positive">Avis positifs (4-5 ★)</option>
-                    <option value="negative">Avis négatifs (1-3 ★)</option>
-                  </select>
+                    onChange={(value: string) => setFilter(value as 'all' | 'positive' | 'negative')}
+                    options={[
+                      { value: 'all', label: 'Tous les avis' },
+                      { value: 'positive', label: 'Avis positifs (4-5 ★)' },
+                      { value: 'negative', label: 'Avis négatifs (1-3 ★)' },
+                    ]}
+                    placeholder="Filtrer par note"
+                  />
+                  
                 </div>
               </div>
             </div>
           </div>
           
-        {/* LIST */}
-        <div className="p-4 space-y-4">
+       {/* LIST */}
+        <div className="p-4 space-y-4 max-h-[500px] overflow-y-auto">
           {filteredReviews.map((review) => (
-            <div key={review.review_id} className="bg-gray-50 p-4 rounded">
+            <div key={review.id} className="bg-gray-50 p-4 rounded">
               <div className="flex justify-between">
                 <div className="flex items-center gap-3">
                   <img
@@ -292,45 +304,11 @@ const Reviews: React.FC<ReviewsProps> = ({ user }) => {
                     </p>
                   </div>
                 </div>
+
                 {renderStars(review.rating)}
               </div>
 
               <p className="mt-3 text-gray-700">{review.comment}</p>
-
-              {/* REPLY */}
-              {user.role === 'professional' && (
-                <div className="mt-3">
-                  {review.reply ? (
-                    <div className="bg-white border-l-4 border-[#e0692d] p-3 text-sm">
-                      <strong>Votre réponse :</strong>
-                      <p>{review.reply}</p>
-                    </div>
-                  ) : replyingTo === review.review_id ? (
-                    <div className="flex gap-2 mt-2">
-                      <input
-                        className="flex-1 border rounded px-3 py-2"
-                        placeholder="Votre réponse..."
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                      />
-                      <button
-                        onClick={() => submitReply(review.review_id)}
-                        className="bg-[#e0692d] text-white px-4 rounded"
-                      >
-                        Envoyer
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setReplyingTo(review.review_id)}
-                      className="flex items-center text-[#e0692d] text-sm mt-2"
-                    >
-                      <MessageSquare size={16} className="mr-1" />
-                      Répondre
-                    </button>
-                  )}
-                </div>
-              )}
             </div>
           ))}
         </div>

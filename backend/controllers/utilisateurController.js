@@ -51,38 +51,41 @@ exports.creerUtilisateur = async (req, res) => {
     const email_verified = false;
     const photo = "http://localhost:5000/uploads/ServicePro_Avatar.png"; // Avatar par défaut
     console.log("je suis role dans exports.creerUtilisateur = ", role);
-    /*if (isPro) {
-      role = 'professional';  
-    } else {
-      role = 'user';
-    }*/
 
-  db.query(
-    'INSERT INTO utilisateurs (nom, prenom, email, role, phone, source, mot_de_passe, date_creation, photo, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [nom, prenom, email, role, tel, source, hashedPassword, date_creation, photo, email_verified],
-    (err, result) => {
-      if (err) {
-        console.error('Erreur lors de la création de l\'utilisateur:', err);
-        return res.status(500).send('Erreur serveur');
-      }
-      const token = jwt.sign(
-        { id: result.insertId, email },
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
-      );
-      /*const refreshToken = jwt.sign({ id: user.id, email }, process.env.REFRESH_SECRET, { expiresIn: '1h' });
+    db.query(
+      'INSERT INTO utilisateurs (nom, prenom, email, role, phone, source, mot_de_passe, date_creation, photo, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [nom, prenom, email, role, tel, source, hashedPassword, date_creation, photo, email_verified],
+      (err, result) => {
+        if (err) {
+          console.error('Erreur lors de la création de l\'utilisateur:', err);
+          return res.status(500).send('Erreur serveur');
+        }
+        if (role === 'professional') {
+          db.query('Insert into settings set user_id = ?', [result.insertId], (err2, rows) => {
+            if (err2) {
+              console.error('Erreur lors de la création des paramètres:', err2);
+              return res.status(500).send('Erreur serveur');
+            }
+          });
+        }
+          const token = jwt.sign(
+            { id: result.insertId, email },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+          );
+          /*const refreshToken = jwt.sign({ id: user.id, email }, process.env.REFRESH_SECRET, { expiresIn: '1h' });
 
-      // Cookie httpOnly pour le refresh
-      res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 3600 * 1000 });*/
+          // Cookie httpOnly pour le refresh
+          res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 3600 * 1000 });*/
 
-      // ✅ Une seule réponse
-      res.status(201).json({
-        message: 'Utilisateur créé avec succès',
-        token,
-        id: result.insertId
-      });
-    }
-  );
+          // ✅ Une seule réponse
+          res.status(201).json({
+            message: 'Utilisateur créé avec succès',
+            token,
+            id: result.insertId
+          });
+       }
+    );
 };
 
 // mettre à jour un utilisateur
@@ -102,7 +105,7 @@ exports.updateUser = async (req, res) => {
 
     const query = `
         UPDATE utilisateurs 
-        SET nom = ?, prenom = ?, email = ?, phone = ?, ville = ?, region = ?, adresse = ?, apropos = ?
+        SET nom = ?, prenom = ?, email = ?, phone = ?, ville = ?, region = ?, adresse = ?, apropos = ?, date_modification = NOW()
         WHERE id = ?
       `;
 
@@ -129,7 +132,16 @@ exports.updateUser = async (req, res) => {
 exports.login = (req, res) => {
     const { email, password } = req.body;
   
-    db.query('SELECT u.*, COUNT(DISTINCT s.id) AS nb_services, COUNT(DISTINCT r.id) AS nb_reviews, COUNT(DISTINCT c.id) AS nb_conversations FROM utilisateurs u LEFT JOIN services s ON s.professionnel_id = u.id and s.statut = ? LEFT JOIN reviews r ON r.recipient_id = u.id LEFT JOIN conversations c ON c.user1_id = u.id or c.user2_id = u.id WHERE u.email = ? GROUP BY u.id;', ['active', email], async (err, result) => {
+    db.query(`SELECT u.*, 
+      COUNT(DISTINCT s.id) AS nb_services, 
+      COUNT(DISTINCT r.id) AS nb_reviews, 
+      COUNT(DISTINCT c.id) AS nb_conversations 
+      FROM utilisateurs u 
+      LEFT JOIN services s ON s.professionnel_id = u.id and s.statut = ? 
+      LEFT JOIN reviews r ON r.recipient_id = u.id 
+      LEFT JOIN conversations c ON c.user1_id = u.id or c.user2_id = u.id WHERE u.email = ? 
+      GROUP BY u.id;`, ['active', email], async (err, result) => {
+        
       if (err) return res.status(500).json({ error: "Erreur serveur" });
   
       const user = result[0];
@@ -164,7 +176,17 @@ exports.getUtilisateur = (req, res) => {
   }
 
   console.log('Email récupéré depuis la query:', email);
-  db.query('SELECT u.*, COUNT(DISTINCT s.id) AS nb_services, COUNT(DISTINCT r.id) AS nb_reviews, COUNT(DISTINCT c.id) AS nb_conversations FROM utilisateurs u LEFT JOIN services s ON s.professionnel_id = u.id and s.statut = ? LEFT JOIN reviews r ON r.recipient_id = u.id LEFT JOIN conversations c ON c.user1_id = u.id or c.user2_id = u.id WHERE u.email = ? GROUP BY u.id', ['active', email], (err, result) => {
+  db.query(`SELECT u.id, u.nom, u.prenom, u.email, u.role, u.email_verified, u.phone, u.ville, u.region, u.category, u.metier, u.adresse, u.apropos, u.photo, u.date_creation,
+    COUNT(DISTINCT s.id) AS nb_services, 
+    COUNT(DISTINCT r.id) AS nb_reviews, 
+    COUNT(DISTINCT c.id) AS nb_conversations
+    FROM utilisateurs u 
+    LEFT JOIN services s ON s.professionnel_id = u.id and s.statut = ? 
+    LEFT JOIN reviews r ON r.recipient_id = u.id 
+    LEFT JOIN conversations c ON c.user1_id = u.id or c.user2_id = u.id 
+    WHERE u.email = ? 
+    GROUP BY u.id`, ['active', email], (err, result) => {
+
     if (err) {
       console.error('Erreur lors de la récupération de l\'utilisateur:', err);
       return res.status(500).send('Erreur serveur');
@@ -571,6 +593,49 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
+// ⬅️ Changer le mot de passe (utilisateur connecté)
+exports.changePassword =  (req, res) => {
+  try {
+    const authHeader = req.headers['authorization'];
+   
+    if (!authHeader) return res.status(401).json({ message: 'Token manquant' });
+  
+    const token = authHeader.split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'Token invalide' });
+  
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+    const { currentPassword, newPassword } = req.body;
+
+    db.query(
+      "SELECT mot_de_passe FROM utilisateurs WHERE id=?",
+      [userId],
+      (err, rows) => {
+        if (err) return res.status(500).json({ error: "Erreur serveur" });
+        if (!rows[0]) return res.status(404).json({ success: false, message: "Utilisateur introuvable" });
+
+        const ok = bcrypt.compareSync(currentPassword, rows[0].mot_de_passe);
+        if (!ok) return res.status(400).json({ success: false, message: "Mot de passe actuel incorrect" });
+
+        const hash = bcrypt.hashSync(newPassword, 10);
+
+        db.query(
+          "UPDATE utilisateurs SET mot_de_passe=? WHERE id=?",
+          [hash, userId],
+          (err2) => {
+            if (err2) return res.status(500).json({ success: false, message: "Erreur serveur" });
+            res.json({ success: true, message: "Mot de passe mis à jour avec succès" });
+          }
+        );
+      }
+    );
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+};
+
 // ⬅️ Envoyer un code à l'utilisateur pour Phone
 exports.sendPhoneCode = (req, res) => {
   try {
@@ -615,7 +680,6 @@ exports.sendPhoneCode = (req, res) => {
   }
 };
 
-
 // Vérification Phone
 exports.verifyPhoneCode = (req, res) => {
   try {
@@ -645,4 +709,77 @@ exports.verifyPhoneCode = (req, res) => {
     return res.status(500).json({ message: "Erreur serveur" });
   }
 };
+
+// GET PRIVACY SETTINGS
+exports.getMyPrivacy = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const [rows] = await db.query(
+      "SELECT * FROM settings WHERE user_id=?",
+      [userId]
+    );
+    if (!rows.length) return res.status(404).json({ message: "User non trouvé" });
+
+    // si pas encore créé → créer ligne par défaut
+    /*if (rows.length === 0) {
+      await db.query(
+        "INSERT INTO settings (user_id) VALUES (?)",
+        [userId]
+      );
+
+      const [created] = await db.query(
+        "SELECT * FROM settings WHERE user_id = ?",
+        [userId]
+      );
+
+      return res.json(created[0]);
+    }*/
+
+    res.json(rows[0]);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erreur récupération paramètres" });
+  }
+};
+
+// UPDATE PRIVACY SETTINGS
+exports.updateMyPrivacy = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const {
+      show_phone,
+      show_address,
+      allow_share,
+      statut_profil,
+      email_notifications
+    } = req.body;
+
+    await db.query(`
+      UPDATE settings
+      SET show_phone=?,
+          show_address=?,
+          allow_share=?,
+          statut_profil=?,
+          email_notifications=?
+      WHERE user_id=?
+    `, [
+      show_phone,
+      show_address,
+      allow_share,
+      statut_profil,
+      email_notifications,
+      userId
+    ]);
+
+    res.json({ ok: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erreur mise à jour paramètres" });
+  }
+};
+
 

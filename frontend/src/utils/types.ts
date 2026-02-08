@@ -28,6 +28,7 @@ export interface Professional {
   profession: string;
   city: string;
   region: string;
+  address: string;
   rating: number;
   reviews: number;
   sponsored: boolean;
@@ -90,6 +91,7 @@ export interface Service {
   description: string;
   status: 'active' | 'paused' | 'archived';
   category: string;
+  metier: string;
   price?: string;
   duration: string;
   verified: boolean;

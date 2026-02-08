@@ -5,7 +5,9 @@ import ProgressSteps from '../profile/ProgressSteps';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { mapUserDataToUserModel } from '../utils/mapper';
 import { villesEtRegions, Ville } from '../components/villesRegions';
+import {  Categorie, Metier } from '../components/categoryMetier';
 import Swal from "sweetalert2";
+import CustomSelect from './CustomSelect';
 
 interface PersonalInfoProps {
   user: UserType;
@@ -13,24 +15,30 @@ interface PersonalInfoProps {
 }
 
 const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
+  
   const [formData, setFormData] = useState({
     firstName: user.firstName,
     lastName: user.lastName,
     email: user.email,
     phone: user.phone,
+    city: user.city,
+    region: user.region,
+    //category: user.category,
+    //metier: user.metier,
     address: user.address,
     apropos: user.apropos,
   });
+  console.log('Données utilisateur reçues dans PersonalInfo :', formData);
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
-  const query = new URLSearchParams(location.search);
   const token = localStorage.getItem('token');
-  const [ville, setVille] = useState<Ville | ''>((query.get('ville') as Ville) || (user.city as Ville) || '');
-  const [region, setRegion] = useState<string>(query.get('region') || user.region || '');
-  const regionsDisponibles = ville ? villesEtRegions[ville] : [];
-
-  useEffect(() => {
+  const regionsDisponibles =
+  formData.city && villesEtRegions[formData.city as Ville]
+    ? villesEtRegions[formData.city as Ville]
+    : [];
+    
+  {/*useEffect(() => {
     if (!token){
       localStorage.removeItem("currentUser");
       localStorage.removeItem("token");
@@ -56,14 +64,14 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
 
       return;
     };
-  }, [token, navigate]);
+  }, [token, navigate]);*/}
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,12 +84,14 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
       fullName: `${formData.firstName} ${formData.lastName}`,
       email: formData.email,
       phone: formData.phone,
-      city: ville,
-      region: region,
+      city: formData.city,
+      region: formData.region,
+      //category: formData.category,
+      //metier: formData.metier,
       address: formData.address,
       apropos: formData.apropos,
     };
-  
+    console.log('Données du formulaire:', formData);
     onSave(updatedUser);
     setIsEditing(false);
     console.log('Données du formulaire:', formData);
@@ -119,7 +129,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
         }
       });
         const userData = await userRes.json();
-  
+         alert('Données utilisateur récupérées :'+ userData)
         if (userRes.ok) {
           console.log('Données utilisateur récupérées :', userData);
           localStorage.setItem('token', token);
@@ -208,8 +218,8 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
                 required={true}
                 className={`w-full pl-10 pr-3 py-2 rounded-md border ${
                   isEditing 
-                    ? 'border-[#e0692d] focus:ring-2 focus:ring-[#e0692d] focus:border-transparent' 
-                    : 'bg-gray-50 border-gray-300'
+                    ? 'w-full pr-4 pl-12  border border-transparent focus:ring-2 focus:ring-orange-200 focus:bg-white rounded-2xl outline-none transition-all' 
+                    : 'pr-4 pl-12 bg-gray-50 border-gray-300'
                 } transition-colors duration-200`}
               />
             </div>
@@ -231,8 +241,8 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
                 required={true}
                 className={`w-full pl-10 pr-3 py-2 rounded-md border ${
                   isEditing 
-                    ? 'border-[#e0692d] focus:ring-2 focus:ring-[#e0692d] focus:border-transparent' 
-                    : 'bg-gray-50 border-gray-300'
+                    ? 'w-full pr-4 pl-12 border border-transparent focus:ring-2 focus:ring-orange-200 focus:bg-white rounded-2xl outline-none transition-all' 
+                    : 'pr-4 pl-12 bg-gray-50 border-gray-300'
                 } transition-colors duration-200`}
               />
             </div>
@@ -252,9 +262,9 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
                 onChange={handleChange}
                 disabled={!isEditing}
                 required={true}
-                className={`w-full pl-10 pr-3 py-2 rounded-md border ${
+                className={`pr-4 pl-12 w-full pl-10 pr-3 py-2 rounded-md border ${
                   isEditing 
-                    ? 'border-[#e0692d] focus:ring-2 focus:ring-[#e0692d] focus:border-transparent' 
+                    ? 'w-full pr-4 pl-12 border border-transparent focus:ring-2 focus:ring-orange-200 focus:bg-white rounded-2xl outline-none transition-all' 
                     : 'bg-gray-50 border-gray-300'
                 } transition-colors duration-200`}
               />
@@ -278,8 +288,8 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
                 pattern="^\+?[0-9\s\-]{8,15}$"
                 className={`w-full pl-10 pr-3 py-2 rounded-md border ${
                   isEditing 
-                    ? 'border-[#e0692d] focus:ring-2 focus:ring-[#e0692d] focus:border-transparent' 
-                    : 'bg-gray-50 border-gray-300'
+                    ? 'w-full pr-4 pl-12 border border-transparent focus:ring-2 focus:ring-orange-200 focus:bg-white rounded-2xl outline-none transition-all' 
+                    : 'pr-4 pl-12 bg-gray-50 border-gray-300'
                 } transition-colors duration-200`}
               />
             </div>
@@ -292,27 +302,33 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
                 <MapPin size={18} />
               </div>
-              <select
-                className={`w-full pl-10 pr-3 py-2 rounded-md border ${
-                  isEditing 
-                    ? 'border-[#e0692d] focus:ring-2 focus:ring-[#e0692d] focus:border-transparent' 
-                    : 'bg-gray-50 border-gray-300'
-                } transition-colors duration-200`}
-                value={ville}
-                onChange={(e) => {
-                  setVille(e.target.value as Ville);
-                  setRegion(''); // Réinitialiser la région si la ville change
+              <CustomSelect
+              className={`w-full pl-10 pr-3 py-2 rounded-md border ${
+                isEditing 
+                  ? 'border-[#e0692d] focus:ring-2 focus:ring-[#e0692d] bg-white focus:border-transparent' 
+                  : 'bg-gray-50 border-gray-300'
+              } transition-colors duration-200`}
+                value={formData.city}
+                onChange={(value: string) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    city: value,
+                    region: '' // reset région quand ville change
+                  }));
                 }}
-                required
                 disabled={!isEditing}
-              >
-                <option value="">Sélectionner une ville</option>
-                {Object.keys(villesEtRegions).map((v) => (
-                    <option key={v} value={v}>
-                      {v}
-                    </option>
-                  ))}
-              </select>
+                required
+                name="ville"
+                placeholder='-- Sélectionner une ville --'
+                options={[
+                  { value: '', label: '-- Sélectionner une ville --' },
+                  ...Object.keys(villesEtRegions).map((v) => ({
+                    value: v,
+                    label: v
+                  }))
+                ]}
+              />
+              
             </div>
           </div>
           
@@ -323,27 +339,34 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
                 <MapPin size={18} />
               </div>
-              <select
+              <CustomSelect
                 className={`w-full pl-10 pr-3 py-2 rounded-md border ${
                   isEditing 
-                    ? 'border-[#e0692d] focus:ring-2 focus:ring-[#e0692d] focus:border-transparent' 
+                    ? 'border-[#e0692d] focus:ring-2 focus:ring-[#e0692d] bg-white focus:border-transparent' 
                     : 'bg-gray-50 border-gray-300'
                 } transition-colors duration-200`}
-                value={region}
-                onChange={(e) => setRegion(e.target.value)}
-                disabled={!isEditing && !ville}
+                value={formData.region}
+                onChange={(value: string) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    region: value
+                  }));
+                }}
+                disabled={!isEditing}
                 required
-              >
-                <option value="">Sélectionner une région</option>
-                {regionsDisponibles?.map((r) => (
-                      <option key={r} value={r}>
-                        {r}
-                      </option>
-                    ))}
-              </select>
+                name="region"
+                placeholder='-- Sélectionner une région --'
+                options={[
+                  { value: '', label: '-- Sélectionner une région --' },
+                  ...regionsDisponibles.map((r) => ({
+                    value: r,
+                    label: r
+                  }))
+                ]}
+              />
             </div>
           </div>
-          
+
           {/* Address */}
           <div className="relative md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
@@ -360,31 +383,33 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
                 required={true}
                 className={`w-full pl-10 pr-3 py-2 rounded-md border ${
                   isEditing 
-                    ? 'border-[#e0692d] focus:ring-2 focus:ring-[#e0692d] focus:border-transparent' 
-                    : 'bg-gray-50 border-gray-300'
+                    ? 'w-full pr-4 pl-12 border border-transparent focus:ring-2 focus:ring-orange-200 focus:bg-white rounded-2xl outline-none transition-all' 
+                    : 'bg-gray-50 pr-4 pl-12 border-gray-300'
                 } transition-colors duration-200`}
               />
             </div>
           </div>
+         
+          {/* Apropos */}
           <div className="relative md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                À propos
-              </label>
-              <textarea
-                name="apropos"
-                value={formData.apropos}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className={`w-full pl-10 pr-3 py-2 rounded-md border ${
-                  isEditing 
-                    ? 'border-[#e0692d] focus:ring-2 focus:ring-[#e0692d] focus:border-transparent' 
-                    : 'bg-gray-50 border-gray-300'
-                } transition-colors duration-200`}
-                rows={4}
-                placeholder="Professionnel qualifié avec plusieurs années d'expérience. Spécialisé dans divers services et toujours à l'écoute des besoins des clients. Disponible pour des travaux dans la région de Tunis..."
-                required
-              />
-            </div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              À propos
+            </label>
+            <textarea
+              name="apropos"
+              value={formData.apropos}
+              onChange={handleChange}
+              disabled={!isEditing}
+              className={`w-full pl-8 pr-5 py-2 rounded-md border ${
+                isEditing 
+                  ? 'w-full pr-4 border border-transparent focus:ring-2 focus:ring-orange-200 focus:bg-white rounded-2xl outline-none transition-all' 
+                  : 'bg-gray-50 border-gray-300'
+              } transition-colors duration-200`}
+              rows={4}
+              placeholder="Professionnel qualifié avec plusieurs années d'expérience. Spécialisé dans divers services et toujours à l'écoute des besoins des clients. Disponible pour des travaux dans la région de Tunis..."
+              required
+            />
+          </div>
         </div>
         
         <div className="mt-8 flex justify-end">

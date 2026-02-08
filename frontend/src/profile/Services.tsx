@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Plus, 
   Edit, 
@@ -10,12 +11,15 @@ import {
   AlertCircle,
   Calendar,
   Tag,
-  PenTool
+  PenTool,
+  Eye,
+  Share2
 } from 'lucide-react';
 import { Service } from '../utils/types';
 import ServiceForm from './ServiceForm';
 import { mapServicesDataToUserModel } from '../utils/mapper';
 import Swal from "sweetalert2";
+import CustomSelect from './CustomSelect';
 
 interface ServicesProps {
   services: Service[];
@@ -30,6 +34,7 @@ const Services: React.FC<ServicesProps> = ({
   onEditService, 
   onDeleteService 
 }) => {
+  const navigate = useNavigate();
 
   const [localServices, setLocalServices] = useState<Service[]>([]);
   const [filter, setFilter] = useState<'all' | 'active' | 'paused' | 'archived'>('all');
@@ -296,6 +301,7 @@ const Services: React.FC<ServicesProps> = ({
         return null;
     }
   };
+  // Fonction de partage dynamique
   
   return (
     <>
@@ -326,7 +332,15 @@ const Services: React.FC<ServicesProps> = ({
               <input
                 type="text"
                 placeholder="Rechercher un service..."
-                className="w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-[#e0692d] focus:border-transparent transition-colors duration-200"
+                className="w-full
+                  py-3 pr-4 pl-12 
+                  bg-gray-50
+                  border border-transparent
+                  focus:ring-2 focus:ring-orange-200
+                  focus:bg-white
+                  rounded-2xl
+                  outline-none
+                  transition-all"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -336,79 +350,144 @@ const Services: React.FC<ServicesProps> = ({
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
                 <Filter size={16} />
               </div>
-              <select
-                className="w-full pl-10 pr-3 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-[#e0692d] focus:border-transparent transition-colors duration-200 bg-white"
+              <CustomSelect
                 value={filter}
-                onChange={(e) => setFilter(e.target.value as 'all' | 'active' | 'paused' | 'archived')}
-              >
-                <option value="all">Tous les statuts</option>
-                <option value="active">Actifs</option>
-                <option value="paused">En pause</option>
-                <option value="archived">Archivés</option>
-              </select>
+                onChange={(value) => setFilter(value as 'all' | 'active' | 'paused' | 'archived')}
+                options={[
+                  { value: 'all', label: 'Tous les statuts' },
+                  { value: 'active', label: 'Actifs' },
+                  { value: 'paused', label: 'En pause' },
+                  { value: 'archived', label: 'Archivés' }
+                ]}
+              />
+               
             </div>
           </div>
-          
+
           {/* Services List */}
           <div className="space-y-4">
             {filteredServices.length > 0 ? (
               filteredServices.map(service => {
                 const sponsored = !!(service.verified && service.sponsored);
+                const handleShare = async (e: React.MouseEvent) => {
+                  e.stopPropagation();
+
+                  const url = `${window.location.origin}/service/${service.slug || service.id}`;
+
+                  const shareData = {
+                    title: service.title,
+                    text: `Découvrez ce service sur ServicePro : ${service.title}`,
+                    url
+                  };
+
+                  try {
+                    // 📱 Mobile share native
+                    if (navigator.share) {
+                      await navigator.share(shareData);
+                      return;
+                    }
+
+                    // 💻 Desktop fallback → copie + popup choix
+                    await navigator.clipboard.writeText(url);
+
+                    Swal.fire({
+                      title: "Lien copié",
+                      text: "Choisissez où partager",
+                      icon: "success",
+                      showCancelButton: true,
+                      confirmButtonText: "WhatsApp",
+                      cancelButtonText: "LinkedIn"
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        window.open(`https://wa.me/?text=${encodeURIComponent(url)}`);
+                      } else {
+                        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`);
+                      }
+                    });
+
+                  } catch (err) {
+                    console.error(err);
+                    Swal.fire("Erreur", "Impossible de partager", "error");
+                  }
+                };
                 return (
-                  <div key={service.id} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                  <div key={service.id} className="p-6 bg-white border border-gray-100 rounded-[24px] shadow-sm hover:shadow-md transition-all duration-300">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                      
                       <div className="flex-grow">
-                        <div className="flex items-center mb-2">
-                          <h3 className="text-xl font-semibold text-gray-900 mr-3">{service.title}</h3>
+                        <div className="flex items-center mb-2 flex-wrap gap-2">
+                          <h3 className="text-xl font-bold text-gray-900 leading-tight">{service.title}</h3>
                           {getStatusBadge(service.status, sponsored)}
                         </div>
                         
-                        <p className="text-gray-600 mb-3">
-                          {service.description.length > 100
-                        ? service.description.slice(0, 100) + '...'
-                        : service.description}
+                        <p className="text-gray-500 text-sm mb-4 line-clamp-2 leading-relaxed">
+                          {service.description}
                         </p>
                         
-                        <div className="flex flex-wrap gap-3 mb-3">
-                          <div className="flex items-center text-sm text-gray-500">
-                            <Tag size={14} className="mr-1" />
+                        <div className="flex flex-wrap gap-4 text-xs text-gray-400 font-medium">
+                          <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-lg">
+                            <Tag size={14} className="mr-1.5 text-[#e0692d]" />
                             {service.category}
                           </div>
                           {service.price && (
-                            <div className="flex items-center text-sm text-gray-500">
-                              <span className="font-medium text-[#e0692d]">{service.price}</span>
+                            <div className="flex items-center bg-orange-50 text-[#e0692d] px-3 py-1.5 rounded-lg">
+                              <span className="font-bold">{service.price} DT</span>
                             </div>
                           )}
-                          <div className="flex items-center text-sm text-gray-500">
-                            <Calendar size={14} className="mr-1" />
+                          <div className="flex items-center px-3 py-1.5">
+                            <Calendar size={14} className="mr-1.5" />
                             Créé le {formatDate(service.createdAt)}
                           </div>
-                          <div className="flex items-center text-sm text-gray-500">
-                            <PenTool size={14} className="mr-1" />
+                          <div className="flex items-center px-3 py-1.5">
+                            <Calendar size={14} className="mr-1.5" />
                             Modifié le {formatDate(service.updatedAt)}
                           </div>
                         </div>
                       </div>
                       
-                      <div className="flex flex-row md:flex-col space-x-3 md:space-x-2 md:space-y-2 mt-3 md:mt-0">
+                      {/* ACTIONS BUTTONS */}
+                      <div className="flex md:flex-col gap-2 shrink-0">
+                        {/* Bouton Voir le service */}
                         <button
-                          onClick={() => handleEditClick(service)}
-                          className="flex items-center justify-center p-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-200"
+                          onClick={() => navigate(`/service/${service.id}`)}
+                          className="flex-1 md:w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-black transition-all"
                         >
-                          <Edit size={16} />
+                          <Eye size={16} /> <span>Aperçu</span>
                         </button>
-                        <button
-                          onClick={() => handleDeleteClick(service.id)}
-                          className="flex items-center justify-center p-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors duration-200"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+
+                        <div className="flex gap-2">
+                          {/* Bouton Partager */}
+                          <button
+                            onClick={handleShare}
+                            className="p-2.5 bg-orange-100 text-[#e0692d] rounded-xl hover:bg-orange-200 transition-colors flex-1 md:flex-none justify-center flex items-center"
+                            title="Partager sur les réseaux"
+                          >
+                            <Share2 size={18} />
+                          </button>
+
+                          {/* Bouton Éditer */}
+                          <button
+                            onClick={() => handleEditClick(service)}
+                            className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 transition-colors"
+                          >
+                            <Edit size={18} />
+                          </button>
+
+                          {/* Bouton Supprimer */}
+                          <button
+                            onClick={() => handleDeleteClick(service.id)}
+                            className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
                       </div>
+
                     </div>
                   </div>
                 );
               })
-              ) : (
+            ) : (
               <div className="text-center py-10">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
                   <Tag size={32} className="text-gray-400" />

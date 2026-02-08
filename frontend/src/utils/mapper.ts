@@ -51,8 +51,8 @@ export function mapProfessionalsDataToUserModel(prosData: any): Professional {
 
   //console.log('Données brutes reçues depuis l’API :', prosData);
 
-  const id = String(prosData.id);
-  const professional_id = String(prosData.professionnel_id)
+  const id = String(prosData.service_id);
+  const professional_id = String(prosData.professional_id)
   const firstName = prosData.prenom || '';
   const lastName = prosData.nom || '';
   const name = `${firstName} ${lastName}`;
@@ -67,7 +67,7 @@ export function mapProfessionalsDataToUserModel(prosData: any): Professional {
   const avatar = prosData.photo || 'http://localhost:5000/uploads/ServicePro_avatar.png';
   const description = prosData.description || '';
   const prix = prosData.prix || '';
-  const availability = prosData.availability || 'Disponible';
+  const availability = prosData.availability || 'Immédiat';
   const verified = prosData.verified || false;
   const sponsored = prosData.sponsored || false;
 
@@ -81,7 +81,7 @@ export function mapProfessionalsDataToUserModel(prosData: any): Professional {
       //phone,
       city,
       region,
-      //address,
+      address,
       rating,
       reviews,
       avatar,
@@ -103,8 +103,9 @@ export function mapServicesDataToUserModel(prosData: any): Service {
   const description = prosData.description || '';
   const status = prosData.statut || '';
   const category = prosData.categorie || '';
+  const metier = prosData.metier || '';
   const price = prosData.prix || '';
-  const duration = prosData.duration || ''
+  const duration = prosData.availability || ''
   const verified =  prosData.verified || false;
   const sponsored =  prosData.sponsored || false;
   const createdAt = prosData.date_creation?.split('T')[0] || '2024-01-01';
@@ -133,6 +134,7 @@ export function mapServicesDataToUserModel(prosData: any): Service {
       description,
       status,
       category,
+      metier,
       price,
       duration,
       verified,

@@ -162,7 +162,7 @@ exports.markRead = (req, res) => {
 exports.markAllRead = (req, res) => {
   const authHeader = req.headers['authorization'];
   const  type  = req.body.type;
-  //const fullType = type +"_received";
+  
   console.log("Type received in markAllRead:", type);
   if (!authHeader) return res.status(401).json({ message: 'Token manquant' });
 

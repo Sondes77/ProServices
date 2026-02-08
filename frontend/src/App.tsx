@@ -59,7 +59,7 @@ import LiveChat from './chat/LiveChat';
 import ArticleDetail from './profile/ArticleDetail';
 import { user, privacySettings, conversations, reviews, services } from './utils/mock-data';
 import { User, PrivacySettings as PrivacySettingsType, Service } from './utils/types';
-import {  mapUserDataToUserModel } from './utils/mapper';
+import { mapUserDataToUserModel } from './utils/mapper';
 import ThreeCXChat from "./chat/ThreeCXChat";
 import Statistics from './profile/Statistics';
 import ForgotPassword from './profile/ForgotPassword';
@@ -77,6 +77,7 @@ function App() {
     const stored = localStorage.getItem('currentUser');
     return stored ? JSON.parse(stored) : user;
   });
+  console.log('Utilisateur actuel au chargement de App.tsx :', currentUser);
   const [currentPrivacySettings, setCurrentPrivacySettings] = useState<PrivacySettingsType>(privacySettings);
   const [currentServices, setCurrentServices] = useState<Service[]>(services);
   const [activeSection, setActiveSection] = useState('overview');

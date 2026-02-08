@@ -3,20 +3,20 @@ const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 
 exports.findOrCreateUser = async (userInfo, callback) => {
-    console.log("Données complètes reçues de Google :", userInfo);
+    //console.log("Données complètes reçues de Google :", userInfo);
     const { email,name, given_name, family_name, picture, email_verified, role } = userInfo;
     const hashedPassword = await bcrypt.hash("ServiceProuserfromgooglePW", 10); // 🔐// Pas de mot de passe pour les utilisateurs Google
     const date_creation = new Date(); // Date actuelle  
     const source = "google";
 
-    console.log("name = ", name);   
-    console.log("given_name = ", given_name);
-    console.log("family_name = ", family_name);
+    //console.log("name = ", name);   
+    //console.log("given_name = ", given_name);
+    //console.log("family_name = ", family_name);
 
     const query = "SELECT * FROM utilisateurs WHERE email = ?";
     db.query(query, [email], (err, results) => {
         if (err) return callback(err);
-
+        console.log("Résultats de la requête findOrCreateUser :", results);
         if (results.length > 0) {
         // Utilisateur existe
         callback(null, results[0]);

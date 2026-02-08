@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Clock, Tag, MessageSquare, Star, ArrowLeft, Zap, CheckCircle, XCircle, FileText, Phone, ShieldCheck, Info, ChevronRight,  } from 'lucide-react';
+import { Calendar, MapPin, Clock, Tag, MessageSquare, Star, Send, Lock, Users, X, ArrowLeft, Zap, CheckCircle, XCircle, FileText, Phone, ShieldCheck, Info, ChevronRight,  } from 'lucide-react';
 import { User, Service } from '../utils/types';
 import { mapServicesDataToUserModel, mapUserDataToUserModel } from '../utils/mapper';
 import Swal from 'sweetalert2';
+import { Helmet as HelmetProviderBase } from "react-helmet-async";
+
+const Helmet = HelmetProviderBase as any;
 
 interface ServiceDetailProps {
     user2: User;
@@ -12,15 +15,29 @@ interface ServiceDetailProps {
 
 const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
   const { id } = useParams<{ id: string }>(); // récupère l'id de l'URL
-  //const routeParams = useParams<{ id?: string }>();
-  //const id = routeParams.id || user2?.id; 
-  
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [message, setMessage] = useState('');
   const [service, setService] = useState<Service | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const userMe = user?.id === user2?.id;
-  const navigate = useNavigate();
-  
-
+  const [showPhone, setShowPhone] = useState(false);
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [quoteDetails, setQuoteDetails] = useState({ date: '', details: '' });
+  const [currentImg, setCurrentImg] = useState(0);
+  const gallery =
+  service && service.gallery
+    ? typeof service.gallery === "string"
+      ? JSON.parse(service.gallery)
+      : service.gallery
+    : [];
+  const next = () =>
+    setCurrentImg((i) => (i + 1) % gallery.length);
+  const prev = () =>
+    setCurrentImg((i) => (i - 1 + gallery.length) % gallery.length);
   useEffect(() => {
     const fetchService = async () => {
       try {
@@ -45,6 +62,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
         
         const data = await response.json();
         const service = Array.isArray(data) ? data[0] : data;
+        console.log("service = ", service);
         const mapped = mapServicesDataToUserModel(service);
         setService(mapped);
        
@@ -77,12 +95,8 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
       fetchService();
     }
   }, [id]);
-  
-  // État pour afficher le numéro
-  const [showPhone, setShowPhone] = useState(false);
-  // État pour le modal de devis
-  const [showQuoteModal, setShowQuoteModal] = useState(false);
-  const [quoteDetails, setQuoteDetails] = useState({ date: '', details: '' });
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   // Fonction pour gérer la demande de devis
   const handleQuoteSubmit = (e: React.FormEvent) => {
@@ -97,20 +111,69 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
     setShowQuoteModal(false);
   };
 
-  const [currentImg, setCurrentImg] = useState(0);
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) return Swal.fire("Connexion requise", "Connectez-vous pour envoyer un message", "info");
 
-  const gallery =
-  service && service.gallery
-    ? typeof service.gallery === "string"
-      ? JSON.parse(service.gallery)
-      : service.gallery
-    : [];
-  const next = () =>
-    setCurrentImg((i) => (i + 1) % gallery.length);
-
-  const prev = () =>
-    setCurrentImg((i) => (i - 1 + gallery.length) % gallery.length);
-
+    try {
+      const res = await fetch(`http://localhost:5000/api/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ recipientId: user?.id, content: message })
+      });
+      if (res.ok) {
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "success",
+          title: "Succès",
+          text: "Message envoyé !",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
+        setMessage('');
+        setShowMessageModal(false);
+      }
+    } catch (error) {
+      Swal.fire("Erreur", "L'envoi a échoué", "error");
+    }
+  };
+  const handleLogin = async (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+        const response = await fetch('http://localhost:5000/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem('token', data.token);
+          const user = mapUserDataToUserModel(data.user);
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          setShowLoginModal(false);
+          window.location.reload();
+        } else {
+          setLoginError('Email ou mot de passe incorrect');
+        }
+      } catch (error) {
+        setLoginError('Erreur de connexion au serveur');
+      }
+    };
+  
   // Affiche un message de chargement si le service n’est pas encore chargé
   if (!service) {
     return <div className="text-center py-10">Chargement du service...</div>;
@@ -121,6 +184,23 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
   }
 
   return (
+    <>
+    <Helmet>
+      <title>{service.title} | ServicePro</title>
+
+      <meta name="description" content={service.description} />
+
+      {/* OpenGraph */}
+      <meta property="og:title" content={service.title} />
+      <meta property="og:description" content={service.description} />
+      <meta property="og:image" content={service.gallery[0]} />
+      <meta property="og:url" content={window.location.href} />
+      <meta property="og:type" content="website" />
+
+      {/* Twitter */}
+      <meta name="twitter:card" content="summary_large_image" />
+    </Helmet>
+    
     <div className="min-h-screen bg-gray-50 pt-8">
       {/* Bannière publicitaire */}
       <div className="max-w-7xl mx-auto px-4 mb-8">
@@ -392,16 +472,29 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
               </div>
             </div>
 
+            
             <div className="space-y-3">
-               <button 
-                onClick={() => setShowQuoteModal(true)}
-                className="w-full bg-[#e0692d] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#f07e40] transition-all shadow-lg shadow-orange-100"
-              >
-                <FileText size={20} /> Demander un devis
-              </button>
-              <button className="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-black transition-all">
-                <MessageSquare size={20} /> Contacter le pro
-              </button>
+              {!userMe && (
+                  <>
+                    <button 
+                      onClick={() => setShowQuoteModal(true)}
+                      className="w-full bg-[#e0692d] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#f07e40] transition-all shadow-lg shadow-orange-100"
+                    >
+                      <FileText size={20} /> Demander un devis
+                    </button>
+                    <button 
+                    onClick={() => {
+                      if (token) {
+                        setShowMessageModal(true);
+                      } else {
+                        setShowLoginModal(true);
+                      }
+                    }}
+                    className="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-black transition-all">
+                      <MessageSquare size={20} /> Contacter le pro
+                    </button>
+                  </>
+              )}
               <button 
                 onClick={() => setShowPhone(!showPhone)}
                 className={`w-full border-2 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${
@@ -440,14 +533,18 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
       
       {/* 🔟 CALL TO ACTION STICKY MOBILE */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex gap-3 z-50">
-        <button 
-         onClick={() => setShowQuoteModal(true)}
-        className="flex-1 bg-[#e0692d] text-white py-3 rounded-xl font-bold text-sm shadow-lg shadow-orange-100">
-          Demander Devis
-        </button>
-        <button className="p-3 bg-gray-100 rounded-xl">
-          <MessageSquare size={20} className="text-gray-700" />
-        </button>
+        {!userMe && (
+          <>
+            <button 
+              onClick={() => setShowQuoteModal(true)}
+              className="flex-1 bg-[#e0692d] text-white py-3 rounded-xl font-bold text-sm shadow-lg shadow-orange-100">
+                Demander Devis
+              </button>
+              <button className="p-3 bg-gray-100 rounded-xl">
+                <MessageSquare size={20} className="text-gray-700" />
+              </button>
+          </>
+        )}
       </div>
 
       {showQuoteModal && (
@@ -506,7 +603,111 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
         </div>
       </div>
       )}
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg w-full max-w-md mx-4 relative">
+            
+            {/* Croix de fermeture */}
+            <button
+              onClick={() => setShowLoginModal(false)}
+              className="absolute top-3 right-3 text-white hover:text-gray-200 z-10"
+              aria-label="Fermer"
+            >
+              <span className="text-2xl font-bold">&times;</span>
+            </button>
+  
+            <div className="bg-[#e0692d] p-4 rounded-t-lg">
+              <h3 className="text-xl font-semibold text-white">Connexion requise</h3>
+            </div>
+            
+            <form onSubmit={handleLogin} className="p-6">
+              {loginError && (
+                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
+                  {loginError}
+                </div>
+              )}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <div className="relative">
+                    <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#e0692d] focus:border-transparent"
+                      placeholder="Votre email"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Mot de passe
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#e0692d] focus:border-transparent"
+                      placeholder="Votre mot de passe"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 flex flex-col gap-3">
+                <button
+                  type="submit"
+                  className="w-full bg-[#e0692d] text-white px-4 py-2 rounded-md hover:bg-[#f07e40] transition-colors duration-200"
+                >
+                  Se connecter
+                </button>
+                <Link
+                  to="/inscription"
+                  className="w-full text-center px-4 py-2 border border-[#e0692d] text-[#e0692d] rounded-md hover:bg-[#e0692d] hover:text-white transition-colors duration-200"
+                >
+                  Créer un compte
+                </Link>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      
+      {/* --- MODAL MESSAGE --- */}
+      {showMessageModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="bg-[#e0692d] p-4 text-white flex justify-between items-center">
+              <h3 className="font-bold">Nouveau message</h3>
+              <button onClick={() => setShowMessageModal(false)} className="bg-white/20 p-2 rounded-full hover:bg-white/30">
+              <XCircle size={24} />
+            </button>
+            </div>
+            <form onSubmit={handleSendMessage} className="p-6">
+              <textarea 
+                className="w-full border rounded-xl p-3 focus:ring-2 focus:ring-orange-200 outline-none" 
+                rows={4} 
+                placeholder="Bonjour..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                required
+              />
+              <button className="w-full mt-4 bg-[#e0692d] text-white py-3 rounded-xl flex justify-center items-center gap-2 hover:bg-[#f07e40]">
+                <Send size={18} /> Envoyer le message
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
+    </>
   );
 };
 

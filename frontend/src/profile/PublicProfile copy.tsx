@@ -603,31 +603,46 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                 {services.filter(service => service.status === 'active').map(service => (
                   <div 
                     key={service.id} 
-                    className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
+                    className="group relative bg-white rounded-lg p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-orange-500/5 hover:border-orange-200 transition-all duration-300 cursor-pointer"
                     onClick={() => handleServiceClick(service.id)}
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-semibold text-[#e0692d] hover:text-[#f07e40] transition-colors duration-200 flex items-center">
-                        {service.title}
-                        <ExternalLink size={16} className="ml-2" />
-                      </h3>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <CheckCircle size={12} className="mr-1" />
-                        Disponible
-                      </span>
+                    {/* Badge de disponibilité discret */}
+                    <div className="flex justify-end items-start mb-4">
+                      
+                      <div className="text-gray-300 group-hover:text-[#e0692d] transition-colors">
+                        <ExternalLink size={18} />
+                      </div>
                     </div>
-                    <p className="text-gray-600 mb-3">{service.description.length > 50
-                        ? service.description.slice(0, 150) + '...'
-                        : service.description}</p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="inline-flex items-center text-sm text-gray-500">
-                        <Tag size={14} className="mr-1" />
-                        {service.category}
-                      </span>
-                      {service.price && (
-                        <span className="text-sm font-medium text-[#e0692d]">
-                          {service.price}
+
+                    {/* Titre & Description */}
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-[#e0692d] transition-colors leading-tight">
+                        {service.title}
+                      </h3>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <CheckCircle size={12} className="mr-1" />
+                          {service.duration}
                         </span>
+                    </div>
+
+                    <p className="text-gray-500 text-sm leading-relaxed line-clamp-2">
+                      {service.description}
+                    </p>
+
+                    {/* Footer de la carte : Catégorie & Prix */}
+                    <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-50">
+                      <div className="flex items-center text-gray-400 bg-gray-50 px-3 py-1.5 rounded-xl">
+                        <Tag size={14} className="mr-2 text-[#e0692d]" />
+                        <span className="text-xs font-semibold">{service.category}</span>
+                      </div>
+
+                      {service.price && (
+                        <div className="text-right">
+                          <p className="text-[10px] text-gray-400 uppercase font-bold tracking-tighter mb-0.5">À partir de</p>
+                          <p className="text-lg font-black text-[#e0692d]">
+                            {service.price} <span className="text-xs font-bold">DT</span>
+                          </p>
+                        </div>
                       )}
                     </div>
                   </div>
