@@ -26,6 +26,15 @@ exports.findOrCreateUser = async (userInfo, callback) => {
         db.query(insert, [given_name, family_name, email, hashedPassword, role, source, date_creation, picture, email_verified], (err, result) => {
             if (err) return callback(err);
 
+            if (role === 'professional') {
+                db.query('Insert into settings set user_id = ?', [result.insertId], (err2, rows) => {
+                    if (err2) {
+                        console.error('Erreur lors de la création des paramètres:', err2);
+                        return callback(err2);
+                    }
+                });
+            }
+
             const newUser = {
             id: result.insertId,
             nom: name,

@@ -1,5 +1,5 @@
 import { use } from 'react';
-import { User, Professional, Service } from './types';
+import { User, Professional, Service, Devis } from './types';
 
 export function mapUserDataToUserModel(userData: any): User {
 
@@ -145,6 +145,51 @@ export function mapServicesDataToUserModel(prosData: any): Service {
       included,
       notIncluded
   };
+}
+
+export function mapDevisDataToUserModel(data: any): Devis[] {
+
+  const array = Array.isArray(data) ? data : [data];
+
+  return array.map(prosData => {
+
+    //console.log('Mapping devis :', prosData);
+
+    const id = String(prosData.id);
+    const client_id = String(prosData.client_id);
+    const pro_id = String(prosData.pro_id);
+    const objet = prosData.objet || '';
+    const description = prosData.description || '';
+    const date_souhaitee = prosData.date_souhaitee?.split('T')[0] || '';
+    const date_intervention = prosData.date_souhaitee?.split('T')[0] || '';
+    const prix = prosData.prix ?? null;
+    const message_pro = prosData.message_pro || '';
+    const statut = prosData.statut || '';
+    const nom = prosData.pro_nom || '';
+    const prenom = prosData.pro_prenom || '';
+    const pro_nom = `${prenom} ${nom}`.trim();
+    const pro_role = prosData.role;
+    const pro_photo = prosData.photo;
+    const created_at = prosData.created_at?.split('T')[0] || '';
+
+    return {
+      id,
+      client_id,
+      pro_id,
+      objet,
+      description,
+      date_souhaitee,
+      date_intervention,
+      prix,
+      message_pro,
+      statut,
+      pro_nom,
+      pro_role,
+      pro_photo,
+      created_at
+    };
+
+  });
 }
 
 /*export function mapReviewsDataToUserModel(prosData: any): Review {

@@ -1,4 +1,4 @@
-import { User, PrivacySettings, Message, Review, Service, Conversation } from './types';
+import { User, PrivacySettings, Message, Review, Service, Conversation, Devis } from './types';
 
 export const user: User = {
   id: '1',
@@ -271,4 +271,29 @@ export const services: Service[] = [
     createdAt: '2023-04-12T14:20:00Z',
     updatedAt: '2023-07-30T08:45:00Z'
   }
+];
+
+export const devis: Devis[] = [
+  {
+  id: '101',
+  objet: "Installation Clim Salon",
+  description: "Installation d'un climatiseur 12000 BTU au 2ème étage.",
+  date_souhaitee: "2026-02-15",
+  prix: 120,
+  message_pro: "Je ramène mes propres supports muraux.",
+  statut: "accepted",
+  pro_nom: "Sami Rekik", // Jointure pro_id
+  created_at: "2026-02-08"
+},
+{
+  id: '102',
+  objet: "Réparation Fuite Cuisine",
+  description: "Fuite d'eau sous l'évier de la cuisine, besoin d'une réparation rapide.",
+  date_souhaitee: "2026-02-20",
+  prix: 80,
+  message_pro: "Je peux intervenir demain matin.",
+  statut: "pending",
+  pro_nom: "Sami Rekik", // Jointure pro_id
+  created_at: "2026-02-10"
+}
 ];

@@ -7,6 +7,7 @@ const uploadRoutes = require('./routes/upload');
 const messageRoutes = require('./routes/messageRoutes'); 
 const reviewRoutes = require('./routes/reviewRoutes'); 
 const notificationsRoutes = require('./routes/notificationsRoutes'); 
+const devisRoutes = require('./routes/devisRoutes'); 
 const cors = require('cors');
 const path = require('path');
 const http = require('http');          // ⬅️ Nécessaire pour Socket.IO
@@ -71,6 +72,7 @@ app.use('/api', uploadRoutes);
 app.use('/api', messageRoutes); 
 app.use('/api', reviewRoutes); 
 app.use('/api', notificationsRoutes); 
+app.use('/api', devisRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'routes/uploads')));
 
 // Lancer le serveur

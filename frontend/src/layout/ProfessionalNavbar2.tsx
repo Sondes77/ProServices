@@ -191,12 +191,16 @@ useEffect(() => {
     }
   };
   const handleNotificationClick = async (notif) => {
+    if (notif.unread)
       await markAsRead(notif.id);
 
-      if (notif.link) {
-        navigate(notif.link);
+      if (notif.link && String(notif.user_id) !== String(user.id)) {
+        window.location.href = notif.link;
       }
-    };
+      else {
+        window.location.href = "/mes-devis";
+      }
+  };
 
 const groupedMessageNotifs = Object.values(
   notifications

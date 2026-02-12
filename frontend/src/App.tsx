@@ -206,8 +206,8 @@ function App() {
             onSave={handleUpdatePrivacySettings}
           />
         );
-      case 'security':
-        return <Security />;
+      //case 'security':
+        //return <Security />;
       case 'messages':
         return <Messages user={currentUser} conversations={conversations}/>;
       case 'reviews':
@@ -223,12 +223,11 @@ function App() {
         );
       case 'notifications':
         return <Notifications user={currentUser} />;
-      case 'quotes':
-        if (currentUser.role === 'professional') {
+      case 'devis':
+        //if (currentUser.role === 'professional') {
           return <ProQuote user={currentUser} />;
-        } else {
+      case 'mes-devis':
           return <UserQuote user={currentUser} />;
-        }
         /*case 'stats':
         return (
           <Statistics user={currentUser} />
@@ -410,6 +409,26 @@ function App() {
           </DashboardLayout>
         } />
         <Route path="/messages/:conversationId" element={
+          <DashboardLayout
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            user={currentUser}
+            onViewPublicProfile={toggleView}
+          >
+            {renderActiveSection()}
+          </DashboardLayout>
+        } />
+         <Route path="/devis/:Id" element={
+          <DashboardLayout
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            user={currentUser}
+            onViewPublicProfile={toggleView}
+          >
+            {renderActiveSection()}
+          </DashboardLayout>
+        } />
+        <Route path="/mes-devis" element={
           <DashboardLayout
             activeSection={activeSection}
             setActiveSection={setActiveSection}

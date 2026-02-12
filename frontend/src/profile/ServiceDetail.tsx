@@ -26,8 +26,11 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
   const userMe = user?.id === user2?.id;
   const [showPhone, setShowPhone] = useState(false);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
-  const [quoteDetails, setQuoteDetails] = useState({ date: '', details: '' });
+  const [quoteDetails, setQuoteDetails] = useState({ date: '', objet: '', details: '' });
   const [currentImg, setCurrentImg] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
   const gallery =
   service && service.gallery
     ? typeof service.gallery === "string"
@@ -38,6 +41,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
     setCurrentImg((i) => (i + 1) % gallery.length);
   const prev = () =>
     setCurrentImg((i) => (i - 1 + gallery.length) % gallery.length);
+  
   useEffect(() => {
     const fetchService = async () => {
       try {
@@ -62,7 +66,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
         
         const data = await response.json();
         const service = Array.isArray(data) ? data[0] : data;
-        console.log("service = ", service);
+        //console.log("service = ", service);
         const mapped = mapServicesDataToUserModel(service);
         setService(mapped);
        
@@ -79,7 +83,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
             const userdata = Array.isArray(data) ? data[0] : data;
             const mapped = mapUserDataToUserModel(userdata);
             setUser(mapped);
-            console.log("id profile = ",user?.id);
+            //console.log("id profile = ",user?.id);
           } else {
             alert('Erreur lors de la récupération d\'utilisateur');
             return;
@@ -95,20 +99,62 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
       fetchService();
     }
   }, [id]);
-  const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  
 
   // Fonction pour gérer la demande de devis
-  const handleQuoteSubmit = (e: React.FormEvent) => {
+  const handleQuoteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Logique d'envoi (API)
-    Swal.fire({
-      title: "Demande envoyée !",
-      text: "Le professionnel vous répondra avec une proposition chiffrée.",
-      icon: "success",
-      confirmButtonColor: "#e0692d"
-    });
-    setShowQuoteModal(false);
+
+    try {
+      setLoading(true);
+
+      const token = localStorage.getItem("token");
+
+      const res = await fetch("http://localhost:5000/api/devis", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          client_id: user2?.id,
+          service_id: service?.id,
+          date_souhaitee: quoteDetails.date,
+          objet: quoteDetails.objet,
+          description: quoteDetails.details,
+          professionnel_id: service?.pro_id // 👈 important
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || "Erreur envoi devis");
+      }
+
+      const data = await res.json();
+      //console.log("Devis créé :", data);
+
+       Swal.fire({
+        title: "Demande envoyée !",
+        text: "Le professionnel vous répondra avec une proposition chiffrée.",
+        icon: "success",
+        confirmButtonColor: "#e0692d"
+      });
+      setShowQuoteModal(false);
+
+      // reset
+      setQuoteDetails({
+        date: "",
+        details: ""
+      });
+
+    } catch (err: any) {
+      console.error(err);
+      Swal.fire("Erreur", err.message || "Erreur lors de l'envoi de la demande", "error");
+    } finally {
+      setLoading(false);
+    }
+   
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -567,8 +613,20 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
               </label>
               <input 
                 type="date" 
-                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-200 transition-all"
+                className="w-full p-2 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-orange-200 transition-all"
                 onChange={(e) => setQuoteDetails({...quoteDetails, date: e.target.value})}
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 font-secondary">
+                Objet de la demande
+              </label>
+              <input 
+                type="text" 
+                placeholder="Ex: Installation Climatiseur 12000 BTU"
+                className="w-full p-2 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-orange-200 transition-all"
+                onChange={(e) => setQuoteDetails({...quoteDetails, objet: e.target.value})}
                 required
               />
             </div>
@@ -580,13 +638,13 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
               <textarea 
                 rows={4}
                 placeholder="Ex: J'ai besoin d'installer un climatiseur 12000 BTU dans mon salon au 2ème étage..."
-                className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:ring-2 focus:ring-orange-200 transition-all"
+                className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-orange-200 transition-all"
                 onChange={(e) => setQuoteDetails({...quoteDetails, details: e.target.value})}
                 required
               ></textarea>
             </div>
 
-            <div className="bg-blue-50 p-4 rounded-2xl flex gap-3 items-start">
+            <div className="bg-blue-50 p-3 rounded-xl flex gap-3 items-start">
               <Info size={20} className="text-blue-500 shrink-0 mt-0.5" />
               <p className="text-xs text-blue-700">
                 Votre demande sera transmise au professionnel. Il pourra vous contacter par téléphone ou via la messagerie interne pour affiner le prix.
@@ -595,7 +653,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
 
             <button 
               type="submit"
-              className="w-full bg-[#e0692d] text-white py-4 rounded-2xl font-bold text-lg hover:shadow-xl hover:shadow-orange-200 transition-all active:scale-[0.98]"
+              className="w-full bg-[#e0692d] text-white py-3 rounded-xl font-bold text-lg hover:shadow-xl hover:shadow-orange-200 transition-all active:scale-[0.98]"
             >
               Envoyer ma demande
             </button>

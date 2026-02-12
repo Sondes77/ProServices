@@ -10,13 +10,17 @@ interface SidebarProps {
   setActiveSection: (section: string) => void;
   user: UserType;
   onViewPublicProfile: () => void;
+  children?: {
+    id: string;
+    label: string;
+  }[];
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
   activeSection, 
   setActiveSection, 
   user,
-  onViewPublicProfile
+  onViewPublicProfile,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [hovered, setHovered] = useState(false);
@@ -24,6 +28,15 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [avatarPreview, setAvatarPreview] = useState(user.avatar || defaultAvatar); // local preview
   const location = useLocation();
   const navigate = useNavigate();
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({'devis-parent': true});
+  const [mobilePopup, setMobilePopup] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -102,22 +115,40 @@ const Sidebar: React.FC<SidebarProps> = ({
       window.location.replace('/connexion');
     };
   };
-  const navigationItems = [
+  const navigationItems: NavigationItem[] = [
     { id: 'overview', label: 'Vue d\'ensemble', icon: <Home size={20} /> },
     { id: 'personal-info', label: 'Informations personnelles', icon: <User size={20} /> },
     { id: 'privacy', label: 'Confidentialité', icon: <Shield size={20} /> },
-    { id: 'security', label: 'Mot de passe & sécurité', icon: <Lock size={20} /> },
+    //{ id: 'security', label: 'Mot de passe & sécurité', icon: <Lock size={20} /> },
     { id: 'messages', label: 'Historique des messages', icon: <MessageSquare size={20} /> },
     { id: 'reviews', label: 'Avis et évaluations', icon: <Star size={20} /> },
     
   ];
 
+  const toggleMenu = (id: string) => {
+    setOpenMenus(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
   if (user.role === 'professional') {
     navigationItems.push({ id: 'services', label: 'Mes services', icon: <Briefcase size={20} /> });
-    navigationItems.push({ id: 'quotes', label: 'Gestion des devis', icon: <FileText size={20} /> });
-    //navigationItems.push({ id: 'stats', label: 'Statistiques', icon: <Shield size={20} /> });
+    //navigationItems.push({ id: 'devis', label: 'Gestion des devis', icon: <FileText size={20} /> });
+    //navigationItems.push({ id: 'mes-devis', label: 'Mes demandes de devis', icon: <FileText size={20} /> });
+     navigationItems.push({id: 'devis-parent', label: 'Devis', icon: <FileText size={20} />,
+      children: [
+        { id: 'devis', label: 'Gestion des devis' },
+        { id: 'mes-devis', label: 'Mes demandes de devis' }
+      ]
+    });
   } else if (user.role === 'user') {
-    navigationItems.push({ id: 'quotes', label: 'Mes demandes de devis', icon: <FileText size={20} /> });
+    navigationItems.push({
+    id: 'devis-parent',
+    label: 'Devis',
+    icon: <FileText size={20} />,
+    children: [
+      { id: 'mes-devis', label: 'Mes demandes de devis' }
+    ]
+  });
+    //navigationItems.push({ id: 'mes-devis', label: 'Mes demandes de devis', icon: <FileText size={20} /> });
   }
 
 
@@ -140,7 +171,15 @@ const Sidebar: React.FC<SidebarProps> = ({
       setActiveSection("messages");
     }
 
-    if (!location.pathname.startsWith("/messages/")) {
+    if (location.pathname.startsWith("/devis/")) {
+      setActiveSection("devis");
+    }
+
+    if (location.pathname.startsWith("/mes-devis")) {
+      setActiveSection("mes-devis");
+    }
+
+    if (!(location.pathname.startsWith("/messages/") || location.pathname.startsWith("/devis/"))) {
       navigate('/dashboard', { replace: true });
     }
   }, [location.pathname, navigate]);
@@ -199,27 +238,95 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Navigation */}
       <nav className="flex-1 mt-2">
         <ul className="space-y-1 items-center">
-          {navigationItems.map((item) => (
-            <li key={item.id}>
-              <button
-                className={`sm:ml-2 w-full justify-center md:justify-start flex items-center px-3 md:px-4 py-3 text-left text-sm rounded-lg transition-colors duration-200 
-                  ${
-                  activeSection === item.id
-                    ? 'text-white bg-[#e0692d]'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-                onClick={() => setActiveSection(item.id)}
-              >
-                <span className="sm:py-2 md:mr-3">{item.icon}</span>
-                <span className="hidden md:inline sm:ml-3">
-                  {item.label}
-                </span>
-              </button>
-            </li>
-          ))}
+          {navigationItems.map((item) => {
+
+            // ✅ Menu avec enfants
+            if ((item as any).children) {
+              const isOpen = openMenus[item.id];
+
+              return (
+                <li key={item.id} className="relative w-full">
+
+                  {/* Parent */}
+                  <button
+                    onClick={() => {
+                      if (window.innerWidth < 768) {
+                        setMobilePopup(item.id === mobilePopup ? null : item.id);
+                      } else {
+                        toggleMenu(item.id);
+                      }
+                    }}
+                    className="relative w-full flex items-center px-3 md:px-4 py-3 rounded-lg text-sm hover:bg-gray-100 transition"
+                  >
+                    {item.icon}
+                    <span className="hidden md:inline ml-3">
+                      {item.label}
+                    </span>
+                  </button>
+                  {mobilePopup === item.id && (
+                    <div className="absolute left-20 top-0 z-50 md:hidden">
+                      <div className="bg-white shadow-xl rounded-xl border p-2 w-56 animate-popRight">
+                        {item.children.map(child => (
+                          <button
+                            key={child.id}
+                            onClick={() => {
+                              setActiveSection(child.id);
+                              setMobilePopup(null);
+                            }}
+                            className="w-full text-left px-4 py-3 rounded-lg hover:bg-orange-50 text-sm font-medium"
+                          >
+                            {child.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}  
+                  {/* Children */}
+                  {isOpen && !isMobile &&(
+                    <ul className="ml-6 mt-1 space-y-1">
+                      {item.children.map((child: any) => (
+                        <li key={child.id}>
+                          <button
+                            onClick={() => setActiveSection(child.id)}
+                            className={`w-full flex items-center px-3 md:px-4 py-3 rounded-lg text-sm transition
+                              ${activeSection === child.id
+                                ? 'bg-[#e0692d] text-white'
+                                : 'text-gray-600 hover:bg-gray-100'
+                              }`}
+                          >
+                            {child.label}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                </li>
+              );
+            }
+
+            // ✅ Menu normal
+            return (
+              <li key={item.id}>
+                <button
+                  className={`w-full flex items-center px-3 md:px-4 py-3 rounded-lg text-sm transition
+                    ${activeSection === item.id
+                      ? 'text-white bg-[#e0692d]'
+                      : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  onClick={() => setActiveSection(item.id)}
+                >
+                  {item.icon}
+                  <span className="hidden md:inline ml-3">
+                    {item.label}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
         </ul>
       </nav>
-
+   
       {/* Logout Button */}
       <div className="p-4 border-t border-gray-200">
         <button

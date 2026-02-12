@@ -10,7 +10,8 @@ import {
   Info, 
   Clock, 
   CheckCircle2,
-  Star
+  Star,
+  CheckCircle,
 } from 'lucide-react';
 import { User } from '../utils/types';
 import { formatDistanceToNow, parseISO } from 'date-fns';
@@ -230,7 +231,13 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
     try {
       await fetch(`http://localhost:5000/api/notifications/read-all`, {
         method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` }
+        body: JSON.stringify({
+          type: "notifications"
+        }),
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
@@ -256,11 +263,11 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
   // FILTER
   // =========================
   const filteredNotifications = notifications.filter(n => {
-    if (filter === 'unread') return n.unread;
+    if (filter === 'unread' ) return n.unread;
     return true;
   });
 
-  const unreadCount = notifications.filter(n => n.unread).length;
+  const unreadCount = notifications.filter(n => n.unread && n.type !== "message_received").length;
 
   // =========================
   // HELPERS
@@ -295,8 +302,11 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
   const handleNotificationClick = async (notif) => {
     await markAsRead(notif.id);
 
-    if (notif.link) {
-      navigate(notif.link);
+    if (notif.link && String(notif.user_id) !== String(user.id)) {
+      window.location.href = notif.link;
+    }
+    else {
+      window.location.href = "/mes-devis";
     }
   };
   // =========================
@@ -370,7 +380,9 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
           <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
             <AnimatePresence mode="popLayout">
               {filteredNotifications.length > 0 ? (
-                filteredNotifications.map((notif) => (
+                filteredNotifications
+                  .filter(n => n.type !== "message_received")
+                  .map(notif => (
                   <motion.div
                     key={notif.id}
                     layout
@@ -387,9 +399,27 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
                   >
                     <div className="flex gap-4 items-start">
                       {/* Icone */}
-                      <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${getIconBg(notif.type)}`}>
-                        {getIcon(notif.type)}
-                      </div>
+                      {notif?.user2_role === "professional" ? (
+                        <div className="relative w-12 h-12">
+                          <img
+                            src={notif.photo}
+                            alt="Profile"
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+
+                          <CheckCircle size={12}
+                            className="flex absolute bottom-0 right-0
+                                      bg-[#e0692d] w-4 h-4 text-white rounded-full 
+                                      border-2 border-[#e0692d] shadow"
+                          />
+                        </div>
+                      ) : (
+                        <img
+                          src={notif.photo}
+                          alt="Profile"
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      )}
 
                       {/* Contenu */}
                       <div className="flex-1 min-w-0 pr-8">

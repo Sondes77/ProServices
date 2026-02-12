@@ -59,9 +59,9 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSave }) =
     setFormData({
         hideContactInfo: !data.show_phone,
         allowMessages: !data.show_address,
-        showServices: data.allow_share,
+        showServices: data.allow_share === 1 || data.allow_share === true,
         profileVisibility: data.statut_profil,
-        emailNotifications: data.email_notifications === 1,
+        emailNotifications: data.email_notifications === 1 || data.email_notifications === true,
         pushNotifications: false,
       });
     };
@@ -83,9 +83,26 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSave }) =
     }));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    try {
+      const payload = {
+        show_phone: !formData.hideContactInfo,
+        show_address: !formData.allowMessages,
+        allow_share: formData.showServices,
+        statut_profil: formData.profileVisibility,
+        email_notifications: formData.emailNotifications
+      };
+
+      await savePrivacySettings(token!, payload);
+
+      Swal.fire("Succès", "Paramètres mis à jour", "success");
+
+      onSave(formData);
+
+    } catch (err:any) {
+      Swal.fire("Erreur", err.message, "error");
+    }
   };
   
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,7 +146,7 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSave }) =
   };
   
   const getPrivacySettings = async (token: string) => {
-    const res = await fetch("http://localhost:5000/api/privacy", {
+    const res = await fetch(`http://localhost:5000/api/privacy`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -158,7 +175,7 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSave }) =
   };
 
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-hidden ">
 
       {/* Password Change Section */}
       <div className="bg-white rounded-lg mt-2 shadow-md overflow-hidden">
@@ -263,7 +280,7 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSave }) =
         </form>
       </div>
 
-      <div className="bg-white rounded-lg mt-3 shadow-md overflow-hidden">
+      <div className="bg-white rounded-lg mt-4 shadow-md overflow-hidden">
         <div className="bg-[#e0692d] p-4">
           <h2 className="text-xl font-semibold text-white">Paramètres de confidentialité</h2>
           <p className="text-white text-opacity-80 text-sm">Contrôlez qui peut voir vos informations</p>

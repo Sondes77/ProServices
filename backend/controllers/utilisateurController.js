@@ -475,7 +475,7 @@ exports.sendForgotPasswordlink = (req, res) => {
       secure: true,
       auth: {
         user: "contact@servicepro.tn",
-        pass: "Sondes610.P###",
+        pass: "ServicePro610.P###",
       },
     });
     
@@ -711,32 +711,24 @@ exports.verifyPhoneCode = (req, res) => {
 };
 
 // GET PRIVACY SETTINGS
-exports.getMyPrivacy = async (req, res) => {
+exports.getMyPrivacy = (req, res) => {
   try {
-    const userId = req.userId;
-
-    const [rows] = await db.query(
+    const userId = req["utilisateur"].id;
+    db.query(
       "SELECT * FROM settings WHERE user_id=?",
-      [userId]
+      [userId],
+      (err, rows) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Erreur base de données" });
+        }
+        if (!rows.length) return res.status(404).json({ message: "User non trouvé" });
+        console.log("Paramètres de confidentialité récupérés :", rows[0]);
+        res.json(rows[0]);
+      }
     );
-    if (!rows.length) return res.status(404).json({ message: "User non trouvé" });
-
-    // si pas encore créé → créer ligne par défaut
-    /*if (rows.length === 0) {
-      await db.query(
-        "INSERT INTO settings (user_id) VALUES (?)",
-        [userId]
-      );
-
-      const [created] = await db.query(
-        "SELECT * FROM settings WHERE user_id = ?",
-        [userId]
-      );
-
-      return res.json(created[0]);
-    }*/
-
-    res.json(rows[0]);
+   
+    //res.json(rows[0]);
 
   } catch (err) {
     console.error(err);
@@ -745,10 +737,10 @@ exports.getMyPrivacy = async (req, res) => {
 };
 
 // UPDATE PRIVACY SETTINGS
-exports.updateMyPrivacy = async (req, res) => {
+exports.updateMyPrivacy = (req, res) => {
   try {
-    const userId = req.userId;
-
+    const userId = req["utilisateur"].id;
+    console.log("userId pour updateMyPrivacy =", userId);
     const {
       show_phone,
       show_address,
@@ -757,7 +749,7 @@ exports.updateMyPrivacy = async (req, res) => {
       email_notifications
     } = req.body;
 
-    await db.query(`
+    db.query(`
       UPDATE settings
       SET show_phone=?,
           show_address=?,

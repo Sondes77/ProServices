@@ -156,13 +156,19 @@ export interface Advertisement {
   impressions: number;
 }
 
-export interface Quote {
+export interface Devis {
   id: string;
-  proName: string;
-  proAvatar: string;
-  serviceTitle: string;
-  status: 'pending' | 'accepted' | 'declined';
-  proposedPrice?: number;
-  proMessage?: string;
-  dateSent: string;
+  client_id: string,
+  pro_id: string,
+  objet: string;
+  description: string;
+  date_souhaitee: string;
+  date_intervention: string;
+  prix: number;
+  message_pro: string;
+  statut: "accepted" | "pending_pro" | "pending_client" | "rejected" | "cancelled" | "proposed";
+  pro_nom: string; // Jointure ,
+  pro_role: string,
+  pro_photo: string,
+  created_at: string;
 }
