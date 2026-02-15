@@ -131,7 +131,7 @@ const About = () => {
             </h2>
             <div className="space-y-6 text-lg text-slate-600">
               <p>
-                Le marché des services à domicile a longtemps souffert d'un manque de transparence. ProFinder est né de la volonté de redonner le pouvoir aux clients tout en valorisant le savoir-faire des artisans.
+                Le marché des services à domicile a longtemps souffert d'un manque de transparence. ServicePro est né de la volonté de redonner le pouvoir aux clients tout en valorisant le savoir-faire des artisans.
               </p>
               <ul className="space-y-4">
                 {['Mise en relation instantanée', 'Garantie de satisfaction', 'Tarification transparente'].map((item, i) => (

@@ -14,7 +14,9 @@ import {
   ExternalLink,
   Users,
   Lock,
-  ArrowLeft
+  ArrowLeft,
+  Briefcase,
+  Share2
 } from 'lucide-react';
 import { User, Service, Review } from '../utils/types';
 import { mapUserDataToUserModel, mapServicesDataToUserModel } from '../utils/mapper';
@@ -56,40 +58,6 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
   const [visibleCount, setVisibleCount] = useState(5);
   const visibleReviews = reviews.slice(0, visibleCount);
   const hasMore = visibleCount < reviews.length;
-
-  /*useEffect(() => {
-      if (!token){
-        localStorage.removeItem("currentUser");
-        localStorage.removeItem("token");
-
-        // Popup moderne + timer 3 sec
-        Swal.fire({
-          title: "Session expirée",
-          text: "Vous allez être redirigé vers la page de connexion.",
-          icon: "warning",
-          timer: 3000,
-          timerProgressBar: true,
-          showConfirmButton: false,
-          position: "center",
-          customClass: {
-            popup: "rounded-2xl shadow-lg", // style chic
-          }
-        });
-
-        // Attendre 3 secondes puis rediriger
-        setTimeout(() => {
-          navigate("/connexion");
-        }, 3000);
-
-        return;
-      }; 
-  }, [token, navigate]);*/
-
-  /*useEffect(() => {
-    if (!token) {
-      navigate('/connexion');
-    }
-  }, [token, navigate]);*/
 
   useEffect(() => {
     
@@ -152,15 +120,10 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
       fetchService();
     }
   }, [id]);
+
   const fetchReviews = async () => {
       
       try {  
-        /*const token = localStorage.getItem('token');
-        if (!token) {
-            console.error("Aucun token trouvé dans le localStorage");
-            return;
-        }*/
-        
         const resp = await fetch(`http://localhost:5000/api/pro-review/${id}`, {
           method: 'GET',
           headers: {
@@ -171,11 +134,12 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
 
         if (resp.ok){
           const prosData = await resp.json();
-          /*const mapped = prosData.map((element: any) =>
-            mapServicesDataToUserModel(element)
-          );*/
 
-          setReviews(prosData);
+          const sorted = [...prosData].sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+
+          setReviews(sorted);
         } else {
           alert('Erreur lors de la récupération de review');
           return;
@@ -186,8 +150,6 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
       }
     };
   useEffect(() => {
-    
-    
     
     if (id) {
       fetchReviews();
@@ -461,6 +423,25 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
     navigate(`/service/${serviceId}`);
   };
 
+  const handleShareProfile = async () => {
+    const url = window.location.href;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: user?.fullName,
+          text: "Voir ce profil professionnel",
+          url
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        alert("Lien du profil copié");
+      }
+    } catch (e) {
+      console.log("Share cancelled");
+    }
+  };
+
   useEffect(() => {
     //const token = localStorage.getItem('token');
     if (!routeParams?.id && !user2?.id) {
@@ -517,8 +498,23 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
         <div className="lg:flex-grow">
           {/* Profile Header */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-            <div className="bg-[#e0692d] p-6">
-             
+            <div className="bg-[#e0692d] p-6 relative">
+              {/* ✅ Bouton partage en haut à droite */}
+              <button
+                onClick={handleShareProfile}
+                className="
+                  absolute top-4 right-4
+                  bg-white/20 hover:bg-white/30
+                  text-white
+                  p-2 rounded-xl
+                  transition
+                  backdrop-blur-sm
+                  z-10
+                "
+                title="Partager le profil"
+              >
+                <Share2 size={18} />
+              </button>
               <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0">
                 
                 <div className="relative">
@@ -529,20 +525,28 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                   />
                   <span className="absolute bottom-1 right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></span>
                 </div>
+
                 <div className="md:ml-6 text-center md:text-left">
-                  <h1 className="text-2xl font-bold text-white">{user.fullName}</h1>
+                  <h1 className="flex items-center justify-center md:justify-start text-2xl font-bold text-white">
+                    {user.fullName}
+                  </h1>
+
                   <div className="flex items-center justify-center md:justify-start text-white opacity-90 space-x-2">
-                    <MapPin size={16} />
-                    <span>{user.city}, {user.region}</span>
+                    <MapPin className="hidden md:block" size={16} />
+                    <span>
+                      {user.show_address && (`${user.address}, `)}
+                      {user.city}, {user.region}
+                    </span>
                   </div>
+
                   <div className="flex items-center justify-center md:justify-start mt-2 space-x-4">
                     {renderStars(Math.round(parseFloat(calculateAverageRating())))}
                     <span className="text-white opacity-90">({reviews.length} avis)</span>
                   </div>
                 </div>
+
               </div>
             </div>
-
             <div className="p-6">
               {!userMe && (
                 <div className="flex flex-col sm:flex-row gap-4 max-w-md">
@@ -574,20 +578,35 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                   </button>
                 </div>
               )}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+              <div className="grid grid-cols-3 gap-3 md:gap-6 mt-8">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#e0692d]">{user.stats.servicesPublished}</div>
-                  <div className="text-gray-600">Services proposés</div>
+                  <div className="text-xl md:text-2xl font-bold text-[#e0692d]">
+                    {user.stats.servicesPublished}
+                  </div>
+                  <div className="text-xs md:text-sm text-gray-600">
+                    Services proposés
+                  </div>
                 </div>
+
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#e0692d]">{calculateAverageRating()}/5</div>
-                  <div className="text-gray-600">Note moyenne</div>
+                  <div className="text-xl md:text-2xl font-bold text-[#e0692d]">
+                    {calculateAverageRating()}/5
+                  </div>
+                  <div className="text-xs md:text-sm text-gray-600">
+                    Note moyenne
+                  </div>
                 </div>
+
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-[#e0692d]">{reviews.length}</div>
-                  <div className="text-gray-600">Avis clients</div>
+                  <div className="text-xl md:text-2xl font-bold text-[#e0692d]">
+                    {reviews.length}
+                  </div>
+                  <div className="text-xs md:text-sm text-gray-600">
+                    Avis clients
+                  </div>
                 </div>
               </div>
+
               <div className="mt-6 border-t pt-6">
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">À propos</h2>
                 <p className="text-gray-600">{user.apropos}</p>
@@ -607,8 +626,14 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                     onClick={() => handleServiceClick(service.id)}
                   >
                     {/* Badge de disponibilité discret */}
-                    <div className="flex justify-end items-start mb-4">
-                      
+                    <div className="flex justify-between items-start mb-4">
+                      {/* Catégorie à gauche */}
+                      {service.category && (
+                        <span className="inline-flex items-center gap-1 bg-orange-50 text-[#e0692d] text-xs font-bold px-2 py-1 rounded-full">
+                          <Tag size={12} />
+                          {service.category}
+                        </span>
+                      )}
                       <div className="text-gray-300 group-hover:text-[#e0692d] transition-colors">
                         <ExternalLink size={18} />
                       </div>
@@ -632,8 +657,8 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                     {/* Footer de la carte : Catégorie & Prix */}
                     <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-50">
                       <div className="flex items-center text-gray-400 bg-gray-50 px-3 py-1.5 rounded-xl">
-                        <Tag size={14} className="mr-2 text-[#e0692d]" />
-                        <span className="text-xs font-semibold">{service.category}</span>
+                        <Briefcase  size={14} className="mr-2 text-[#e0692d]" />
+                        <span className="text-xs font-semibold">{service.metier}</span>
                       </div>
 
                       {service.price && (
@@ -691,7 +716,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                         />
                         <div className="ml-4">
                           <div className="flex items-center">
-                            <h4 className="font-medium text-gray-900">{review.author_nom}</h4>
+                            <h4 className="font-medium text-gray-900 font-semibold cursor-pointer hover:text-[#e0692d]" onClick={() => navigate(`/professional/${review.author_id}`)}>{review.author_nom}</h4>
                             <span className="mx-2 text-gray-300">•</span>
                             <span className="text-sm text-gray-500">{formatDate(review.created_at)}</span>
                           </div>
@@ -852,7 +877,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
               <div className="mt-6 flex justify-end space-x-3">
                 <button
                   type="button"
-                  onClick={() => setShowMessageModal(false)}
+                  onClick={() => {setShowMessageModal(false); setMessage('');}}
                   className="thq-button-outline"
                 >
                   Annuler
@@ -909,7 +934,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
               <div className="mt-6 flex justify-end space-x-3">
                 <button
                   type="button"
-                  onClick={() => setShowReviewModal(false)}
+                  onClick={() => {setShowReviewModal(false); setRating(0); setReviewComment('');}}
                   className="thq-button-outline"
                 >
                   Annuler

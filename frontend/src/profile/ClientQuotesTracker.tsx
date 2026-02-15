@@ -8,12 +8,13 @@ import Swal from 'sweetalert2';
 import { Devis } from '../utils/types';
 import { mapDevisDataToUserModel } from '../utils/mapper';
 import { useNavigate } from 'react-router-dom';
+import CustomSelect from './CustomSelect';
 
 const ClientQuotesDashboard = () => {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 10;
 
   const [selectedQuote, setSelectedQuote] = useState<Devis | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -55,36 +56,24 @@ const ClientQuotesDashboard = () => {
     return `${day}-${month}-${year}`;
   };
 
-  // Filtres
-  /*const filteredData = useMemo(() => {
-    return devis?.filter(d => {
-      const matchesSearch = d.objet.toLowerCase().includes(search.toLowerCase());
-      const matchesFilter = filter === 'all' || d.statut === filter;
-      return matchesSearch && matchesFilter;
-    });
-  }, [search, filter, devis]);*/
-
   const filteredData = useMemo(() => {
     if (!devis) return [];
 
     switch (filter) {
       case 'pending':
-        return devis.filter(d =>
-          d.statut === 'pending_pro' || d.statut === 'pending_client'
-        );
+        return devis.filter(d => d.statut === 'pending_pro');
 
       case 'proposed':
         return devis.filter(d => d.statut === 'proposed');
 
       case 'accepted':
-        return devis.filter(d =>
-          d.statut === 'accepted'
-        );
+        return devis.filter(d => d.statut === 'accepted');
 
       case 'declined':
-        return devis.filter(d =>
-          d.statut === 'rejected' || d.statut === 'cancelled'
-        );
+        return devis.filter(d => d.statut === 'rejected');
+      
+      case 'cancelled':
+        return devis.filter(d => d.statut === 'cancelled');
 
       default:
         return devis;
@@ -98,6 +87,7 @@ const ClientQuotesDashboard = () => {
       proposed: 0,
       accepted: 0,
       declined: 0,
+      cancelled: 0,
     };
 
     if (!devis) return counts;
@@ -105,7 +95,7 @@ const ClientQuotesDashboard = () => {
     for (const d of devis) {
       counts.all++;
 
-      if (d.statut === 'pending_pro' || d.statut === 'pending_client') {
+      if (d.statut === 'pending_pro') {
         counts.pending++;
       }
 
@@ -117,11 +107,14 @@ const ClientQuotesDashboard = () => {
         counts.accepted++;
       }
 
-      if (d.statut === 'rejected' || d.statut === 'cancelled') {
+      if (d.statut === 'rejected') {
         counts.declined++;
       }
-    }
 
+      if (d.statut === 'cancelled') {
+        counts.cancelled++;
+      }
+    }
     return counts;
   }, [devis]);
   
@@ -165,7 +158,7 @@ const ClientQuotesDashboard = () => {
       proposed: "Proposé",
       accepted: "Vous avez accepté la proposition du professionnel.",
       rejected: "Vous avez refusé la proposition du professionnel.",
-      cancelled: "Annulé"
+      cancelled: "Le professionnel a annulé votre demande"
     };
     return map[statut] || statut;
   };
@@ -224,7 +217,15 @@ const ClientQuotesDashboard = () => {
       alert('Erreur de connexion au serveur');
     }
   };
-
+  const statusOptions = [
+    { value: 'all', label: `Tous (${countByStatus.all})` },
+    { value: 'pending', label: `En attente (${countByStatus.pending})` },
+    { value: 'proposed', label: `Proposés (${countByStatus.proposed})` },
+    { value: 'accepted', label: `Acceptés (${countByStatus.accepted})` },
+    { value: 'declined', label: `Refusés (${countByStatus.declined})` },
+    { value: 'cancelled', label: `Annulés (${countByStatus.cancelled})` }
+  ];
+  
   return  (
     <div className="min-h-screen bg-[#F8F9FB] p-4 md:p-10">
       <div className="max-w-7xl mx-auto flex flex-col gap-6">
@@ -233,17 +234,40 @@ const ClientQuotesDashboard = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <h1 className="text-3xl font-[1000] text-slate-900 tracking-tight italic">Suivi de mes devis</h1>
           
-          <div className="flex flex-wrap bg-white p-1 rounded-2xl shadow-sm border border-slate-100 gap-2">
-            {['all', 'pending', 'accepted', 'declined'].map((s) => (
-              <button
-                key={s}
-                onClick={() => setFilter(s)}
-                className={`px-4 py-2 rounded-xl text-xs font-black uppercase transition-all ${filter === s ? 'bg-slate-900 text-white' : 'text-slate-400'}`}
-              >
-                {s === 'all' ? `Tous (${countByStatus.all})` : s==='pending' ? `En attente (${countByStatus.pending})` : s === 'accepted' ? `Acceptés (${countByStatus.accepted})` : `Refusés (${countByStatus.declined})`}
-              </button>
-            ))}
-          </div>
+          <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+
+  {/* 📱 MOBILE → Select */}
+  <div className="md:hidden">
+    <CustomSelect
+      value={filter}
+      onChange={(val: string) => setFilter(val)}
+      options={statusOptions}
+      placeholder="Filtrer par statut"
+      className="w-full"
+    />
+  </div>
+
+  {/* 💻 DESKTOP → Boutons */}
+  <div className="hidden md:flex md:flex-wrap gap-2">
+    {statusOptions.map((opt) => (
+      <button
+        key={opt.value}
+        onClick={() => setFilter(opt.value)}
+        className={`
+          px-4 py-2 rounded-xl text-xs font-black uppercase transition-all
+          ${
+            filter === opt.value
+              ? 'bg-slate-900 text-white'
+              : 'text-slate-400 hover:bg-slate-50'
+          }
+        `}
+      >
+        {opt.label}
+      </button>
+    ))}
+  </div>
+
+</div>
         </div>
 
         {/* Table pour desktop */}
@@ -260,7 +284,14 @@ const ClientQuotesDashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {currentData.map(d => (
+              {currentData.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-10 text-center text-slate-400 font-semibold">
+                    Aucun devis trouvé
+                  </td>
+                </tr>
+              ) : (
+                currentData.map(d => (
                 <tr key={d.id} className="hover:bg-orange-50/80 transition-colors">
                   <td className="px-4 py-3">
                     <p className="font-bold text-slate-900">{d.objet}</p>
@@ -294,7 +325,7 @@ const ClientQuotesDashboard = () => {
                     </button>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>
@@ -433,8 +464,8 @@ const ClientQuotesDashboard = () => {
               ) : (
                 <>
                   <div className={`p-6 mt-3 rounded-3xl border ${getStatutBoxClasses(selectedQuote.statut)}`}>
-                    <p className="text-[10px] font-black uppercase mb-2 tracking-widest opacity-70">Votre réponse</p>
-                    <p className="text-[11px]">
+                    {/*<p className="text-[10px] font-black uppercase mb-2 tracking-widest opacity-70">Votre réponse</p>*/}
+                    <p className="text-xs">
                       {getStatutResponse(selectedQuote.statut)}
                     </p>
                   </div>

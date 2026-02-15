@@ -57,11 +57,11 @@ const Footer = () => {
                   Contact
                 </Link>
               </li>
-              <li>
+              {/*<li>
                 <Link to="/advertisement-request" className="text-gray-400 hover:text-[#e0692d]">
                   Publicité
                 </Link>
-              </li>
+              </li>*/}
               <li>
                 <Link to="/blog" className="text-gray-400 hover:text-[#e0692d]">
                   Blog
@@ -80,18 +80,13 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/legal" className="text-gray-400 hover:text-[#e0692d]">
+                <Link to="/mentions-legales" className="text-gray-400 hover:text-[#e0692d]">
                   Mentions légales
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-gray-400 hover:text-[#e0692d]">
+                <Link to="/politique-confidentialite" className="text-gray-400 hover:text-[#e0692d]">
                   Politique de confidentialité
-                </Link>
-              </li>
-              <li>
-                <Link to="/cookies" className="text-gray-400 hover:text-[#e0692d]">
-                  Gestion des cookies
                 </Link>
               </li>
             </ul>

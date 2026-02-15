@@ -17,7 +17,7 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSave }) =
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+  const userRole = JSON.parse(localStorage.getItem("currentUser") || "null")?.role;
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
     newPassword: '',
@@ -280,157 +280,159 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSave }) =
         </form>
       </div>
 
-      <div className="bg-white rounded-lg mt-4 shadow-md overflow-hidden">
-        <div className="bg-[#e0692d] p-4">
-          <h2 className="text-xl font-semibold text-white">Paramètres de confidentialité</h2>
-          <p className="text-white text-opacity-80 text-sm">Contrôlez qui peut voir vos informations</p>
-        </div>
-        
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="space-y-6">
-            {/* Privacy Toggles */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Visibilité des informations</h3>
-              
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                <div className="flex items-center">
-                  {formData.hideContactInfo ? <EyeOff size={20} className="text-gray-500 mr-3" /> : <Eye size={20} className="text-[#e0692d] mr-3" />}
-                  <div>
-                    <p className="font-medium text-gray-800">Masquer mon numéro de téléphone</p>
-                    <p className="text-sm text-gray-500">Votre numéro de téléphone ne sera pas visible par les autres utilisateurs</p>
-                  </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="sr-only peer" 
-                    checked={formData.hideContactInfo} 
-                    onChange={() => handleToggle('hideContactInfo')}
-                  />
-                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#e0692d] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e0692d]"></div>
-                </label>
-              </div>
-              
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                <div className="flex items-center">
-                  {formData.allowMessages ? <EyeOff size={20} className="text-gray-500 mr-3" /> : <Eye size={20} className="text-[#e0692d] mr-3" />}
-                  <div>
-                    <p className="font-medium text-gray-800">Masquer mon adresse complete </p>
-                    <p className="mt-2 text-sm text-gray-500">
-                      {formData.allowMessages 
-                        ? "Seulement la ville et la région seront visibles sur votre profil"
-                        : "Votre adresse complète sera visible sur votre profil"}
-                    </p>
-                  </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="sr-only peer" 
-                    checked={formData.allowMessages} 
-                    onChange={() => handleToggle('allowMessages')}
-                  />
-                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#e0692d] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e0692d]"></div>
-                </label>
-              </div>
-              
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                <div className="flex items-center">
-                  {formData.showServices ? <Share2  size={20} className="text-[#e0692d] mr-3" /> : <Share2 size={20} className="text-gray-500 mr-3" />}
-                  <div>
-                    <p className="font-medium text-gray-800">Autoriser le partage du profil et des services</p>
-                    <p className="text-sm text-gray-500">Contrôlez si votre profil et vos services peuvent être partagés par d’autres</p>
-                  </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="sr-only peer" 
-                    checked={formData.showServices} 
-                    onChange={() => handleToggle('showServices')}
-                  />
-                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#e0692d] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e0692d]"></div>
-                </label>
-              </div>
-            </div>
-            
-            {/* Profile Visibility */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Visibilité du profil</h3>
-              
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <label className="block mb-2 text-sm font-medium text-gray-700">Qui peut voir mon profil ?</label>
-                <select 
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e0692d] focus:border-transparent"
-                  value={formData.profileVisibility}
-                  onChange={handleSelectChange}
-                >
-                  <option value="public">Public - Visible par tous</option>
-                  <option value="private">Privé - Seulement les utilisateurs connectés</option>
-                </select>
-                <p className="mt-2 text-sm text-gray-500">
-                  {formData.profileVisibility === 'public' 
-                    ? "Votre profil est visible par tous les visiteurs, même non connectés."
-                    : "Votre profil est visible uniquement par les utilisateurs connectés à ServicePro."}
-                </p>
-              </div>
-            </div>
-            
-            {/* Notifications */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Notifications</h3>
-              
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                <div className="flex items-center">
-                  {formData.emailNotifications ? <Bell size={20} className="text-[#e0692d] mr-3" /> : <BellOff size={20} className="text-gray-500 mr-3" />}
-                  <div>
-                    <p className="font-medium text-gray-800">Notifications par email</p>
-                    <p className="text-sm text-gray-500">Recevoir des emails pour les messages et interactions</p>
-                  </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="sr-only peer" 
-                    checked={formData.emailNotifications} 
-                    onChange={() => handleToggle('emailNotifications')}
-                  />
-                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#e0692d] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e0692d]"></div>
-                </label>
-              </div>
-              
-              {/*<div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
-                <div className="flex items-center">
-                  {formData.pushNotifications ? <Bell size={20} className="text-[#e0692d] mr-3" /> : <BellOff size={20} className="text-gray-500 mr-3" />}
-                  <div>
-                    <p className="font-medium text-gray-800">Notifications push</p>
-                    <p className="text-sm text-gray-500">Recevoir des notifications sur votre appareil</p>
-                  </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="sr-only peer" 
-                    checked={formData.pushNotifications} 
-                    onChange={() => handleToggle('pushNotifications')}
-                  />
-                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#e0692d] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e0692d]"></div>
-                </label>
-              </div>*/}
-            </div>
+      {userRole === "professional" && (
+        <div className="bg-white rounded-lg mt-4 shadow-md overflow-hidden">
+          <div className="bg-[#e0692d] p-4">
+            <h2 className="text-xl font-semibold text-white">Paramètres de confidentialité</h2>
+            <p className="text-white text-opacity-80 text-sm">Contrôlez qui peut voir vos informations</p>
           </div>
           
-          <div className="mt-8">
-            <button
-              type="submit"
-              className="thq-button-filled flex items-center justify-center w-full md:w-auto md:ml-auto"
-            >
-              <Save size={16} />
-              <span>Sauvegarder</span>
-            </button>
-          </div>
-        </form>
-      </div>
+          <form onSubmit={handleSubmit} className="p-6">
+            <div className="space-y-6">
+              {/* Privacy Toggles */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Visibilité des informations</h3>
+                
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                  <div className="flex items-center">
+                    {formData.hideContactInfo ? <EyeOff size={20} className="text-gray-500 mr-3" /> : <Eye size={20} className="text-[#e0692d] mr-3" />}
+                    <div>
+                      <p className="font-medium text-gray-800">Masquer mon numéro de téléphone</p>
+                      <p className="text-sm text-gray-500">Votre numéro de téléphone ne sera pas visible par les autres utilisateurs</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer" 
+                      checked={formData.hideContactInfo} 
+                      onChange={() => handleToggle('hideContactInfo')}
+                    />
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#e0692d] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e0692d]"></div>
+                  </label>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                  <div className="flex items-center">
+                    {formData.allowMessages ? <EyeOff size={20} className="text-gray-500 mr-3" /> : <Eye size={20} className="text-[#e0692d] mr-3" />}
+                    <div>
+                      <p className="font-medium text-gray-800">Masquer mon adresse complete </p>
+                      <p className="mt-2 text-sm text-gray-500">
+                        {formData.allowMessages 
+                          ? "Seulement la ville et la région seront visibles sur votre profil"
+                          : "Votre adresse complète sera visible sur votre profil"}
+                      </p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer" 
+                      checked={formData.allowMessages} 
+                      onChange={() => handleToggle('allowMessages')}
+                    />
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#e0692d] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e0692d]"></div>
+                  </label>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                  <div className="flex items-center">
+                    {formData.showServices ? <Share2  size={20} className="text-[#e0692d] mr-3" /> : <Share2 size={20} className="text-gray-500 mr-3" />}
+                    <div>
+                      <p className="font-medium text-gray-800">Autoriser le partage du profil et des services</p>
+                      <p className="text-sm text-gray-500">Contrôlez si votre profil et vos services peuvent être partagés par d’autres</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer" 
+                      checked={formData.showServices} 
+                      onChange={() => handleToggle('showServices')}
+                    />
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#e0692d] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e0692d]"></div>
+                  </label>
+                </div>
+              </div>
+              
+              {/* Profile Visibility */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Visibilité du profil</h3>
+                
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <label className="block mb-2 text-sm font-medium text-gray-700">Qui peut voir mon profil ?</label>
+                  <select 
+                    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#e0692d] focus:border-transparent"
+                    value={formData.profileVisibility}
+                    onChange={handleSelectChange}
+                  >
+                    <option value="public">Public - Visible par tous</option>
+                    <option value="private">Privé - Seulement les utilisateurs connectés</option>
+                  </select>
+                  <p className="mt-2 text-sm text-gray-500">
+                    {formData.profileVisibility === 'public' 
+                      ? "Votre profil est visible par tous les visiteurs, même non connectés."
+                      : "Votre profil est visible uniquement par les utilisateurs connectés à ServicePro."}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Notifications */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Notifications</h3>
+                
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                  <div className="flex items-center">
+                    {formData.emailNotifications ? <Bell size={20} className="text-[#e0692d] mr-3" /> : <BellOff size={20} className="text-gray-500 mr-3" />}
+                    <div>
+                      <p className="font-medium text-gray-800">Notifications par email</p>
+                      <p className="text-sm text-gray-500">Recevoir des emails pour les messages et interactions</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer" 
+                      checked={formData.emailNotifications} 
+                      onChange={() => handleToggle('emailNotifications')}
+                    />
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#e0692d] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e0692d]"></div>
+                  </label>
+                </div>
+                
+                {/*<div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                  <div className="flex items-center">
+                    {formData.pushNotifications ? <Bell size={20} className="text-[#e0692d] mr-3" /> : <BellOff size={20} className="text-gray-500 mr-3" />}
+                    <div>
+                      <p className="font-medium text-gray-800">Notifications push</p>
+                      <p className="text-sm text-gray-500">Recevoir des notifications sur votre appareil</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer" 
+                      checked={formData.pushNotifications} 
+                      onChange={() => handleToggle('pushNotifications')}
+                    />
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#e0692d] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#e0692d]"></div>
+                  </label>
+                </div>*/}
+              </div>
+            </div>
+            
+            <div className="mt-8">
+              <button
+                type="submit"
+                className="thq-button-filled flex items-center justify-center w-full md:w-auto md:ml-auto"
+              >
+                <Save size={16} />
+                <span>Sauvegarder</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

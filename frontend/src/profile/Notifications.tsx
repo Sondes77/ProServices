@@ -19,130 +19,6 @@ import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import Swal from "sweetalert2";
 
-// Données simulées (Mock Data)
-/*const INITIAL_NOTIFICATIONS = [
-  {
-    id: 1,
-    type: 'security',
-    title: 'Connexion détectée',
-    message: 'Une nouvelle connexion depuis Paris a été détectée sur votre compte.',
-    time: 'Il y a 2 min',
-    unread: true,
-  },
-  {
-    id: 2,
-    type: 'success',
-    title: 'Mot de passe mis à jour',
-    message: 'Votre mot de passe a été modifié avec succès.',
-    time: 'Il y a 10 min',
-    unread: true,
-  },
-  {
-    id: 3,
-    type: 'message',
-    title: 'Nouveau message',
-    message: 'Sarah M. a répondu à votre demande de devis.',
-    time: 'Il y a 1 heure',
-    unread: false,
-  },
-  {
-    id: 4,
-    type: 'info',
-    title: 'Mise à jour système',
-    message: 'La plateforme sera en maintenance ce soir à 23h00.',
-    time: 'Il y a 3 heures',
-    unread: false,
-  },
-  {
-    id: 5,
-    type: 'message',
-    title: 'Bienvenue !',
-    message: 'Merci d\'avoir rejoint notre communauté de professionnels.',
-    time: 'Hier',
-    unread: false,
-  },
-  {
-    id: 6,
-    type: 'message',
-    title: 'Bienvenue !',
-    message: 'Merci d\'avoir rejoint notre communauté de professionnels.',
-    time: 'Hier',
-    unread: false,
-  },
-  {
-    id: 7,
-    type: 'message',
-    title: 'Bienvenue !',
-    message: 'Merci d\'avoir rejoint notre communauté de professionnels.',
-    time: 'Hier',
-    unread: false,
-  },
-  {
-    id: 8,
-    type: 'message',
-    title: 'Bienvenue !',
-    message: 'Merci d\'avoir rejoint notre communauté de professionnels.',
-    time: 'Hier',
-    unread: false,
-  },
-  {
-    id: 9,
-    type: 'message',
-    title: 'Bienvenue !',
-    message: 'Merci d\'avoir rejoint notre communauté de professionnels.',
-    time: 'Hier',
-    unread: false,
-  },
-  {
-    id: 10,
-    type: 'message',
-    title: 'Bienvenue !',
-    message: 'Merci d\'avoir rejoint notre communauté de professionnels.',
-    time: 'Hier',
-    unread: false,
-  },
-  {
-    id: 11,
-    type: 'message',
-    title: 'Bienvenue !',
-    message: 'Merci d\'avoir rejoint notre communauté de professionnels.',
-    time: 'Hier',
-    unread: false,
-  },
-  {
-    id: 12,
-    type: 'message',
-    title: 'Bienvenue !',
-    message: 'Merci d\'avoir rejoint notre communauté de professionnels.',
-    time: 'Hier',
-    unread: false,
-  },
-  {
-    id: 13,
-    type: 'message',
-    title: 'Bienvenue !',
-    message: 'Merci d\'avoir rejoint notre communauté de professionnels.',
-    time: 'Hier',
-    unread: false,
-  },
-  {
-    id: 14,
-    type: 'message',
-    title: 'Bienvenue !',
-    message: 'Merci d\'avoir rejoint notre communauté de professionnels.',
-    time: 'Hier',
-    unread: false,
-  },
-  {
-    id: 15,
-    type: 'message',
-    title: 'Bienvenue !',
-    message: 'Merci d\'avoir rejoint notre communauté de professionnels.',
-    time: 'Hier',
-    unread: false,
-  },
-];*/
-
 interface NotificationsProps {
   user: User;
 }
@@ -302,10 +178,10 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
   const handleNotificationClick = async (notif) => {
     await markAsRead(notif.id);
 
-    if (notif.link && String(notif.user_id) !== String(user.id)) {
-      window.location.href = notif.link;
+    if (notif.link.startsWith("devis/") && String(notif.user_id) === String(user.id)) {
+      navigate(notif.link);
     }
-    else {
+    else if (notif.link.startsWith("devis/") && String(notif.user_id) !== String(user.id)) {
       window.location.href = "/mes-devis";
     }
   };

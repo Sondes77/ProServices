@@ -270,7 +270,7 @@ const FirstService: React.FC<FirstServiceProps> = ({  user, service, onSubmit, o
   if (isCheckingAuth) return null;
   return (
     
-    <div className="w-full max-w-2xl mx-4 bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="w-full max-w-2xl mx-4 bg-white rounded-lg shadow-md overflow-hidden my-6">
     <>
       {location.pathname === '/service' && (
         <div className="bg-white shadow-md overflow-hidden">

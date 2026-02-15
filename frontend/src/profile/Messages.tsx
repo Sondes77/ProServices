@@ -58,14 +58,13 @@ useEffect(() => {
   if (!conversationId) return;
   if (conversations.length === 0) return;
 
-  const conv = conversations.find(c => String(c.id) === String(conversationId));
-  
-  if (conv && isopen === false) {
+  const conv = conversations.find(
+    c => String(c.id) === String(conversationId)
+  );
+
+  // ouvre seulement si différente de celle déjà ouverte
+  if (conv && selectedConversation?.id !== conv.id) {
     openConversation(conv);
-    setIsOpen(true);
-  }
-  else {
-    setIsOpen(false);
   }
 
 }, [conversationId, conversations]);
@@ -134,7 +133,6 @@ useEffect(() => {
     setReadyToShow(false);
     setSelectedConversation(conversation);
     setLoadingMessages(true);
-
     try {
       const res = await fetch(`http://localhost:5000/api/messages/${conversation.id}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -148,7 +146,6 @@ useEffect(() => {
       setLoadingMessages(false);
     }
   };
-
 
   // --- Envoyer un message ---
   const handleSendMessage = async (e: React.FormEvent) => {

@@ -43,7 +43,7 @@ exports.receiveExactLocation = (req, res) => {
 
 // Créer un utilisateur via le formulaire d'inscription
 exports.creerUtilisateur = async (req, res) => {
-    const { nom, prenom, email, tel, password, role} = req.body;
+    const { nom, prenom, email, tel, category, password, role} = req.body;
     //let role = req.body.role; // Récupérer le rôle depuis le corps de la requête
     const date_creation = new Date(); // Date actuelle
     const hashedPassword = await bcrypt.hash(password, 10); // 🔐
@@ -52,40 +52,50 @@ exports.creerUtilisateur = async (req, res) => {
     const photo = "http://localhost:5000/uploads/ServicePro_Avatar.png"; // Avatar par défaut
     console.log("je suis role dans exports.creerUtilisateur = ", role);
 
-    db.query(
-      'INSERT INTO utilisateurs (nom, prenom, email, role, phone, source, mot_de_passe, date_creation, photo, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [nom, prenom, email, role, tel, source, hashedPassword, date_creation, photo, email_verified],
-      (err, result) => {
-        if (err) {
-          console.error('Erreur lors de la création de l\'utilisateur:', err);
-          return res.status(500).send('Erreur serveur');
+    try{
+        db.query(
+        'INSERT INTO utilisateurs (nom, prenom, email, role, phone, source, category, mot_de_passe, date_creation, photo, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [nom, prenom, email, role, tel, source, category, hashedPassword, date_creation, photo, email_verified],
+        (err, result) => {
+          if (err) {
+            console.error('Erreur lors de la création de l\'utilisateur:', err);
+            return res.status(500).send('Erreur serveur');
+          }
+          if (role === 'professional') {
+            db.query('Insert into settings set user_id = ?', [result.insertId], (err2, rows) => {
+              if (err2) {
+                console.error('Erreur lors de la création des paramètres:', err2);
+                return res.status(500).send('Erreur serveur');
+              }
+            });
+          }
+            const token = jwt.sign(
+              { id: result.insertId, email },
+              process.env.JWT_SECRET,
+              { expiresIn: '1h' }
+            );
+           
+            return res.status(201).json({
+              message: "Utilisateur créé avec succès",
+              token,
+              id: result.insertId
+            });
+            
         }
-        if (role === 'professional') {
-          db.query('Insert into settings set user_id = ?', [result.insertId], (err2, rows) => {
-            if (err2) {
-              console.error('Erreur lors de la création des paramètres:', err2);
-              return res.status(500).send('Erreur serveur');
-            }
-          });
-        }
-          const token = jwt.sign(
-            { id: result.insertId, email },
-            process.env.JWT_SECRET,
-            { expiresIn: '1h' }
-          );
-          /*const refreshToken = jwt.sign({ id: user.id, email }, process.env.REFRESH_SECRET, { expiresIn: '1h' });
-
-          // Cookie httpOnly pour le refresh
-          res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 3600 * 1000 });*/
-
-          // ✅ Une seule réponse
-          res.status(201).json({
-            message: 'Utilisateur créé avec succès',
-            token,
-            id: result.insertId
-          });
-       }
-    );
+      );
+    } catch (err) {
+      console.log(err.code);
+      // ✅ email déjà utilisé
+      if (err.code === "ER_DUP_ENTRY") {
+        return res.status(409).json({
+          message: "Cet email est déjà utilisé"
+        });
+      }
+      else { // ✅ autre erreur serveur
+      return res.status(500).json({
+        message: "Erreur lors de l'inscription"
+      });}
+    }
 };
 
 // mettre à jour un utilisateur
@@ -231,7 +241,7 @@ exports.getUtilisateurParamId = (req, res) => {
 
   //const decoded = jwt.verify(token, process.env.JWT_SECRET);
   //console.log(id);
-  db.query('SELECT u.*, COUNT(DISTINCT s.id) AS nb_services, COUNT(DISTINCT r.id) AS nb_reviews, COUNT(DISTINCT c.id) AS nb_conversations FROM utilisateurs u LEFT JOIN services s ON s.professionnel_id = u.id and s.statut = ? LEFT JOIN reviews r ON r.recipient_id = u.id LEFT JOIN conversations c ON c.user1_id = u.id or c.user2_id = u.id WHERE u.id = ?', ['active', id], (err, result) => {
+  db.query('SELECT u.*, se.*, COUNT(DISTINCT s.id) AS nb_services, COUNT(DISTINCT r.id) AS nb_reviews, COUNT(DISTINCT c.id) AS nb_conversations FROM utilisateurs u LEFT JOIN services s ON s.professionnel_id = u.id and s.statut = ? LEFT JOIN reviews r ON r.recipient_id = u.id LEFT JOIN conversations c ON c.user1_id = u.id or c.user2_id = u.id left join settings se on se.user_id = u.id WHERE u.id = ?', ['active', id], (err, result) => {
     if (err) {
       console.error('Erreur lors de la récupération des services:', err);
       return res.status(500).send('Erreur serveur');
@@ -774,4 +784,151 @@ exports.updateMyPrivacy = (req, res) => {
   }
 };
 
+exports.contact = (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+      
+     const transporter = nodemailer.createTransport({
+      //host: "ssl0.ovh.net",
+      host: "smtp.mail.ovh.net",
+      port: 465,
+      secure: true,
+      auth: {
+        user: "contact@servicepro.tn",
+        pass: "ServicePro610.P###",
+      },
+    });
+    
+    console.log(transporter.verify());
+    transporter.verify((error, success) => {
+      if (error) {
+        console.log("❌ Erreur SMTP :", error);
+      } else {
+        console.log("✅ SMTP prêt à envoyer");
+      }
+    });
+
+    transporter.sendMail({
+      from: `"SERVICEPRO" <contact@servicepro.tn>`,
+      to: "contact@servicepro.tn",
+      replyTo: email,
+      subject: `[Contact Site] ${subject}`,
+     //text: `Votre code de vérification est : ${code}`,
+      html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+          <meta charset="UTF-8">
+          <title>Nouveau message contact</title>
+          </head>
+          <body style="margin:0;font-family:Arial,sans-serif;background:#f5f5f5;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td align="center">
+                  <table width="600" style="background:#ffffff;border-radius:12px;overflow:hidden;">
+                    
+                    <!-- Header -->
+                    <tr>
+                      <td style="background:#e0692d;padding:24px;color:white;text-align:center;">
+                        <h2>Nouveau message — Formulaire Contact</h2>
+                      </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                      <td style="padding:30px;">
+                        <p><b>Nom :</b> ${name}</p>
+                        <p><b>Email :</b> ${email}</p>
+                        <p><b>Sujet :</b> ${subject}</p>
+
+                        <div style="margin-top:20px;padding:20px;background:#fafafa;border-radius:8px;">
+                          ${message}
+                        </div>
+                      </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                      <td style="background:#f0f0f0;padding:20px;text-align:center;font-size:12px;color:#777;">
+                        Message envoyé depuis le site web
+                      </td>
+                    </tr>
+
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </body>
+          </html>`,
+    });
+    transporter.sendMail({
+      from: `"SERVICEPRO" <contact@servicepro.tn>`,
+      to: email,
+      subject: `Accusé de reception`,
+     //text: `Votre code de vérification est : ${code}`,
+      html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+          <meta charset="UTF-8">
+          </head>
+          <body style="margin:0;font-family:Arial;background:#f6f7f9;">
+            <table width="100%">
+              <tr>
+                <td align="center">
+                  <table width="600" style="background:white;border-radius:12px;">
+                    
+                    <tr>
+                      <td style="background:#e0692d;color:white;padding:28px;text-align:center;">
+                        <h2>Message bien reçu</h2>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td style="padding:30px;">
+                        <p>Bonjour ${name},</p>
+
+                        <p>Nous avons bien reçu votre message.</p>
+                        <p>Notre équipe vous répondra rapidement.</p>
+
+                        <table width="100%" style="margin-top:20px;background:#fafafa;padding:16px;border-radius:8px;">
+                          <tr><td><b>Sujet :</b> ${subject}</td></tr>
+                          <tr><td>${message}</td></tr>
+                        </table>
+
+                        <div style="margin-top:30px;text-align:center;">
+                          <a href="{{site_url}}" style="
+                            background:#e0692d;
+                            color:white;
+                            padding:14px 22px;
+                            border-radius:8px;
+                            text-decoration:none;
+                            display:inline-block;
+                          ">
+                            Retour au site
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td style="text-align:center;padding:20px;font-size:12px;color:#999;">
+                        Merci pour votre confiance
+                      </td>
+                    </tr>
+
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </body>
+          </html>`
+    });
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Erreur envoi email" });
+  }
+};
 

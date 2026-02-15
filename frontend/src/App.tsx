@@ -45,6 +45,10 @@ import UserProfile from './profile/UserProfile';
 import SearchProfessionals from './profile/SearchProfessionals';
 import AdminDashboard from './admin/AdminDashboard';
 import Home from './pages/Home';
+import Home1 from './pages/Home1';
+import Home2 from './pages/Home2';
+import Home3 from './pages/Home3';
+import Home4 from './pages/Home4';
 import About from './profile/About';
 import ServicesPage from './profile/Service';
 import Pricing from './profile/Pricing';
@@ -65,6 +69,10 @@ import Statistics from './profile/Statistics';
 import ForgotPassword from './profile/ForgotPassword';
 import ProQuote from './profile/ProQuotesManager';
 import UserQuote from './profile/ClientQuotesTracker';
+import Cgu from './profile/CGU';
+import MentionsLegales from './profile/MentionsLegales';
+import PolitiqueConfidentialite from './profile/PolitiqueConfidentialite';
+import GestionCookies from './profile/GestionCookies';
 //import { io } from "socket.io-client";
 import socket from './socket';
 import './style.css';
@@ -77,7 +85,7 @@ function App() {
     const stored = localStorage.getItem('currentUser');
     return stored ? JSON.parse(stored) : user;
   });
-  console.log('Utilisateur actuel au chargement de App.tsx :', currentUser);
+  
   const [currentPrivacySettings, setCurrentPrivacySettings] = useState<PrivacySettingsType>(privacySettings);
   const [currentServices, setCurrentServices] = useState<Service[]>(services);
   const [activeSection, setActiveSection] = useState('overview');
@@ -99,7 +107,7 @@ function App() {
     // --- ⚡ Enregistrement socket pour cet utilisateur ---
   useEffect(() => {
     socket.on("connect", () => {
-      console.log("Socket connecté avec id", socket.id);
+      //console.log("Socket connecté avec id", socket.id);
       socket.emit("user_connected", currentUser.id);
     });
   }, [currentUser.id]);
@@ -260,7 +268,6 @@ function App() {
       {/*{verifNavbar()}*/}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/test2" element={<Test2 />} />
         <Route path="*" element={<NotFound />} />
         
         <Route path="/a-propos" element={<About />} /> 
@@ -268,6 +275,10 @@ function App() {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/blog" element={<Blog />} />
+        <Route path="/terms" element={<Cgu />} />
+        <Route path="/mentions-legales" element={<MentionsLegales />} />
+        <Route path="/politique-confidentialite" element={<PolitiqueConfidentialite />} />
+        <Route path="/gestion-cookies" element={<GestionCookies />} />
         {/* <Route path="/conditions-utilisation" element={<ConditionsUtilisation />} /> */}
         {/* <Route path="/conditions-generales" element={<ConditionsGenerales />} /> */}
         <Route path="/connexion" element={<Connexion />} />
@@ -283,7 +294,7 @@ function App() {
         <Route path="/search" element={<SearchProfessionals onViewProfile={(id) => console.log('View profile:', id)} />} />
         <Route path="/service/:id" element={<ServiceDetail user2={currentUser}/>} />
         <Route path="/blog/:id" element={<ArticleDetail />} />
-        <Route path="/proquote" element={<ProQuote />} />
+        <Route path="/proquote" element={<ProQuote user2={currentUser} />} />
         <Route path="/userquote" element={<UserQuote />} />
         <Route path="/blog/:id" element={<ArticleDetail />} />
         <Route path="/professional/:id" element={

@@ -139,8 +139,8 @@ exports.sendMessage = async (req, res) => {
       .query(
         `
         INSERT INTO notifications 
-        (user_id, user_id2, type, title, text, link, unread)
-        VALUES (?, ?, ?, ?, ?, ?, true);
+        (user_id, user_id2, type, title, text, link, unread, notified)
+        VALUES (?, ?, ?, ?, ?, ?, true, false);
         `,
         [recipientId, senderId, "message_received", "Nouveau message", `${senderName} vous a envoyé un message`, `/messages/${conversationId}`]
       );
@@ -486,7 +486,7 @@ exports.getMessages = (req, res) => {
         db.query('UPDATE messages SET is_read = TRUE WHERE conversation_id = ? AND recipient_id = ? AND is_read = FALSE', [id, userId], (err) => {
           if (err) console.error('Erreur mise à jour is_read :', err);
         });
-        db.query('UPDATE notifications SET unread = FALSE WHERE link LIKE ? AND user_id = ? AND unread = TRUE', [`%${id}%`, userId], (err) => {
+        db.query('UPDATE notifications SET unread = FALSE, notified = TRUE WHERE link LIKE ? AND user_id = ? AND unread = TRUE', [`%${id}%`, userId], (err) => {
           if (err) console.error('Erreur mise à jour unread :', err);
         });
         res.json(formatted);

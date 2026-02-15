@@ -25,6 +25,11 @@ export function mapUserDataToUserModel(userData: any): User {
     reviewsPosted: userData.nb_reviews || 0,
     servicesPublished: userData.nb_services || 0
   };
+   const show_phone = userData.show_phone || true;
+  const show_address = userData.show_address || false;
+  const allow_share = userData.allow_share || true;
+  const statut_profil = userData.statut_profil || 'public';
+  const email_notif = userData.email_notification || true;
 
   return {
    
@@ -43,7 +48,12 @@ export function mapUserDataToUserModel(userData: any): User {
       apropos,
       avatar,
       memberSince,
-      stats
+      stats,
+      show_phone,
+      show_address,
+      allow_share,
+      statut_profil,
+      email_notif
   };
 }
 
@@ -57,6 +67,7 @@ export function mapProfessionalsDataToUserModel(prosData: any): Professional {
   const lastName = prosData.nom || '';
   const name = `${firstName} ${lastName}`;
   const profession = prosData.categorie || '';
+  const metier = prosData.metier || '';
   const email = prosData.email;
   const phone = prosData.phone || '';
   const city = prosData.ville || '';
@@ -70,6 +81,7 @@ export function mapProfessionalsDataToUserModel(prosData: any): Professional {
   const availability = prosData.availability || 'Immédiat';
   const verified = prosData.verified || false;
   const sponsored = prosData.sponsored || false;
+ 
 
   return {
    
@@ -77,6 +89,7 @@ export function mapProfessionalsDataToUserModel(prosData: any): Professional {
       professional_id,
       name,
       profession,
+      metier,
       //email,
       //phone,
       city,
@@ -90,6 +103,7 @@ export function mapProfessionalsDataToUserModel(prosData: any): Professional {
       availability,
       verified,
       sponsored
+      
   };
 }
 

@@ -118,7 +118,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
       console.log('Statut HTTP:', response.status);
   
       if (response.status === 201 || response.status === 200) {
-        alert('Utilisateur mis à jour avec succès');
+        Swal.fire('succes','Mis à jour avec succès');
         console.log('Utilisateur mis à jour avec succès');
   
       // Requête pour obtenir les infos complètes de l'utilisateur
@@ -129,7 +129,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
         }
       });
         const userData = await userRes.json();
-         alert('Données utilisateur récupérées :'+ userData)
+        
         if (userRes.ok) {
           console.log('Données utilisateur récupérées :', userData);
           localStorage.setItem('token', token);
@@ -415,26 +415,28 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
         <div className="mt-8 flex justify-end">
           {isEditing ? (
             <div className="flex space-x-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsEditing(false);
-                  
-                  setFormData({
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email: user.email,
-                    phone: user.phone,
-                    city: user.city,
-                    region: user.region,
-                    address: user.address,
-                    apropos: user.apropos
-                  });
-                }}
-                className="thq-button-outline"
-              >
-                Annuler
-              </button>
+              {location.pathname === '/dashboard' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditing(false);
+                    
+                    setFormData({
+                      firstName: user.firstName,
+                      lastName: user.lastName,
+                      email: user.email,
+                      phone: user.phone,
+                      city: user.city,
+                      region: user.region,
+                      address: user.address,
+                      apropos: user.apropos
+                    });
+                  }}
+                  className="thq-button-outline"
+                >
+                  Annuler
+                </button>
+              )}
               <button
                 type="submit"
                 className="thq-button-filled flex items-center"

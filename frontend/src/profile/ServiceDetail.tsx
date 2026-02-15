@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Clock, Tag, MessageSquare, Star, Send, Lock, Users, X, ArrowLeft, Zap, CheckCircle, XCircle, FileText, Phone, ShieldCheck, Info, ChevronRight,  } from 'lucide-react';
+import { Calendar, MapPin, Clock, Tag, MessageSquare, Star, Send, Lock, Users, X, ArrowLeft, Zap, CheckCircle, XCircle, FileText, Phone, ShieldCheck, Info, ChevronRight, Share2,  } from 'lucide-react';
 import { User, Service } from '../utils/types';
 import { mapServicesDataToUserModel, mapUserDataToUserModel } from '../utils/mapper';
 import Swal from 'sweetalert2';
@@ -220,6 +220,24 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
       }
     };
   
+  const handleShareService = async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: service?.title,
+          text: "Voir ce service",
+          url
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        alert("Lien du service copié");
+      }
+    } catch (e) {
+      console.log("Share cancelled");
+    }
+  };
+
   // Affiche un message de chargement si le service n’est pas encore chargé
   if (!service) {
     return <div className="text-center py-10">Chargement du service...</div>;
@@ -330,11 +348,11 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
                   </div>
                 ))}*/}
               <div className="absolute top-4 left-4 flex gap-2">
-                <span className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold flex items-center shadow-sm">
+                {/*<span className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold flex items-center shadow-sm">
                   <Zap size={14} className="text-yellow-500 mr-1" /> Populaire
-                </span>
+                </span>*/}
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#e0692d] text-white">
-                  {service.category}
+                  {service.metier}
                 </span>
               </div>
             </div>
@@ -343,19 +361,63 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h1 className="text-3xl font-bold text-gray-900 mb-2">{service.title}</h1>
+                  
+                  {service.category && (
+                    <span className="inline-flex items-center gap-1 bg-orange-50 text-[#e0692d] text-xs font-bold px-2 py-1 rounded-full mb-3">
+                      <Tag size={12} />
+                      {service.category}
+                    </span>
+                  )}
+
                   <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                     <div className="flex items-center text-yellow-500 font-bold">
-                      <Star size={16} fill="currentColor" className="mr-1" /> 4.9 <span className="text-gray-400 font-normal ml-1">({user.stats.reviewsPosted} avis)</span>
+                      <Star size={16} fill="currentColor" className="mr-1" />
+                      4.9
+                      <span className="text-gray-400 font-normal ml-1">
+                        ({user.stats.reviewsPosted} avis)
+                      </span>
                     </div>
-                    <div className="flex items-center"><MapPin size={16} className="mr-1" /> {user.city}, {user.region}</div>
-                    <div className="flex items-center"><Clock size={16} className="mr-1" /> 24h - 48h délai</div>
+
+                    <div className="flex items-center">
+                      <MapPin size={16} className="mr-1" />
+                      {user.city}, {user.region}
+                    </div>
+
+                    <div className="flex items-center">
+                      <Clock size={16} className="mr-1" />
+                      {service.duration}
+                    </div>
                   </div>
                 </div>
-                <div className="hidden md:block text-right">
-                  <p className="text-sm text-gray-400 uppercase tracking-wider">À partir de</p>
-                  <p className="text-3xl font-black text-[#e0692d]">{service.price} DT</p>
+
+                {/* ✅ Bloc droite : prix + partager */}
+                <div className="hidden md:flex flex-col items-end gap-3 text-right">
+                  <div>
+                    <p className="text-sm text-gray-400 uppercase tracking-wider">
+                      À partir de
+                    </p>
+                    <p className="text-3xl font-black text-[#e0692d]">
+                      {service.price} DT
+                    </p>
+                  </div>
+
+                  {/* ✅ Bouton partager */}
+                  <button
+                    onClick={handleShareService}
+                    className="
+                      flex items-center gap-2
+                      bg-gray-100 hover:bg-gray-200
+                      text-gray-700 hover:text-gray-900
+                      px-3 py-2 rounded-xl
+                      text-sm font-medium
+                      transition
+                    "
+                    title="Partager le service"
+                  >
+                    <Share2 size={16} />
+                    Partager
+                  </button>
                 </div>
-                
               </div>
               {/* Galerie 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -372,52 +434,6 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
             </div>
           </section>
 
-          {/* En-tête du service 
-          <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h1 className="text-3xl font-bold text-gray-900">{service.title}</h1>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#e0692d] text-white">
-                  {service.category}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="flex items-center text-gray-600">
-                  <MapPin className="h-5 w-5 mr-2 text-gray-400" />
-                  {user.city}, {user.region}
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <Clock className="h-5 w-5 mr-2 text-gray-400" />
-                  {service.duration}
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <Tag className="h-5 w-5 mr-2 text-gray-400" />
-                  {service.price}
-                </div>
-              </div>
-
-              {/* Galerie
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                {service.gallery.map((image, index) => (
-                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
-                    <img
-                      src={image}
-                      alt={`${service.title} - Image ${index + 1}`}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Description 
-              <div className="prose max-w-none">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Description du service</h2>
-                <p className="text-gray-600 whitespace-pre-line">{service.description}</p>
-              </div>
-            </div>
-          </div>*/}
-          
           {/* 2️⃣ DESCRIPTION & PROCESSUS */}
           <section className="bg-white rounded-3xl mb-6 md:mb-10 p-6 md:p-8 shadow-sm border border-gray-100">
             <h2 className="text-xl font-bold mb-4">Détails du service</h2>
@@ -552,14 +568,14 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
               </button>
             </div>
 
-            <div className="mt-6 pt-6 border-t space-y-3">
+            {/*<div className="mt-6 pt-6 border-t space-y-3">
               <div className="flex items-center gap-3 text-sm text-gray-600">
                 <ShieldCheck size={18} className="text-green-500" /> Professionnel vérifié
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-600">
                 <Info size={18} className="text-blue-500" /> Garantie Qualité
               </div>
-            </div>
+            </div>*/}
           </div>
           <div className="hidden lg:block bg-white p-4 rounded-lg shadow-md">
             <p className="text-sm text-gray-500 mb-2">Publicité</p>

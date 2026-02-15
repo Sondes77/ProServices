@@ -100,6 +100,7 @@ exports.getMesNotifications = (req, res) => {
         n.text,
         n.link,
         n.unread,
+        n.notified,
         n.created_at,
         u2.photo AS photo,
         u2.role AS user2_role
@@ -214,4 +215,56 @@ exports.deleteNotification = (req, res) => {
    
     res.status(200).json(result);
   });
+};
+
+//
+exports.markNotified = async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    // ✅ validation
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({
+        message: "Liste des ids requise"
+      });
+    }
+
+    // ✅ sécuriser ids numériques
+    const cleanIds = ids.map(id => Number(id)).filter(Boolean);
+
+    if (cleanIds.length === 0) {
+      return res.status(400).json({
+        message: "Ids invalides"
+      });
+    }
+
+    // ✅ SQL dynamique
+    const placeholders = cleanIds.map(() => '?').join(',');
+
+    const sql = `
+      UPDATE notifications
+      SET notified = true
+      WHERE id IN (${placeholders})
+    `;
+
+    db.query(sql, cleanIds, (err, result) => {
+      if (err) {
+        console.error("Erreur markNotified:", err);
+        return res.status(500).json({
+          message: "Erreur base de données"
+        });
+      }
+
+      res.json({
+        success: true,
+        updated: result.affectedRows
+      });
+    });
+
+  } catch (error) {
+    console.error("Erreur serveur markNotified:", error);
+    res.status(500).json({
+      message: "Erreur serveur"
+    });
+  }
 };

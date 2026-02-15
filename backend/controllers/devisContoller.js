@@ -30,15 +30,15 @@ exports.createDevis = async (req,res)=>{
     // 🔔 Notification destinataire
     await db.promise().query(
       `INSERT INTO notifications
-       (user_id, user_id2, type, title, text, link, unread, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, true, NOW())`,
+       (user_id, user_id2, type, title, text, link, unread, notified, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, true, false, NOW())`,
       [
         professionnel_id,
         client_id,
         "devis_created",
         "Nouveau devis",
         `${senderName} vous a envoyé un devis`,
-        `devis/${devisId}`
+        `/devis/${devisId}`
       ]
     );
 
@@ -94,15 +94,15 @@ exports.proposeDevis = async (req,res)=>{
     // 🔔 Notification destinataire
     await db.promise().query(
       `INSERT INTO notifications
-       (user_id, user_id2, type, title, text, link, unread, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, true, NOW())`,
+       (user_id, user_id2, type, title, text, link, unread, notified, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, true, false, NOW())`,
       [
         pro_id,
         user_id,
         "devis_proposed",
         "Nouvelle proposition",
         `${senderName} vous a envoyé une proposition`,
-        `devis/${id}`
+        `/devis/${id}`
       ]
     );
 
@@ -151,15 +151,15 @@ exports.acceptDevis = async (req,res)=>{
   // 🔔 Notification destinataire
   await db.promise().query(
     `INSERT INTO notifications
-      (user_id, user_id2, type, title, text, link, unread, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, true, NOW())`,
+      (user_id, user_id2, type, title, text, link, unread, notified, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, true, false, NOW())`,
     [
       pro_id,
       user_id,
       "devis_proposed",
       "Proposition acceptée",
       `${senderName} a accepté votre proposition`,
-      `devis/${req.params.id}`
+      `/devis/${req.params.id}`
     ]
   );
   res.json({ ok:true });
@@ -186,15 +186,15 @@ exports.rejectDevis = async (req,res)=>{
   // 🔔 Notification destinataire
   await db.promise().query(
     `INSERT INTO notifications
-      (user_id, user_id2, type, title, text, link, unread, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, true, NOW())`,
+      (user_id, user_id2, type, title, text, link, unread, notified, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, true, false, NOW())`,
     [
       pro_id,
       user_id,
       "devis_proposed",
       "Proposition refusée",
       `${senderName} a refusé votre proposition`,
-      `devis/${req.params.id}`
+      `/devis/${req.params.id}`
     ]
   );
 
@@ -205,10 +205,10 @@ exports.cancelDevis = async (req,res)=>{
   try{
     const { id } = req.params;
     const user_id = req["utilisateur"].id;
-    const { prix, message_pro, date_intervention,pro_id } = req.body;
+    const { pro_id } = req.body;
 
     await db.promise().query(
-      "UPDATE devis SET statut='rejected' WHERE id=? AND client_id=?",
+      "UPDATE devis SET statut='cancelled' WHERE id=? AND pro_id=?",
       [req.params.id, user_id]
     );
 
@@ -224,15 +224,15 @@ exports.cancelDevis = async (req,res)=>{
     // 🔔 Notification destinataire
     await db.promise().query(
       `INSERT INTO notifications
-       (user_id, user_id2, type, title, text, link, unread, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, true, NOW())`,
+       (user_id, user_id2, type, title, text, link, unread, notified, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, true, false, NOW())`,
       [
         pro_id,
         user_id,
-        "devis_proposed",
-        "Nouvelle proposition",
-        `${senderName} vous a envoyé une proposition`,
-        `devis/${id}`
+        "devis_cancelled",
+        "Demande annulé",
+        `${senderName} a annulé votre demande`,
+        `/devis/${id}`
       ]
     );
 

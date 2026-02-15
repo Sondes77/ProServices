@@ -92,8 +92,8 @@ exports.creerReview = async (req, res) => {
     // 🔔 Notification destinataire
     await db.promise().query(
       `INSERT INTO notifications
-       (user_id, user_id2, type, title, text, link, unread, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, true, NOW())`,
+       (user_id, user_id2, type, title, text, link, unread, notified, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, true, false, NOW())`,
       [
         recipientId,
         userId,
@@ -266,7 +266,7 @@ exports.getReviewsByProId = (req, res) => {
 
   //const decoded = jwt.verify(token, process.env.JWT_SECRET);
   //console.log("dfdf",id);
-  db.query('SELECT r.id AS review_id, r.rating, r.comment, r.created_at, u.id AS author_id, u.nom AS author_nom, u.photo AS author_photo, ur.id AS recipient_id, ur.nom AS recipient_nom, ur.photo AS recipient_photo FROM reviews r JOIN utilisateurs u ON r.author_id = u.id JOIN utilisateurs ur ON r.recipient_id = ur.id WHERE r.recipient_id = ?', [id], (err, result) => {
+  db.query("SELECT r.id AS review_id, r.rating, r.comment, r.created_at, u.id AS author_id, CONCAT(u.nom, ' ', u.prenom) AS author_nom, u.photo AS author_photo, ur.id AS recipient_id, ur.nom AS recipient_nom, ur.photo AS recipient_photo FROM reviews r JOIN utilisateurs u ON r.author_id = u.id JOIN utilisateurs ur ON r.recipient_id = ur.id WHERE r.recipient_id = ?", [id], (err, result) => {
     if (err) {
       console.error('Erreur lors de la récupération des reviews:', err);
       return res.status(500).send('Erreur serveur');

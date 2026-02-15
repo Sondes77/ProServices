@@ -11,5 +11,6 @@ router.put("/devis/:id/propose", verifyToken.verifyToken, devisController.propos
 router.get("/devis/me", verifyToken.verifyToken, devisController.getMyDevis);
 router.put("/devis/:id/accepted", verifyToken.verifyToken, devisController.acceptDevis);
 router.put("/devis/:id/rejected", verifyToken.verifyToken, devisController.rejectDevis);
+router.put("/devis/:id/cancelled", verifyToken.verifyToken, devisController.cancelDevis);
 
 module.exports = router;

@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import { Mail, Lock, Eye, EyeOff, ShieldCheck, Star, ArrowRight, Loader2 } from 'lucide-react';
 import { mapUserDataToUserModel } from '../utils/mapper';
 import './sign-in4.css'
+import Swal from "sweetalert2";
 
 const SignIn4 = (props) => {
   useEffect(() => {
@@ -18,6 +19,7 @@ const SignIn4 = (props) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -31,6 +33,11 @@ const SignIn4 = (props) => {
 
       const data = await response.json();
 
+      if (!response.ok) {
+        setError(data.message || "Email ou mot de passe incorrect");
+        return; 
+      }
+
       if (response.ok) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('email', data.user.email);
@@ -39,18 +46,38 @@ const SignIn4 = (props) => {
         localStorage.setItem('currentUser', JSON.stringify(user));
         
         
-        console.log('Utilisateur connecté :', data.user);
-        console.log('Token :', data.token);
-        alert('Bienvenue ' + data.user.nom);
+        //console.log('Utilisateur connecté :', data.user);
+        //console.log('Token :', data.token);
+        //alert('Bienvenue ' + data.user.nom);
         
         // Redirection possible ici :
         window.location.href = '/dashboard';
-      } else {
-        alert(data.error || 'Une erreur est survenue.');
       }
+
     } catch (error) {
-      console.error('Erreur de connexion :', error);
-      alert("Échec de la connexion. Veuillez réessayer plus tard.");
+      //console.error('Erreur de connexion :', error);
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "warning",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Un problème est survenu ! Veuillez réessayer plus tard.",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
+    }  finally {
+      // ✅ TOUJOURS exécuté — succès ou erreur
+      setLoading(false);
     }
   };
 
@@ -107,6 +134,12 @@ const SignIn4 = (props) => {
 
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
+                {error && (
+                    <div className="bg-red-50 border my-4 border-red-50 text-red-600 text-sm font-semibold px-4 py-3 rounded-xl">
+                      {error}
+                    </div>
+                  )}
+
                 <label className="block text-sm font-bold text-slate-700 mb-2">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -115,8 +148,8 @@ const SignIn4 = (props) => {
                     required
                     placeholder="nom@exemple.com"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-[#e0692d] outline-none transition-all text-slate-900 placeholder:text-slate-400 font-medium"
+                    onChange={(e) => {setEmail(e.target.value); setError(null);}}
+                    className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orange-200 outline-none transition-all text-slate-900 placeholder:text-slate-400 font-medium"
                   />
                 </div>
               </div>
@@ -124,7 +157,7 @@ const SignIn4 = (props) => {
               <div>
                 <div className="flex justify-between mb-2">
                   <label className="block text-sm font-bold text-slate-700">Mot de passe</label>
-                  <a href="/mot-de-passe-oublie" className="text-xs font-bold text-[#e0692d] hover:underline">Oublié ?</a>
+                  <a href="/mot-de-passe-oublie" className="text-xs font-bold text-[#e0692d] hover:underline">Mot de passe oublié ?</a>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -133,9 +166,10 @@ const SignIn4 = (props) => {
                     required
                     placeholder="••••••••"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-12 pr-12 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-[#e0692d] outline-none transition-all text-slate-900 placeholder:text-slate-400 font-medium"
+                    onChange={(e) => {setPassword(e.target.value); setError(null);}}
+                    className="w-full pl-12 pr-12 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orange-200 outline-none transition-all text-slate-900 placeholder:text-slate-400 font-medium"
                   />
+                  
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}

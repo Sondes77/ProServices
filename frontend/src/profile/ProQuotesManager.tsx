@@ -6,8 +6,8 @@ import {
 import Swal from 'sweetalert2';
 import { User, Devis } from '../utils/types';
 import { mapDevisDataToUserModel } from '../utils/mapper';
-import { useLocation } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 // Types pour la gestion des devis
 /*interface QuoteRequest {
@@ -21,20 +21,22 @@ import { useParams } from "react-router-dom";
   priceProposed?: number;
 }*/
 
-interface PublicProfileProps {
+interface ProQuoteProps {
   user2: User;
 }
 
-const ProQuotesManager:  React.FC<PublicProfileProps> = ({ user2 }) => {
+const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
   const [quotes, setQuotes] = useState<Devis[]>([]);
   const [selectedQuote, setSelectedQuote] = useState<Devis | null>(null);
   const [responsePrice, setResponsePrice] = useState<string>('');
   const [responseMsg, setResponseMsg] = useState<string>('');
   const token = localStorage.getItem('token');
+  const userId = JSON.parse(localStorage.getItem("currentUser") || "null")?.id;
   const { Id } = useParams<{ Id: string }>();
-  
-  useEffect(() => {
-    console.log(Id);
+  const [checkingAccess, setCheckingAccess] = useState(true);
+  const navigate = useNavigate();
+ 
+  useEffect(() => {   
     const fetchDevis = async () => {
       try {
         
@@ -52,14 +54,25 @@ const ProQuotesManager:  React.FC<PublicProfileProps> = ({ user2 }) => {
         const data = await response.json();
         const devis = Array.isArray(data) ? data : [data];
         const mapped = mapDevisDataToUserModel(devis);
-        setQuotes(mapped);
+        //setQuotes(mapped);
 
         // ✅ Sélection auto via URL
         if (Id) {
-          const found = mapped.find(d => String(d.id) === String(Id));
-          console.log("found = ", found);
-          if (found) setSelectedQuote(found);
-        }
+          const found = mapped.find(d =>
+          String(d.id) === String(Id) &&
+          (String(d.pro_id) === String(userId) ||
+          String(d.client_id) === String(userId))
+        );
+
+          if (!found) {
+            navigate('/mes-devis');
+            return;
+          }
+
+          // ✅ autorisé
+          setQuotes(mapped);
+          setSelectedQuote(found);
+        } else setQuotes(mapped);
           
       } catch (error) {
         console.error('Erreur réseau :', error);
@@ -68,7 +81,8 @@ const ProQuotesManager:  React.FC<PublicProfileProps> = ({ user2 }) => {
     };
     fetchDevis();
   }, []);
-  
+
+
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
     const day = String(d.getDate()).padStart(2, '0');
@@ -80,7 +94,7 @@ const ProQuotesManager:  React.FC<PublicProfileProps> = ({ user2 }) => {
   const handleSendResponse = async (
     e: React.FormEvent,
     quoteId: string,
-    status: 'accepted' | 'cancelled',
+    status: 'proposed' | 'cancelled',
     proId: string
   ) => {
     e.preventDefault();
@@ -113,19 +127,20 @@ const ProQuotesManager:  React.FC<PublicProfileProps> = ({ user2 }) => {
       // update UI direct
       setQuotes(prev =>
         prev.map(q =>
-          q.id === quoteId ? { ...q, status } : q
+          q.id === quoteId ? { ...q, statut: 'proposed' } : q
         )
       );
+      
+      setSelectedQuote(null);
+      setResponseMsg('');
+      setResponsePrice('');
 
-      if (status === 'accepted') {
+      if (status === 'proposed') {
         Swal.fire("Devis Accepté", "Le client a été notifié.", "success");
       } else {
         Swal.fire("Devis Refusé", "La demande a été classée.", "info");
       }
 
-      setSelectedQuote(null);
-      setResponseMsg('');
-      setResponsePrice('');
 
     } catch (error) {
       console.error(error);
@@ -142,7 +157,7 @@ const ProQuotesManager:  React.FC<PublicProfileProps> = ({ user2 }) => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/devis/${quoteId}/cancel`,
+        `http://localhost:5000/api/devis/${quoteId}/cancelled`,
         {
           method: 'PUT',
           headers: {
@@ -156,7 +171,7 @@ const ProQuotesManager:  React.FC<PublicProfileProps> = ({ user2 }) => {
       );
 
       if (!response.ok) {
-        alert('Erreur lors de l’envoi de la proposition');
+        alert('Erreur lors de l’annulation de la demande');
         return;
       }
 
@@ -203,6 +218,32 @@ const ProQuotesManager:  React.FC<PublicProfileProps> = ({ user2 }) => {
     return map[statut] || statut;
   };
 
+   const getStatutResponse = (statut: string) => {
+    const map: Record<string, string> = {
+      pending_client: "En attente (Client)",
+      pending_pro: "Le client attend votre proposition.",
+      proposed: "Le client a bien reçu votre proposition.",
+      accepted: "Le client a accepté votre proposition.",
+      rejected: "Le client a refusé votre proposition.",
+      cancelled: "Vous avez annulé la demande du client."
+    };
+    return map[statut] || statut;
+  };
+
+  const getStatutBoxClasses = (statut: string) => {
+    const map: Record<string, string> = {
+      pending_client: "bg-purple-50 border-purple-200 text-purple-700",
+      pending_pro: "bg-orange-50 border-orange-200 text-orange-700",
+      proposed: "bg-blue-50 border-blue-200 text-blue-700",
+      accepted: "bg-green-50 border-green-200 text-green-700",
+      rejected: "bg-red-50 border-red-200 text-red-700",
+      cancelled: "bg-gray-100 border-gray-300 text-gray-700"
+    };
+
+    return map[statut] || "bg-gray-50 border-gray-200 text-gray-700";
+  };
+
+  if (Id && !checkingAccess) return null;
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
       <div className="flex justify-between items-center mb-8">
@@ -285,16 +326,26 @@ const ProQuotesManager:  React.FC<PublicProfileProps> = ({ user2 }) => {
                 </div>
 
                 {/* FOOTER INFOS */}
-                <div className="flex flex-wrap gap-6 text-sm text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Calendar size={14} />
-                    Demande le: {formatDate(quote.created_at)}
+                <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-gray-500">
+
+                  {/* Bloc gauche */}
+                  <div className="flex flex-wrap gap-6">
+                    <div className="flex items-center gap-1">
+                      <Calendar size={14} />
+                      Demande le: {formatDate(quote.created_at)}
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <MapPin size={14} />
+                      Date souhaitée: {formatDate(quote.date_souhaitee)}
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-1">
-                    <MapPin size={14} />
-                    Date souhaitée: {formatDate(quote.date_souhaitee)}
-                  </div>
+                  {/* Bloc droite */}
+                  <p className="text-slate-400 font-bold uppercase whitespace-nowrap">
+                    REF: DV-{quote.id}
+                  </p>
+
                 </div>
               </div>
             ))}
@@ -306,20 +357,57 @@ const ProQuotesManager:  React.FC<PublicProfileProps> = ({ user2 }) => {
         <aside>
           {selectedQuote ? (
             <div className="bg-white rounded-[32px] p-8 shadow-xl border border-gray-100 sticky top-10 animate-in slide-in-from-right duration-300">
-              <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                <FileText className="text-[#e0692d]" /> Détails de la demande
-              </h2>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-2">
+                {/* Bloc gauche */}
+                <div className="min-w-0">
+                  <h2 className="text-xl font-bold flex items-center gap-2">
+                    <FileText className="text-[#e0692d]" />
+                    Détails de la demande
+                  </h2>
+
+                  <div className="text-xs text-slate-500">
+                    Date souhaitée: {formatDate(selectedQuote.date_souhaitee)}
+                  </div>
+                </div>
+
+                {/* Bloc droite */}
+                <p className="text-xs text-slate-400 font-bold uppercase whitespace-nowrap sm:text-right">
+                  REF: DV-{selectedQuote.id}
+                </p>
+
+              </div>
               
               <div className="bg-gray-50 p-4 rounded-2xl mb-6 text-sm text-gray-600 leading-relaxed">
                 "{selectedQuote.description}"
               </div>
-
+              <div className="space-y-4">
+                {selectedQuote.message_pro && (
+                  <div className="bg-orange-50 p-6 rounded-3xl border border-orange-100">
+                    <p className="text-[10px] font-black text-orange-400 uppercase mb-2 tracking-widest">Votre Réponse</p>
+                    <p className="text-orange-900 font-bold">{selectedQuote.message_pro}</p>
+                  </div>
+                )}
+                {selectedQuote.prix && (
+                  <div className="bg-orange-50 p-6 rounded-3xl border border-orange-100">
+                    <p className="text-[10px] font-black text-orange-400 uppercase mb-2 tracking-widest">Prix proposé</p>
+                    <p className="text-orange-900 font-bold">{selectedQuote.prix} DT</p>
+                  </div>
+                )}
+                {selectedQuote.statut !== 'pending_pro' && (
+                <div className={`p-6 mt-3 rounded-3xl border ${getStatutBoxClasses(selectedQuote.statut)}`}>
+                    {/*<p className="text-[10px] font-black uppercase mb-2 tracking-widest opacity-70">Votre réponse</p>*/}
+                    <p className="text-xs">
+                      {getStatutResponse(selectedQuote.statut)}
+                    </p>
+                </div>
+                )}
+              </div>
               {selectedQuote.statut === 'pending_pro' && (
                 <form
                   className="space-y-6"
                   onSubmit={(e) => {
                     e.preventDefault();
-                    handleSendResponse(e, selectedQuote.id, 'accepted', selectedQuote.client_id)
+                    handleSendResponse(e, selectedQuote.id, 'proposed', selectedQuote.client_id)
                   }}
                 >
                   <div>

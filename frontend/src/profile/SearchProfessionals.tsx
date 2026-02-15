@@ -386,7 +386,7 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
       {/* Sponsored Professionals Carousel */}
       {sponsoredProfessionals.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Professionnels recommandés</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Services sponsorisés</h2>
           <Swiper
             modules={[Autoplay, Pagination, Navigation]}
             spaceBetween={30}
@@ -428,12 +428,10 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                           <BadgeCheck className="h-5 w-5 text-[#e0692d] ml-2" />
                         )}
                       </div>
-                      <p className="text-sm text-gray-600">{professional.profession}</p>
+                      <p className="text-sm text-gray-600">{professional.metier}</p>
                       <div className="flex items-center mt-1">
-                        <MapPin className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-600 ml-1">
-                          {professional.city}, {professional.region}
-                        </span>
+                        <MapPin size={14} className="text-gray-400" />
+                        <span className="ml-1 text-gray-400 flex items-center gap-1 text-xs font-semibold text-gray-500">{professional.city}, {professional.region}</span>
                       </div>
                     </div>
                   </div>
@@ -448,10 +446,14 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
 
                   <div className="mt-4 flex items-center justify-between">
                     <div className="flex items-center">
-                      <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                      <span className="ml-1 text-sm font-medium text-gray-900">{professional.rating}</span>
-                      <span className="mx-1 text-gray-400">•</span>
-                      <span className="text-sm text-gray-600">{professional.reviews} avis</span>
+                      {professional.reviews > 0 && (
+                        <>
+                          <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                          <span className="ml-1 text-sm font-medium text-gray-900">{professional.rating}</span>
+                          <span className="mx-1 text-gray-400">•</span>
+                          <span className="text-sm text-gray-600">{professional.reviews} avis</span>
+                        </>
+                      )}
                     </div>
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                       {professional.availability}
@@ -630,16 +632,29 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                       <div className="mt-4 flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                           <div className="flex items-center">
-                            <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                            <span className="ml-1 text-sm font-medium text-gray-900">{professional.rating}</span>
-                            <span className="mx-1 text-gray-400">•</span>
-                            <span className="text-sm text-gray-600">{professional.reviews} avis</span>
-                          </div>
+                            {professional.rating >0 && (
+                              <>
+                              <Star className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                              
+                              <span className="ml-1 text-sm font-medium text-gray-900">{professional.rating}</span>
+                              
+                              <span className="mx-1 text-gray-400">•</span>
+                              <span className="flex items-center gap-1 text-xs font-semibold text-gray-500">{professional.reviews} avis</span>
+                            </>
+                            )}
+                            </div>
                           <div className="flex items-center text-gray-600">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            <span className="text-sm">{professional.city}, {professional.region}</span>
+                            <MapPin size={14} className="text-[#e0692d]" />
+                            <span className="ml-1 flex items-center gap-1 text-xs font-semibold text-gray-500">{professional.city}, {professional.region}</span>
                           </div>
-                          <span className="text-sm font-medium text-[#e0692d]">{professional.prix}</span>
+                          <div className="flex items-center text-gray-400">
+                            {/* Icône pour le prix */}
+                            <span className="flex items-center gap-1 text-xs font-semibold text-gray-500">
+                              <Star size={14} className="text-[#e0692d]" /> {/* ou une icône “prix” comme Tag / Money */}
+                              À partir de&nbsp;
+                            </span>
+                            <span className="text-sm font-bold text-[#e0692d]">{professional.prix} DT</span>
+                          </div>
                         </div>
                         <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                           {professional.availability}

@@ -11,10 +11,35 @@ const Contact = () => {
     message: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission
-    console.log('Form submitted:', formData);
+      try {
+      const res = await fetch("http://localhost:5000/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        alert("Message envoyé ✅");
+        setFormData({
+          name: "",
+          email: "",
+          subject: "",
+          message: ""
+        });
+      } else {
+        alert("Erreur envoi");
+      }
+
+    } catch (err) {
+      alert("Erreur serveur");
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -56,20 +81,18 @@ const Contact = () => {
                   <dt className="sr-only">Email</dt>
                   <dd className="flex">
                     <Mail className="flex-shrink-0 h-6 w-6 text-[#e0692d]" />
-                    <span className="ml-3 text-gray-600">contact@profinder.fr</span>
+                    <span className="ml-3 text-gray-600">contact@servicepro.tn</span>
                   </dd>
                   <dt className="sr-only">Téléphone</dt>
                   <dd className="flex">
                     <Phone className="flex-shrink-0 h-6 w-6 text-[#e0692d]" />
-                    <span className="ml-3 text-gray-600">01 23 45 67 89</span>
+                    <span className="ml-3 text-gray-600">(+216) 55 289 528</span>
                   </dd>
                   <dt className="sr-only">Adresse</dt>
                   <dd className="flex">
                     <MapPin className="flex-shrink-0 h-6 w-6 text-[#e0692d]" />
                     <span className="ml-3 text-gray-600">
-                      123 Rue de Paris<br />
-                      75000 Paris<br />
-                      France
+                      Tunis, Tunisie
                     </span>
                   </dd>
                 </dl>
@@ -77,13 +100,11 @@ const Contact = () => {
               <div className="bg-gray-50 px-6 py-8">
                 <div className="flex items-center">
                   <h3 className="text-sm font-medium text-gray-900">
-                    Horaires d'ouverture
+                    Assistance continue
                   </h3>
                 </div>
                 <div className="mt-3 text-sm text-gray-600">
-                  <p>Lundi - Vendredi : 9h00 - 18h00</p>
-                  <p>Samedi : 9h00 - 12h00</p>
-                  <p>Dimanche : Fermé</p>
+                  <p>Lundi - Samedi : 24H</p>
                 </div>
               </div>
             </div>

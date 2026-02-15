@@ -34,7 +34,8 @@ const BlogPage = () => {
         <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
-              Blog ProFinder
+              Blog&nbsp;
+                  <span className="text-4xl font-extrabold leading-tight sm:text-5xl sm:tracking-tight lg:text-6xl text-[#e0692d] thq-link-h1-home">ServicePro</span>
             </h1>
             <p className="mt-5 text-xl text-gray-500">
               Conseils, guides et actualités du monde des services

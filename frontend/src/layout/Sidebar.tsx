@@ -28,7 +28,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [avatarPreview, setAvatarPreview] = useState(user.avatar || defaultAvatar); // local preview
   const location = useLocation();
   const navigate = useNavigate();
-  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({'devis-parent': true});
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({'devis-parent': false});
   const [mobilePopup, setMobilePopup] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -140,18 +140,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       ]
     });
   } else if (user.role === 'user') {
-    navigationItems.push({
-    id: 'devis-parent',
-    label: 'Devis',
-    icon: <FileText size={20} />,
-    children: [
-      { id: 'mes-devis', label: 'Mes demandes de devis' }
-    ]
-  });
+    navigationItems.push({ id: 'mes-devis', label: 'Mes demandes de devis', icon: <FileText size={20} />});
     //navigationItems.push({ id: 'mes-devis', label: 'Mes demandes de devis', icon: <FileText size={20} /> });
   }
-
-
 
   useEffect(() => {
 
@@ -179,16 +170,16 @@ const Sidebar: React.FC<SidebarProps> = ({
       setActiveSection("mes-devis");
     }
 
-    if (!(location.pathname.startsWith("/messages/") || location.pathname.startsWith("/devis/"))) {
+    if (!(location.pathname.startsWith("/messages/") || location.pathname.startsWith("/devis/") || location.pathname === "/mes-devis" )) {
       navigate('/dashboard', { replace: true });
     }
   }, [location.pathname, navigate]);
 
   return (
     
-    <div className="h-full flex flex-col w-20 md:w-64">
+    <div className="h-full flex flex-col w-16 md:w-64">
       {/* User Profile Section */}
-      <div className="md:p-6 md:mt-4  flex flex-col items-center border-b border-gray-200">
+      <div className="md:p-6 md:mt-4 flex flex-col items-center border-b border-gray-200">
         <div 
           className="relative group w-20 h-20"
           onMouseEnter={() => setHovered(true)}

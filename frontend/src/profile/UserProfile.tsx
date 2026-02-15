@@ -56,10 +56,19 @@ const UserProfile:  React.FC<PublicProfileProps> = ({ user2 }) => {
         if (userData[0].role === "professional"){
           navigate(`/professional/${id}`);
         }
+        
         setUser(mapUserDataToUserModel(Array.isArray(userData) ? userData[0] : userData));
 
         const reviewsRes = await fetch(`http://localhost:5000/api/pro-review/${id}`);
-        if (reviewsRes.ok) setReviews(await reviewsRes.json());
+        if (reviewsRes.ok) {
+
+          const data = await reviewsRes.json();
+          const sorted = [...data].sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+
+          setReviews(sorted);
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -150,7 +159,15 @@ const UserProfile:  React.FC<PublicProfileProps> = ({ user2 }) => {
         setShowReviewModal(false);
         // Refresh reviews
         const reviewsRes = await fetch(`http://localhost:5000/api/pro-review/${id}`);
-        setReviews(await reviewsRes.json());
+        if (reviewsRes.ok) {
+
+          const data = await reviewsRes.json();
+          const sorted = [...data].sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+
+          setReviews(sorted);
+        }
       }
     } catch (error) {
       console.error(error);
@@ -312,7 +329,7 @@ const UserProfile:  React.FC<PublicProfileProps> = ({ user2 }) => {
 
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold">{r.author_nom}</span>
+                       <span className="font-semibold cursor-pointer hover:text-[#e0692d]" onClick={() => navigate(`/professional/${r.author_id}`)}> {r.author_nom}</span>
 
                         <div className="flex text-yellow-400">
                           {[...Array(5)].map((_, i) => (

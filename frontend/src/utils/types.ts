@@ -19,6 +19,11 @@ export interface User {
     reviewsPosted: number;
     servicesPublished?: number;
   };
+  show_phone: boolean;
+  show_address: boolean;
+  allow_share: boolean;
+  statut_profil: boolean;
+  email_notif: boolean;
 }
 
 export interface Professional {
@@ -26,6 +31,7 @@ export interface Professional {
   professional_id:string,
   name: string;
   profession: string;
+  metier: string;
   city: string;
   region: string;
   address: string;
@@ -37,6 +43,7 @@ export interface Professional {
   prix: string;
   availability: string;
   verified: boolean;
+  
 }
 
 export interface PrivacySettings {

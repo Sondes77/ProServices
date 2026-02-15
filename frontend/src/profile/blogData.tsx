@@ -78,7 +78,7 @@ export interface BlogPost {
         <p>Prendre le temps de choisir le bon professionnel pour vos travaux est un investissement qui en vaut la peine. En suivant ces étapes, vous augmentez considérablement vos chances de trouver un partenaire fiable et compétent qui réalisera vos travaux dans le respect de vos attentes, de votre budget et de votre calendrier.</p>
       `,
       image: 'https://images.pexels.com/photos/3760529/pexels-photo-3760529.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-      author: 'Sophie Martin',
+      author: 'ServicePro',
       date: '15 Mars 2024',
       category: 'Guides',
       readTime: '5 min'
@@ -164,7 +164,7 @@ export interface BlogPost {
         <p>Les tendances de 2024 reflètent un désir d'habitats plus durables, plus flexibles et plus connectés. L'esthétique reste importante, mais elle s'accompagne désormais d'une réflexion approfondie sur la fonctionnalité, l'impact environnemental et l'adaptabilité des espaces. Que vous envisagiez une rénovation complète ou quelques aménagements ponctuels, ces tendances offrent une multitude d'inspirations pour créer un intérieur à la fois contemporain et pérenne.</p>
       `,
       image: 'https://images.pexels.com/photos/1669754/pexels-photo-1669754.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-      author: 'Thomas Dubois',
+      author: 'ServicePro',
       date: '10 Mars 2024',
       category: 'Tendances',
       readTime: '4 min'
@@ -272,7 +272,7 @@ export interface BlogPost {
         <p>Optimiser son budget travaux ne signifie pas nécessairement rechercher systématiquement les solutions les moins chères, mais plutôt faire des choix éclairés qui garantiront la qualité et la pérennité de vos rénovations. Une planification minutieuse, une recherche active des aides disponibles et un suivi rigoureux des dépenses vous permettront de mener à bien votre projet dans le respect de votre enveloppe budgétaire initiale.</p>
       `,
       image: 'https://images.pexels.com/photos/159888/pexels-photo-159888.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-      author: 'Marie Laurent',
+      author: 'ServicePro',
       date: '5 Mars 2024',
       category: 'Conseils',
       readTime: '6 min'
@@ -344,7 +344,7 @@ export interface BlogPost {
         <p>Pour tous ceux qui envisagent des travaux de rénovation, je ne peux que recommander cette approche qui combine la qualité de l'artisanat traditionnel avec l'efficacité des outils numériques modernes.</p>
       `,
       image: 'https://images.pexels.com/photos/7937307/pexels-photo-7937307.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-      author: 'Jeanne Moreau',
+      author: 'ServicePro',
       date: '28 Février 2024',
       category: 'Témoignages',
       readTime: '7 min'
@@ -442,7 +442,7 @@ export interface BlogPost {
         <p>Les nouvelles normes énergétiques de 2024 marquent une étape importante dans la transition écologique du secteur du bâtiment. Si elles peuvent sembler contraignantes à première vue, elles visent à garantir des logements plus confortables, plus économiques à l'usage et plus respectueux de l'environnement. Pour naviguer dans cet environnement réglementaire complexe, n'hésitez pas à vous faire accompagner par des professionnels qualifiés qui pourront vous orienter vers les solutions les plus adaptées à votre situation et vous aider à bénéficier des dispositifs d'aide disponibles.</p>
       `,
       image: 'https://images.pexels.com/photos/356036/pexels-photo-356036.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-      author: 'Pierre Durand',
+      author: 'ServicePro',
       date: '20 Février 2024',
       category: 'Actualités',
       readTime: '8 min'
@@ -545,7 +545,7 @@ export interface BlogPost {
         <p>Rénover sa salle de bain à petit budget est tout à fait possible avec un peu d'organisation, de créativité et de travail manuel. En combinant intelligemment DIY et intervention ciblée de professionnels, vous pouvez transformer cette pièce essentielle de votre habitation sans compromettre votre budget. L'important est de ne pas négliger les aspects techniques fondamentaux (étanchéité, électricité aux normes) tout en laissant libre cours à votre créativité pour les aspects esthétiques.</p>
       `,
       image: 'https://images.pexels.com/photos/1454804/pexels-photo-1454804.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-      author: 'Sophie Martin',
+      author: 'ServicePro',
       date: '15 Février 2024',
       category: 'Conseils',
       readTime: '7 min'

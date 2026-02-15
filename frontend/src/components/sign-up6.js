@@ -7,22 +7,29 @@ import intlTelInput from "intl-tel-input";
 import "intl-tel-input/build/css/intlTelInput.css";
 import "intl-tel-input/build/js/utils";
 import './sign-up6.css'
-import { User, Mail, Phone, Lock, Eye, EyeOff, Facebook, Chrome, ArrowRight } from 'lucide-react';
+import { User, Mail, Phone, Lock, Eye, EyeOff, Facebook, Chrome, MapPin, ArrowRight, CheckCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
+import CustomSelect from '../profile/CustomSelect';
+import { Categorie, Metier } from './categoryMetier';
 
 const SignUp6 = (props) => {
 const location = useLocation();
-
+const [error, setError] = useState(null);
 const [formData, setFormData] = useState({
   nom: "",
   prenom: "",
   email: "",
   tel: "",
+  category:"",
+  confirmRole: false,
   password: "",
 });
 
 const [showPassword, setShowPassword] = useState(false);
 const [loading, setLoading] = useState(false);
+const metierDisponibles = formData.category
+  ? Metier[formData.category] || []
+  : [];
 
 useEffect(() => {
   // Nettoyage complet à l’arrivée sur la page
@@ -31,19 +38,24 @@ useEffect(() => {
 }, []);
 
 const handleChange = (e) => {
-  const { name, value } = e.target;
-  setFormData((prev) => ({
+  const { name, value, type, checked } = e.target;
+
+  setFormData(prev => ({
     ...prev,
-    [name]: value,
+    [name]: type === "checkbox" ? checked : value,
   }));
 };
 
 const handleSubmit = async (e) => {
   e.preventDefault();
+  let role;
 
-  const role =
-    location.pathname === "/business" ? "professional" : "user";
-
+  if (location.pathname === "/business") {
+    role = formData.confirmRole ? "user" : "professional";
+  } else {
+    role = "user";
+  }
+  
   const payload = {
     ...formData,
     role,
@@ -68,11 +80,13 @@ const handleSubmit = async (e) => {
         body: JSON.stringify(payload),
       }
     );
-
+      
+    alert(response.status);
     const data = await response.json();
-
+   
     if (!response.ok) {
-      alert(data.message || "Erreur lors de l'inscription");
+      setError(data.message || "Erreur lors de l'inscription");
+      setLoading(false);
       return;
     }
 
@@ -92,7 +106,12 @@ const handleSubmit = async (e) => {
     );
 
     const userData = await userRes.json();
-
+    if (!response.ok) {
+      alert("sdfsdf " + data.message);
+        setError(data.message || "Erreur lors de l'inscription");
+        setLoading(false);
+        return;
+      }
     if (userRes.ok) {
       localStorage.setItem("email", userData.email);
       localStorage.setItem(
@@ -100,14 +119,14 @@ const handleSubmit = async (e) => {
         JSON.stringify(mapUserDataToUserModel(userData))
       );
 
-      alert("Bienvenue 👋");
+      //alert("Bienvenue 👋");
       window.location.href = "/dashboard";
     } else {
       alert("Impossible de récupérer les données utilisateur");
     }
   } catch (err) {
     console.error("Erreur réseau :", err);
-    alert("Erreur serveur");
+    //alert("Erreur serveur");
   } finally {
     setLoading(false);
   }
@@ -131,7 +150,7 @@ const handleSubmit = async (e) => {
                 transition={{ duration: 0.8 }}
               >
                 <h1 className="text-6xl font-black text-white mb-6 leading-tight">
-                  Bienvenue sur <span className="text-[#e0692d]">ProFinder</span>.
+                  Bienvenue sur <span className="text-[#e0692d]">ServicePro</span>.
                 </h1>
                 <p className="text-xl text-slate-300 leading-relaxed">
                   La plateforme n°1 pour connecter les talents locaux avec ceux qui en ont besoin. Simple, rapide et sécurisé.
@@ -164,6 +183,11 @@ const handleSubmit = async (e) => {
               </div>
     
               <form className="space-y-5" onSubmit={handleSubmit}>
+                {error && (
+                  <div className="bg-red-50 my-4 border border-red-200 text-red-600 text-sm font-semibold px-4 py-3 rounded-xl">
+                    {error}
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-slate-700 ml-1">Nom</label>
@@ -175,7 +199,7 @@ const handleSubmit = async (e) => {
                         required
                         placeholder="Nom"
                         onChange={handleChange}
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-[#e0692d] outline-none transition-all"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orange-200 outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -187,7 +211,7 @@ const handleSubmit = async (e) => {
                       required
                       placeholder="Prénom"
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-[#e0692d] outline-none transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orange-200 outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -202,7 +226,7 @@ const handleSubmit = async (e) => {
                       required
                       placeholder="votre@email.com"
                       onChange={handleChange}
-                      className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-[#e0692d] outline-none transition-all"
+                      className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orange-200 outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -217,11 +241,72 @@ const handleSubmit = async (e) => {
                       required
                       placeholder="+216 -- --- ---"
                       onChange={handleChange}
-                      className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-[#e0692d] outline-none transition-all"
+                      className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orange-200 outline-none transition-all"
                     />
                   </div>
                 </div>
-    
+
+               <div className="space-y-2">
+                  {/* Category */}
+                  <div className="relative">
+                    <label className="text-sm font-bold text-slate-700 ml-1">
+                      Domaine d'activité
+                    </label>
+
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                        <MapPin size={18} />
+                      </div>
+
+                      <CustomSelect
+                        value={formData.category}
+                        onChange={(value) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            category: value,
+                            metier: '' // reset métier
+                          }));
+                        }}
+                        name="Domaine d'activité"
+                        placeholder="-- Sélectionner une catégorie --"
+                        options={Object.keys(Metier).map(c => ({
+                          value: c,
+                          label: c
+                        }))}
+                      />
+                    </div>
+                  </div>
+                  {/* Métier  
+                  <div className="relative">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Métier
+                    </label>
+
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                        <MapPin size={18} />
+                      </div>
+
+                      <CustomSelect
+                        value={formData.metier}
+                        onChange={(value) => {
+                          setFormData(prev => ({
+                            ...prev,
+                            metier: value
+                          }));
+                        }}
+                        required
+                        name="metier"
+                        placeholder="-- Sélectionner un métier --"
+                        options={metierDisponibles.map(m => ({
+                          value: m,
+                          label: m
+                        }))}
+                      />
+                    </div>
+                  </div>*/}
+                </div>
+
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">Mot de passe</label>
                   <div className="relative">
@@ -232,7 +317,7 @@ const handleSubmit = async (e) => {
                       required
                       placeholder="••••••••"
                       onChange={handleChange}
-                      className="w-full pl-12 pr-12 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-[#e0692d] outline-none transition-all"
+                      className="w-full pl-12 pr-12 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-orange-200 outline-none transition-all"
                     />
                     <button
                       type="button"
@@ -243,7 +328,30 @@ const handleSubmit = async (e) => {
                     </button>
                   </div>
                 </div>
-    
+
+                <div className="space-y-2">
+                  <label className="flex py-2 items-center gap-3 cursor-pointer select-none">
+                    <input
+                      name="confirmRole"
+                      type="checkbox"
+                      onChange={handleChange}
+                      className="
+                        ml-2 h-5 w-5
+                        rounded-md
+                        border-gray-300
+                        text-orange-500
+                        focus:ring-2
+                        focus:ring-orange-200
+                        transition
+                      "
+                    />
+                    <span className="text-sm font-semibold text-slate-700">
+                      Je ne suis pas un professionnel
+                    </span>
+
+                  </label>
+                </div>
+
                 <button
                   type="submit"
                   disabled={loading}

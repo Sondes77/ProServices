@@ -28,10 +28,13 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
   const [showMessages, setShowMessages] = useState(false);
   const messageRef = useRef<HTMLDivElement>(null);
   const [notifications, setNotifications] = useState([]);
+  const hasPlayedRef = useRef(false);
   //const [markAllAsReadType, setMarkAllAsReadType] = useState<'all' | 'messages' | 'notifications'>('all');
 
   const unreadNotifications = notifications.filter(n => n.unread && n.type !== "message_received").length;
   const unreadMessages = notifications.filter(n => n.unread && n.type === "message_received").length;
+  const newNotifiedNotifications = notifications.filter(n => n.unread && n.type !== "message_received" && !n.notified);
+  const newNotifiedMessages = notifications.filter(n => n.unread && n.type === "message_received" && !n.notified);
 
   const avatar = user?.avatar || 'https://ui-avatars.com/api/?name=' + user?.nom + '&background=e0692d&color=fff';
   const isProfessional = user?.role === 'professional';
@@ -52,13 +55,35 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
 
   // Simulation : jouer le son quand un message arrive
   useEffect(() => {
-    if (unreadMessages > 0 && !currentPath.startsWith("/messages/")) {
+    const newNotified = notifications.filter(
+      n => n.unread && !n.notified
+    );
+    
+    if (unreadMessages > 0 && !currentPath.startsWith("/messages/") && newNotifiedMessages.length > 0) {
       playNotificationSound();
+      markAsNotified(newNotified.map(n => n.id));
     }
-    if (unreadNotifications > 0) {
+    if (unreadNotifications > 0 && newNotifiedNotifications.length > 0) {
       playNotificationSound();
+      markAsNotified(newNotified.map(n => n.id));
     }
+   
+    // ✅ Marquer comme notified
+    //markAsNotified(newNotified.map(n => n.id));
+    
   }, [unreadMessages, unreadNotifications]);
+
+  const markAsNotified = async (ids: string[]) => {
+    try {
+      await fetch("http://localhost:5000/api/notifications/notified", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ ids })
+      });
+    } catch (e) {
+      console.log("Erreur update notified", e);
+    }
+  };
 
   /*const markAllAsRead = () => {
     setNotifications(notifications.map(n => ({ ...n, unread: true })));
@@ -112,134 +137,128 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
     };
   };
   
-useEffect(() => {
-  const fetchNotifications = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/notifications", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      if (res.status === 401) {
-        handleLogout();
-        return;
-      }
-      if (res.status === 403) throw new Error("Access denied");
-      const data = await res.json();
-      const newUnread = data.filter((n: any) => n.unread && n.type !== "message_received").length;
-      console.log("New unread notifications count:", newUnread);
-      // Jouer le son seulement si nouvelles notifications
-      if (newUnread > unreadNotifications) playNotificationSound();
-
-      setNotifications(data);
-    } catch (err) { console.log(err); }
-  };
-
-  const fetchMessages = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/messages/unread", {
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/notifications", {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
+        if (res.status === 401) {
+          handleLogout();
+          return;
+        }
+        if (res.status === 403) throw new Error("Access denied");
         const data = await res.json();
-        /*if (data.count > unreadMessages) {
-          playNotificationSound();
-        }*/
-        //setUnreadMessages(data.count);
+        const newUnread = data.filter((n: any) => n.unread && n.type !== "message_received").length;
+       
+        // Jouer le son seulement si nouvelles notifications
+        if (newUnread > unreadNotifications && newNotifiedNotifications.length > 0) playNotificationSound();
+
+        setNotifications(data);
       } catch (err) { console.log(err); }
     };
 
-    //fetchNotifications();
-    //fetchMessages();
+    const fetchMessages = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/messages/unread", {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          });
+          const data = await res.json();
+          /*if (data.count > unreadMessages) {
+            playNotificationSound();
+          }*/
+          //setUnreadMessages(data.count);
+        } catch (err) { console.log(err); }
+      };
 
-    const interval = setInterval(() => {
-      fetchNotifications();
-      fetchMessages();
-           
-    }, 1000); // toutes les 5 secondes
+      //fetchNotifications();
+      //fetchMessages();
 
-    return () => clearInterval(interval);
-  }, [unreadNotifications, unreadMessages]);
+      const interval = setInterval(() => {
+        fetchNotifications();
+        fetchMessages();
+            
+      }, 1000); // toutes les 5 secondes
 
-  const markAllAsRead = async (type: string) => {
-    try {
-      console.log("Sending type:", type);
-      await fetch(`http://localhost:5000/api/notifications/read-all`, {
-        method: 'PATCH',
-        body: JSON.stringify({
-          type: type
-        }),
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      return () => clearInterval(interval);
+    }, [unreadNotifications, unreadMessages]);
 
-      setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    const markAllAsRead = async (type: string) => {
+      try {
+       
+        await fetch(`http://localhost:5000/api/notifications/read-all`, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            type: type
+          }),
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
 
-  const markAsRead = async (id: string) => {
-    try {
-      await fetch(`http://localhost:5000/api/notifications/read/${id}`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  const handleNotificationClick = async (notif) => {
-    if (notif.unread)
-      await markAsRead(notif.id);
-
-      if (notif.link && String(notif.user_id) !== String(user.id)) {
-        window.location.href = notif.link;
+        setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+      } catch (err) {
+        console.error(err);
       }
-      else {
-        window.location.href = "/mes-devis";
+    };
+
+    const markAsRead = async (id: string) => {
+      try {
+        await fetch(`http://localhost:5000/api/notifications/read/${id}`, {
+          method: 'PATCH',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
+      } catch (err) {
+        console.error(err);
       }
-  };
+    };
+    const handleNotificationClick = async (notif) => {
+      if (notif.unread)
+        await markAsRead(notif.id);
+        window.location.href = ("http://localhost:3000")+notif.link;
+    };
 
-const groupedMessageNotifs = Object.values(
-  notifications
-    .filter(n => n.type === "message_received")
-    .reduce((acc: any, notif: any) => {
-      const key = notif.user_id2;
+  const groupedMessageNotifs = Object.values(
+    notifications
+      .filter(n => n.type === "message_received")
+      .reduce((acc: any, notif: any) => {
+        const key = notif.user_id2;
 
-      if (!acc[key]) {
-        acc[key] = {
-          ...notif,
-          count: 1,
-          unreadCount: notif.unread ? 1 : 0,
-          lastDate: notif.created_at
-        };
-      } else {
-        acc[key].count += 1;
+        if (!acc[key]) {
+          acc[key] = {
+            ...notif,
+            count: 1,
+            unreadCount: notif.unread ? 1 : 0,
+            lastDate: notif.created_at
+          };
+        } else {
+          acc[key].count += 1;
 
-        if (notif.unread) {
-          acc[key].unreadCount += 1;
-          //playNotificationSound();
+          if (notif.unread) {
+            acc[key].unreadCount += 1;
+            //playNotificationSound();
+          }
+
+          // garder le + récent
+          if (new Date(notif.created_at) > new Date(acc[key].lastDate)) {
+            acc[key].lastDate = notif.created_at;
+            acc[key].text = notif.text;
+            acc[key].title = notif.title;
+            acc[key].photo = notif.photo;
+            acc[key].link = notif.link;
+          }
         }
 
-        // garder le + récent
-        if (new Date(notif.created_at) > new Date(acc[key].lastDate)) {
-          acc[key].lastDate = notif.created_at;
-          acc[key].text = notif.text;
-          acc[key].title = notif.title;
-          acc[key].photo = notif.photo;
-          acc[key].link = notif.link;
-        }
-      }
-
-      return acc;
-    }, {})
-)
-.sort(
-  (a: any, b: any) =>
-    new Date(b.lastDate).getTime() - new Date(a.lastDate).getTime()
-);
+        return acc;
+      }, {})
+  )
+  .sort(
+    (a: any, b: any) =>
+      new Date(b.lastDate).getTime() - new Date(a.lastDate).getTime()
+  );
 
   /*const groupedMessageNotifs = React.useMemo(() => {
       const map = new Map();
