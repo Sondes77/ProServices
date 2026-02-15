@@ -3,6 +3,7 @@ const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
+const nodemailer = require("nodemailer");
 
 require('dotenv').config();
 
@@ -20,13 +21,35 @@ exports.createDevis = async (req,res)=>{
     const devisId = result.insertId; // ✅ ID ici
 
     // 👤 Nom auteur
-    const [rows] = await db.promise().query(
-      `SELECT nom FROM utilisateurs WHERE id = ?`,
-      [client_id]
-    );
+    const [rows] = await db.promise().query(`
+      SELECT 
+        uc.nom        AS client_nom,
+        uc.prenom     AS client_prenom,
+        up.email      AS pro_email,
+        sp.email_notifications AS pro_email_notifications
 
-    const senderName = rows[0]?.nom || "Un utilisateur";
+      FROM utilisateurs uc
+      LEFT JOIN utilisateurs up 
+        ON up.id = ?
 
+      LEFT JOIN settings sp 
+        ON sp.user_id = up.id
+
+      WHERE uc.id = ?
+    `, [professionnel_id, client_id]);
+
+    const row = rows[0];
+    const senderName = row
+      ? `${row.client_nom} ${row.client_prenom}`
+      : "Un utilisateur";
+
+    const proEmail = row?.pro_email ?? "";
+    const proEmailNotifications = row?.pro_email_notifications ?? false;
+
+    console.log(" senderName = "+senderName);
+    console.log(" email_notification = "+proEmailNotifications);
+    console.log(" email = "+proEmail);
+    
     // 🔔 Notification destinataire
     await db.promise().query(
       `INSERT INTO notifications
@@ -41,6 +64,92 @@ exports.createDevis = async (req,res)=>{
         `/devis/${devisId}`
       ]
     );
+
+    if (proEmailNotifications){
+      const transporter = nodemailer.createTransport({
+        //host: "ssl0.ovh.net",
+        host: "smtp.mail.ovh.net",
+        port: 465,
+        secure: true,
+        auth: {
+          user: "contact@servicepro.tn",
+          pass: "ServicePro610.P###",
+        },
+      });
+      
+      console.log(transporter.verify());
+      transporter.verify((error, success) => {
+        if (error) {
+          console.log("❌ Erreur SMTP :", error);
+        } else {
+          console.log("✅ SMTP prêt à envoyer");
+        }
+      });
+  
+      transporter.sendMail({
+        from: `"SERVICEPRO" <contact@servicepro.tn>`,
+        to: proEmail,
+        subject: `Nouvel demande de devis`,
+        //text: `Votre code de vérification est : ${code}`,
+        html: `
+            <!DOCTYPE html>
+            <html>
+            <body style="font-family:Arial;background:#f4f4f4;margin:0;">
+            <table width="100%">
+            <tr>
+            <td align="center">
+            <table width="600" style="background:white;border-radius:10px;">
+            
+            <tr>
+            <td style="background:#e0692d;color:white;padding:24px;text-align:center;">
+            <img 
+                src="http://localhost:3000/static/media/noBgColor5.a91ff3c99db745febd01.png" 
+                alt="ServicePro"
+                width="160"
+                style="display:block;margin:auto;"
+              >
+            </td>
+            </tr>
+
+            <tr>
+            <td style="background:#e0692d;color:white;padding:24px;text-align:center;">
+            <h2>Nouvelle demande de service</h2>
+            </td>
+            </tr>
+
+            <tr>
+            <td style="padding:28px;">
+            <p><b>Client :</b> ${senderName}</p>
+            <p><b>Service :</b> ${objet}</p>
+
+            <div style="background:#fafafa;padding:18px;border-radius:8px;margin-top:15px;">
+            ${description}
+            </div>
+
+            <div style="margin-top:25px;text-align:center;">
+            <a href="/devis/${devisId}" style="
+            background:#e0692d;
+            color:white;
+            padding:12px 20px;
+            border-radius:8px;
+            text-decoration:none;
+            ">
+            Voir la demande
+            </a>
+            </div>
+
+            </td>
+            </tr>
+
+            </table>
+            </td>
+            </tr>
+            </table>
+            </body>
+            </html>`
+      });
+        
+    }
 
     // ✅ OK
     res.status(200).json({

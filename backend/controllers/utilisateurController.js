@@ -788,7 +788,7 @@ exports.contact = (req, res) => {
   try {
     const { name, email, subject, message } = req.body;
       
-     const transporter = nodemailer.createTransport({
+    const transporter = nodemailer.createTransport({
       //host: "ssl0.ovh.net",
       host: "smtp.mail.ovh.net",
       port: 465,
