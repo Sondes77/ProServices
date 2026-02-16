@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
   FileText, Clock, CheckCircle, XCircle, 
-  MessageCircle, Send, Calendar, MapPin, User as UserIcon
+  MessageCircle, Send, Calendar, MapPin, User as UserIcon,
+  Search,
+  SlidersHorizontal,
+  ChevronRight
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { User, Devis } from '../utils/types';
@@ -35,7 +38,23 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
   const { Id } = useParams<{ Id: string }>();
   const [checkingAccess, setCheckingAccess] = useState(true);
   const navigate = useNavigate();
- 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterDate, setFilterDate] = useState('');
+
+  // Logique de filtrage calculée
+  const filteredQuotes = quotes.filter(quote => {
+    const matchesSearch = quote.pro_nom.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          quote.objet.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          quote.id.toString().includes(searchTerm);
+    const matchesStatus = filterStatus === 'all' || quote.statut === filterStatus;
+    
+    // Filtrage par date (on compare les chaînes YYYY-MM-DD)
+    const matchesDate = !filterDate || quote.created_at.includes(filterDate);
+
+    return matchesSearch && matchesStatus && matchesDate;
+  });
+
   useEffect(() => {   
     const fetchDevis = async () => {
       try {
@@ -257,22 +276,74 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
           </span>
         </div>
       </div>
+ 
+      <div className="bg-white p-2 rounded-[24px] shadow-sm border border-slate-100 mb-8 flex flex-col lg:flex-row gap-2">
+        {/* 1. Recherche Texte */}
+        <div className="relative flex-[2]">
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input 
+            type="text"
+            placeholder="Client, objet, REF..."
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-[18px] focus:ring-2 focus:ring-orange-100 outline-none text-sm transition-all placeholder:text-slate-400"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2 flex-[3]">
+          {/* 2. Filtre par Date (Le look est épuré) */}
+          <div className="relative flex-1">
+            <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <input 
+              type="date"
+              className="w-full pl-11 pr-4 py-3 bg-slate-50 border-none rounded-[18px] focus:ring-2 focus:ring-orange-100 outline-none text-sm text-slate-600 font-medium appearance-none"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+            />
+            {filterDate && (
+              <button 
+                onClick={() => setFilterDate('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-red-400"
+              >
+                <XCircle size={14} />
+              </button>
+            )}
+          </div>
+
+          {/* 3. Filtre par Statut */}
+          <div className="relative flex-1">
+            <SlidersHorizontal size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <select 
+              className="w-full pl-11 pr-10 py-3 bg-slate-50 border-none rounded-[18px] focus:ring-2 focus:ring-orange-100 outline-none text-sm appearance-none cursor-pointer text-slate-600 font-medium"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">Tous les statuts</option>
+              <option value="pending_pro">À répondre (Nouveau)</option>
+              <option value="proposed">Offres envoyées</option>
+              <option value="accepted">Acceptés</option>
+              <option value="rejected">Refusés</option>
+              <option value="cancelled">Annulés</option>
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+              <ChevronRight size={16} className="rotate-90" />
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
-        
         {/* LISTE DES DEVIS */}
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          
+        <div className="bg-white p-3 rounded-lg shadow-md">
           {/* zone scrollable */}
-          <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+          <div className="space-y-4 max-h-[650px] overflow-y-auto custom-scrollbar -mr-2 pr-1">
             
-            {quotes.length === 0 && (
-              <div className="text-center text-gray-400 py-10">
-                Aucun devis trouvé
+            {filteredQuotes.length === 0 ? (
+              <div className="text-center text-gray-400 py-16 bg-slate-50 rounded-[24px] border-2 border-dashed border-slate-100">
+                <Search size={40} className="mx-auto mb-3 opacity-20" />
+                <p>Aucun devis ne correspond à votre recherche</p>
               </div>
-            )}
-
-            {quotes.map((quote) => (
+            ) : (
+            filteredQuotes.map((quote) => (
               <div
                 key={quote.id}
                 onClick={() => setSelectedQuote(quote)}
@@ -348,10 +419,9 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
 
                 </div>
               </div>
-            ))}
+            )))}
           </div>
         </div>
-
 
         {/* DÉTAILS ET RÉPONSE */}
         <aside>

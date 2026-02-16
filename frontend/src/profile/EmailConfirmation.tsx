@@ -21,7 +21,7 @@ const EmailConfirmation = () => {
     if(!isVerified)
     {
       const userEmail = localStorage.getItem("email");
-      alert(userEmail);
+
       if (!userEmail || !token) {
         localStorage.removeItem("currentUser");
         // Popup moderne + timer 3 sec
@@ -118,7 +118,25 @@ const EmailConfirmation = () => {
       body: JSON.stringify({ email }),
     });
 
-    alert('Un nouveau code a été envoyé à votre adresse email');
+    Swal.fire({
+      toast: true, // active le mode toast
+      position: "top-end", // en haut à droite
+      showConfirmButton: false, // pas de bouton OK
+      timer: 1500, // durée d'affichage
+      timerProgressBar: true, // barre de progression
+      icon: "success",
+      //title: selectedService ? "Service mis à jour" : "Service créé",
+      text: "Un nouveau code a été envoyé à votre adresse email",
+      showClass: {
+        popup: "animate__animated animate__slideInRight", // entrée animée
+      },
+      hideClass: {
+        popup: "animate__animated animate__slideOutRight", // sortie animée
+      },
+      customClass: {
+        popup: "rounded-2xl shadow-lg p-4", // style chic
+      },
+    });
   };
 
   const [step, setStep] = useState(0);

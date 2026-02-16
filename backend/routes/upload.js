@@ -73,4 +73,19 @@ router.post('/upload-gallery', upload.array('images', 5), (req, res) => {
 
 });
 
+router.post("/upload-message-file", upload.single("file"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "Aucun fichier" });
+  }
+
+  const fileUrl = `/uploads/${req.file.filename}`;
+
+  res.json({
+    success: true,
+    fileUrl,
+    fileName: req.file.originalname,
+    type: req.file.mimetype.startsWith("image") ? "image" : "file"
+  });
+});
+
 module.exports = router;

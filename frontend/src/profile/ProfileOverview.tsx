@@ -65,7 +65,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({ user, onEditProfile }
               id="avatar"
               className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
             />
-            <span className="absolute bottom-1 right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></span>
+            {/*<span className="absolute bottom-1 right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></span>*/}
           </div>
           <div className="md:ml-6 text-center md:text-left lg:text-left">
             <h1 className="text-2xl font-bold text-white">{user.fullName}</h1>

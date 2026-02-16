@@ -52,21 +52,24 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSave }) =
     }
   }, [navigate]);
 
+  
   useEffect(() => {
-  const load = async () => {
-    const data = await getPrivacySettings(token!);
+    if (userRole === "user") return;
 
-    setFormData({
-        hideContactInfo: !data.show_phone,
-        allowMessages: !data.show_address,
-        showServices: data.allow_share === 1 || data.allow_share === true,
-        profileVisibility: data.statut_profil,
-        emailNotifications: data.email_notifications === 1 || data.email_notifications === true,
-        pushNotifications: false,
-      });
-    };
+    const load = async () => {
+      const data = await getPrivacySettings(token!);
 
-    load();
+      setFormData({
+          hideContactInfo: !data.show_phone,
+          allowMessages: !data.show_address,
+          showServices: data.allow_share === 1 || data.allow_share === true,
+          profileVisibility: data.statut_profil,
+          emailNotifications: data.email_notifications === 1 || data.email_notifications === true,
+          pushNotifications: false,
+        });
+      };
+
+      load();
   }, []);
 
   const handleToggle = (field: keyof PrivacySettingsType) => {
@@ -126,6 +129,7 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSave }) =
       Swal.fire("Erreur", "Mots de passe différents", "error");
       return;
     }
+    console.log("passwordForm = ", passwordForm);
     const res = await fetch(`http://localhost:5000/api/change-password`, {
       method: 'PUT',
       headers: {  'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

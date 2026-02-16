@@ -59,6 +59,8 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
   const visibleReviews = reviews.slice(0, visibleCount);
   const hasMore = visibleCount < reviews.length;
 
+  console.log("user = ", user);
+  console.log("user2 = ", user2);
   useEffect(() => {
     
     const fetchService = async () => {

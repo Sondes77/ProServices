@@ -191,7 +191,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             id="user-avatar" 
             className="hidden md:flex w-20 h-20 rounded-full object-cover border-2 border-[#e0692d]"
           />
-          <span className="hidden md:flex absolute bottom-0 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></span>
+          {/*<span className="hidden md:flex absolute bottom-0 right-0 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></span>*/}
 
           {/* Overlay appareil photo */}
           {hovered && (

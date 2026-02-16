@@ -111,7 +111,25 @@ const FirstService: React.FC<FirstServiceProps> = ({  user, service, onSubmit, o
 
     const total = existingImages.length + newFiles.length + files.length;
     if (total > 5) {
-      alert("Max 5 images");
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "warning",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Max 5 images",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
       return;
     }
 
@@ -191,8 +209,26 @@ const FirstService: React.FC<FirstServiceProps> = ({  user, service, onSubmit, o
       console.log('Statut HTTP:', response.status);
   
       if (response.status === 201 || response.status === 200) {
-        alert('Utilisateur mis à jour avec succès');
-        console.log('Utilisateur mis à jour avec succès');
+
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "success",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Utilisateur mis à jour avec succès",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
   
       // Requête pour obtenir les infos complètes de l'utilisateur
       const userRes = await fetch(`http://localhost:5000/api/utilisateurId?id=${encodeURIComponent(data.userId)}`, {
@@ -215,10 +251,28 @@ const FirstService: React.FC<FirstServiceProps> = ({  user, service, onSubmit, o
             window.location.href = `/dashboard`;
           }, 300); // 300ms par exemple
         } else {
-          alert("Erreur lors de la récupération des données utilisateur");
+          Swal.fire({
+            toast: true, // active le mode toast
+            position: "top-end", // en haut à droite
+            showConfirmButton: false, // pas de bouton OK
+            timer: 1500, // durée d'affichage
+            timerProgressBar: true, // barre de progression
+            icon: "warning",
+            //title: selectedService ? "Service mis à jour" : "Service créé",
+            text: "Erreur lors de la récupération des données utilisateur",
+            showClass: {
+              popup: "animate__animated animate__slideInRight", // entrée animée
+            },
+            hideClass: {
+              popup: "animate__animated animate__slideOutRight", // sortie animée
+            },
+            customClass: {
+              popup: "rounded-2xl shadow-lg p-4", // style chic
+            },
+          });
         }
       }else if(response.status === 403){
-        alert("Votre session a été épuisée ! Veuillez vous vous connectez");
+        Swal.fire("warning","Votre session a été épuisée ! Veuillez vous vous connectez");
         navigate("/connexion");
       }else {
         console.error("Erreur lors de la création de l'utilisateur :", data.message);
@@ -313,7 +367,7 @@ const FirstService: React.FC<FirstServiceProps> = ({  user, service, onSubmit, o
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Prix (DT)</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Prix (DT) : À partir de</label>
                 <input 
                   type="number" 
                   value={formData.price}
@@ -327,32 +381,7 @@ const FirstService: React.FC<FirstServiceProps> = ({  user, service, onSubmit, o
             </div>
           </section>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            {/*<div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                Catégorie
-              </label>
-              <CustomSelect
-                value={formData.category}
-                onChange={(value: string) =>
-                  setFormData(prev => ({ ...prev, category: value }))
-                }
-                placeholder="Catégorie"
-                options={[
-                  { value: "Plomberie", label: "Plomberie" },
-                  { value: "Électricité", label: "Électricité" },
-                  { value: "Menuiserie", label: "Menuiserie" },
-                  { value: "Peinture", label: "Peinture" },
-                  { value: "Jardinage", label: "Jardinage" },
-                  { value: "Maçonnerie", label: "Maçonnerie" },
-                  { value: "Chauffage", label: "Chauffage" },
-                  { value: "Climatisation", label: "Climatisation" },
-                  { value: "Serrurerie", label: "Serrurerie" },
-                  { value: "Autre", label: "Autre" },
-                ]}
-              />
-            </div>*/}
-
+          
             {/* Category */}
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>

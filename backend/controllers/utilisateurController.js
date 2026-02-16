@@ -241,7 +241,69 @@ exports.getUtilisateurParamId = (req, res) => {
 
   //const decoded = jwt.verify(token, process.env.JWT_SECRET);
   //console.log(id);
-  db.query('SELECT u.*, se.*, COUNT(DISTINCT s.id) AS nb_services, COUNT(DISTINCT r.id) AS nb_reviews, COUNT(DISTINCT c.id) AS nb_conversations FROM utilisateurs u LEFT JOIN services s ON s.professionnel_id = u.id and s.statut = ? LEFT JOIN reviews r ON r.recipient_id = u.id LEFT JOIN conversations c ON c.user1_id = u.id or c.user2_id = u.id left join settings se on se.user_id = u.id WHERE u.id = ?', ['active', id], (err, result) => {
+  db.query(`SELECT
+              u.id,
+              u.prenom,
+              u.nom,
+              u.role,
+              u.email,
+              u.email_verified,
+              u.phone_verified,
+              u.phone,
+              u.ville,
+              u.region,
+              u.adresse,
+              u.apropos,
+              u.photo,
+              u.date_creation,
+
+              se.show_phone,
+              se.show_address,
+              se.allow_share,
+              se.statut_profil,
+              se.email_notifications,
+
+              COUNT(DISTINCT s.id) AS nb_services,
+              COUNT(DISTINCT r.id) AS nb_reviews,
+              COUNT(DISTINCT c.id) AS nb_conversations
+
+            FROM utilisateurs u
+
+            LEFT JOIN services s
+              ON s.professionnel_id = u.id
+              AND s.statut = ?
+
+            LEFT JOIN reviews r
+              ON r.recipient_id = u.id
+
+            LEFT JOIN conversations c
+              ON (c.user1_id = u.id OR c.user2_id = u.id)
+
+            LEFT JOIN settings se
+              ON se.user_id = u.id
+
+            WHERE u.id = ?
+
+            GROUP BY
+              u.id,
+              u.prenom,
+              u.nom,
+              u.role,
+              u.email,
+              u.email_verified,
+              u.phone_verified,
+              u.phone,
+              u.ville,
+              u.region,
+              u.adresse,
+              u.apropos,
+              u.photo,
+              u.date_creation,
+              se.show_phone,
+              se.show_address,
+              se.allow_share,
+              se.statut_profil,
+              se.email_notifications`, ['active', id], (err, result) => {
     if (err) {
       console.error('Erreur lors de la récupération des services:', err);
       return res.status(500).send('Erreur serveur');
@@ -628,7 +690,7 @@ exports.changePassword =  (req, res) => {
         if (!ok) return res.status(400).json({ success: false, message: "Mot de passe actuel incorrect" });
 
         const hash = bcrypt.hashSync(newPassword, 10);
-
+        
         db.query(
           "UPDATE utilisateurs SET mot_de_passe=? WHERE id=?",
           [hash, userId],

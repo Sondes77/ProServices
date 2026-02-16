@@ -469,10 +469,10 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onSubmit, onCancel})
 
             {/* Footer d'action */}
             <div className="flex items-center justify-between pt-6 border-t">
-              <div className="flex items-center gap-2 text-blue-600 text-sm bg-blue-50 px-4 py-2 rounded-full">
-                <Info size={16} />
-                <span>Pensez à utiliser des mots-clés pour le SEO</span>
-              </div>
+               <div className="flex items-center gap-2 text-blue-600 text-sm bg-blue-50 px-4 py-2 rounded-full">
+                {/*<Info size={16} />
+                <span>Pensez à utiliser des mots-clés pour le SEO</span>*/}
+              </div> 
               <div className="flex gap-4">
                 <button 
                   type="button" 

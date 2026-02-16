@@ -440,7 +440,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
             <p className="text-gray-600 mb-8 leading-relaxed">{service.description}</p>
 
             <div className="grid md:grid-cols-2 gap-6">
-              {service.included.length > 0 &&
+              {service.included && service.included.length > 0 && service.included[0] !== "" &&
                 <div className="bg-green-50 p-5 rounded-2xl">
                   <h3 className="font-bold text-green-800 flex items-center mb-3">
                     <CheckCircle size={18} className="mr-2" /> Ce qui est inclus
@@ -452,7 +452,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
                   </ul>
                 </div>
               }
-              {service.notIncluded.length > 0 && 
+              {service.notIncluded && service.notIncluded.length > 0 && service.notIncluded[0] !== "" &&
                 <div className="bg-red-50 p-5 rounded-2xl">
                   <h3 className="font-bold text-red-800 flex items-center mb-3">
                     <XCircle size={18} className="mr-2" /> Non inclus
@@ -488,37 +488,6 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
               Voir le profil complet <ChevronRight size={16} />
             </button>
           </div>
-          {/* Informations du prestataire 
-          <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-            <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">À propos du prestataire</h2>
-              <div className="flex items-center">
-                <img
-                  src={user.avatar}
-                  alt={user.fullName}
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-                <div className="ml-4">
-                  <h3 className="text-lg font-medium text-gray-900">{user.firstName}</h3>
-                  <div className="flex items-center mt-1">
-                    <div className="flex items-center">
-                      <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                      <span className="ml-1 text-gray-600">{user.stats.reviewsPosted}</span>
-                    </div>
-                    <span className="mx-2 text-gray-300">•</span>
-                    <span className="text-gray-600">{user.stats.reviewsPosted} avis</span>
-                  </div>
-                </div>
-                {!userMe && (
-                    <button className="ml-auto bg-[#e0692d] text-white px-6 py-2 rounded-full hover:bg-[#f07e40] transition-colors duration-200 flex items-center">
-                    <MessageSquare className="h-5 w-5 mr-2" />
-                    Contacter
-                    </button>
-                )}
-              </div>
-            </div>
-          </div>*/}
-          
         </div>
 
         {/* Colonne droite (pub) */}

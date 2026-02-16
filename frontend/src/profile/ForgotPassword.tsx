@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types'
 import { Mail, ArrowRight, Loader2, ArrowLeft, CheckCircle, ShieldCheck } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 const ForgotPassword = (props) => {
   const [email, setEmail] = useState('');
@@ -26,13 +27,28 @@ const ForgotPassword = (props) => {
         // Succès de l'envoi
         setIsSubmitted(true);
       } else {
-        alert(data.error || 'Une erreur est survenue. Vérifiez votre email.');
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "warning",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Une erreur est survenue. Vérifiez votre email.",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
       }
     } catch (error) {
       console.error('Erreur de récupération :', error);
-      // Pour la démo, on simule un succès même en cas d'erreur réseau si pas de backend
-      // alert("Impossible de contacter le serveur."); 
-      // À supprimer en prod :
       setTimeout(() => setIsSubmitted(true), 1500);
     } finally {
       setLoading(false);

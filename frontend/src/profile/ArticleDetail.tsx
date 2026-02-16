@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Calendar, User, ArrowLeft, Tag, Clock, Share2 } from 'lucide-react';
 import { blogPosts, BlogPost } from './blogData';
+import Swal from 'sweetalert2';
 
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -61,7 +62,25 @@ const ArticleDetail = () => {
         .catch(err => console.error('Error sharing:', err));
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert('Lien copié dans le presse-papier!');
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "success",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Lien copié dans le presse-papier!",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
     }
   };
 

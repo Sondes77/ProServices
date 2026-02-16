@@ -3,7 +3,7 @@ import { User, Professional, Service, Devis } from './types';
 
 export function mapUserDataToUserModel(userData: any): User {
 
-  //console.log('Données brutes reçues depuis l’API :', userData);
+  console.log('Données brutes reçues depuis l’API :', userData);
 
   const id = String(userData.id);
   const firstName = userData.prenom || '';

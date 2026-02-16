@@ -11,6 +11,7 @@ import { User, Mail, Phone, Lock, Eye, EyeOff, Facebook, Chrome, MapPin, ArrowRi
 import { motion } from 'framer-motion';
 import CustomSelect from '../profile/CustomSelect';
 import { Categorie, Metier } from './categoryMetier';
+import Swal from "sweetalert2";
 
 const SignUp6 = (props) => {
 const location = useLocation();
@@ -63,7 +64,25 @@ const handleSubmit = async (e) => {
 
   // ✅ VALIDATION AVANT ENVOI
   if (!payload.email || !payload.password) {
-    alert("Email et mot de passe obligatoires");
+    Swal.fire({
+      toast: true, // active le mode toast
+      position: "top-end", // en haut à droite
+      showConfirmButton: false, // pas de bouton OK
+      timer: 1500, // durée d'affichage
+      timerProgressBar: true, // barre de progression
+      icon: "warning",
+      //title: selectedService ? "Service mis à jour" : "Service créé",
+      text: "Email et mot de passe obligatoires",
+      showClass: {
+        popup: "animate__animated animate__slideInRight", // entrée animée
+      },
+      hideClass: {
+        popup: "animate__animated animate__slideOutRight", // sortie animée
+      },
+      customClass: {
+        popup: "rounded-2xl shadow-lg p-4", // style chic
+      },
+    });
     return;
   }
 
@@ -81,7 +100,6 @@ const handleSubmit = async (e) => {
       }
     );
       
-    alert(response.status);
     const data = await response.json();
    
     if (!response.ok) {
@@ -107,7 +125,6 @@ const handleSubmit = async (e) => {
 
     const userData = await userRes.json();
     if (!response.ok) {
-      alert("sdfsdf " + data.message);
         setError(data.message || "Erreur lors de l'inscription");
         setLoading(false);
         return;
@@ -119,14 +136,30 @@ const handleSubmit = async (e) => {
         JSON.stringify(mapUserDataToUserModel(userData))
       );
 
-      //alert("Bienvenue 👋");
       window.location.href = "/dashboard";
     } else {
-      alert("Impossible de récupérer les données utilisateur");
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "warning",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Une erreur est survenue. Réessayez plus tard.",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
     }
   } catch (err) {
-    console.error("Erreur réseau :", err);
-    //alert("Erreur serveur");
+    console.log("Erreur réseau");
   } finally {
     setLoading(false);
   }
@@ -328,7 +361,7 @@ const handleSubmit = async (e) => {
                     </button>
                   </div>
                 </div>
-
+                {location.pathname === "/business" &&(
                 <div className="space-y-2">
                   <label className="flex py-2 items-center gap-3 cursor-pointer select-none">
                     <input
@@ -351,7 +384,7 @@ const handleSubmit = async (e) => {
 
                   </label>
                 </div>
-
+                )}
                 <button
                   type="submit"
                   disabled={loading}

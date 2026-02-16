@@ -69,9 +69,12 @@ export interface Message {
     avatar: string;
     role: 'user' | 'professional';
   };
-  content: string;
+  content: string | string[];
+  type: string;
   timestamp: string;
+  groupId?: string;
   read: boolean;
+  notified: boolean;
 }
 
 export interface Review {
@@ -117,8 +120,10 @@ export interface Service {
 }
 
 export interface Conversation {
+  isRead: any;
   id: string;
   participant: {
+    isOnline: any;
     id: string;
     name: string;
     avatar: string;

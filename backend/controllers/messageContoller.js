@@ -220,7 +220,7 @@ exports.sendMessageContainer2 = async (req, res) => {
 };
 
 exports.sendMessageContainer = async (req, res) => {
-  const { recipientId, conversationId, content } = req.body;
+  const { recipientId, conversationId, content, type, groupId } = req.body;
   console.log("req.body = ", req.body);
 
   const authHeader = req.headers['authorization'];
@@ -241,10 +241,10 @@ exports.sendMessageContainer = async (req, res) => {
     await db.promise().query(
       `
       INSERT INTO messages 
-      (id, conversation_id, sender_id, recipient_id, content, is_read)
-      VALUES (?, ?, ?, ?, ?, FALSE);
+      (id, conversation_id, sender_id, recipient_id, content, type, groupId, is_read)
+      VALUES (?, ?, ?, ?, ?, ?, ?, FALSE);
       `,
-      [messageId, conversationId, senderId, recipientId, content]
+      [messageId, conversationId, senderId, recipientId, content, type, groupId]
     );
 
     // Récup message complet
@@ -253,6 +253,7 @@ exports.sendMessageContainer = async (req, res) => {
       SELECT
         m.id,
         m.content,
+        m.type,
         m.created_at AS timestamp,
         m.is_read,
         s.id AS sender_id,
@@ -269,6 +270,7 @@ exports.sendMessageContainer = async (req, res) => {
     const fullMessage = {
       id: messageRows[0].id,
       content: messageRows[0].content,
+      type: messageRows[0].type,
       timestamp: messageRows[0].timestamp,
       read: messageRows[0].is_read,
       sender: {
@@ -340,6 +342,7 @@ exports.getConversations = (req, res) => {
         u.role AS participant_role,
 
         m.content AS last_message_content,
+        m.type,
         m.created_at AS last_message_timestamp,
         m.sender_id AS last_message_sender,
 
@@ -383,6 +386,7 @@ exports.getConversations = (req, res) => {
         },
         lastMessage: {
           content: row.last_message_content || "",
+          type: row.type || "text",
           timestamp: row.last_message_timestamp || null,
           sender: row.last_message_sender || null,
         },
@@ -441,6 +445,8 @@ exports.getMessages = (req, res) => {
         SELECT
           m.id,
           m.content,
+          m.type,
+          m.groupId,
           m.created_at AS timestamp,
           m.is_read,
 
@@ -467,8 +473,11 @@ exports.getMessages = (req, res) => {
         const formatted = rows.map(m => ({
           id: m.id,
           content: m.content,
+          type: m.type,
+          groupId: m.groupId,
           timestamp: m.timestamp,
           read: m.is_read,
+          //notified: m.notified,
           sender: {
             id: m.sender_id,
             name: m.sender_name,

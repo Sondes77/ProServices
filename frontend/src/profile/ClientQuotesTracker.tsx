@@ -32,7 +32,25 @@ const ClientQuotesDashboard = () => {
         });
 
         if (!response.ok) {
-          alert('Erreur lors de la récupération du service');
+          Swal.fire({
+            toast: true, // active le mode toast
+            position: "top-end", // en haut à droite
+            showConfirmButton: false, // pas de bouton OK
+            timer: 1500, // durée d'affichage
+            timerProgressBar: true, // barre de progression
+            icon: "warning",
+            //title: selectedService ? "Service mis à jour" : "Service créé",
+            text: "Une erreur est survenue !",
+            showClass: {
+              popup: "animate__animated animate__slideInRight", // entrée animée
+            },
+            hideClass: {
+              popup: "animate__animated animate__slideOutRight", // sortie animée
+            },
+            customClass: {
+              popup: "rounded-2xl shadow-lg p-4", // style chic
+            },
+          });
           return;
         }
 
@@ -41,8 +59,26 @@ const ClientQuotesDashboard = () => {
         const mapped = mapDevisDataToUserModel(devisArray);
         setDevis(mapped);
       } catch (error) {
-        console.error('Erreur réseau :', error);
-        alert('Erreur de connexion au serveur');
+        //console.error('Erreur réseau :', error);
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "warning",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Erreur réseau !",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
       }
     };
     fetchDevis();
@@ -192,7 +228,25 @@ const ClientQuotesDashboard = () => {
       });
 
       if (!response.ok) {
-        alert('Erreur lors de la récupération du service');
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "warning",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Erreur lors du changement du statut de devis !",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
         return;
       }
       
@@ -214,7 +268,25 @@ const ClientQuotesDashboard = () => {
 
     } catch (error) {
       console.error('Erreur réseau :', error);
-      alert('Erreur de connexion au serveur');
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "warning",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Erreur réseau !",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
     }
   };
   const statusOptions = [

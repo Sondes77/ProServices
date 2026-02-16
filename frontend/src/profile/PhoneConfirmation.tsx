@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Phone, ArrowRight, CheckCircle } from 'lucide-react';
 import ProgressSteps from '../profile/ProgressSteps';
-import { json } from 'express';
 
 const PhoneConfirmation = () => {
   const [phone, setPhone] = useState(''); // In a real app, this would come from auth context

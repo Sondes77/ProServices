@@ -27,6 +27,7 @@
     "react-bootstrap": "^2.10.9",
     "react-dom": "^19.1.0",
     "react-helmet": "^6.1.0",
+    "react-image-lightbox": "^5.1.4",
     "react-router-dom": "^7.5.3",
     "react-scripts": "5.0.1",
     "react-select": "^5.10.2",
