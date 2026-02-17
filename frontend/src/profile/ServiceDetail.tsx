@@ -5,6 +5,7 @@ import { User, Service } from '../utils/types';
 import { mapServicesDataToUserModel, mapUserDataToUserModel } from '../utils/mapper';
 import Swal from 'sweetalert2';
 import { Helmet as HelmetProviderBase } from "react-helmet-async";
+import CustomPicker from './CustomPicker';
 
 const Helmet = HelmetProviderBase as any;
 
@@ -60,13 +61,31 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
         });
 
         if (!response.ok) {
-          alert('Erreur lors de la récupération du service');
+          Swal.fire({
+            toast: true, // active le mode toast
+            position: "top-end", // en haut à droite
+            showConfirmButton: false, // pas de bouton OK
+            timer: 1500, // durée d'affichage
+            timerProgressBar: true, // barre de progression
+            icon: "warning",
+            //title: selectedService ? "Service mis à jour" : "Service créé",
+            text: "Erreur lors de la récupération de données",
+            showClass: {
+              popup: "animate__animated animate__slideInRight", // entrée animée
+            },
+            hideClass: {
+              popup: "animate__animated animate__slideOutRight", // sortie animée
+            },
+            customClass: {
+              popup: "rounded-2xl shadow-lg p-4", // style chic
+            },
+          });
           return;
         }
         
         const data = await response.json();
         const service = Array.isArray(data) ? data[0] : data;
-        //console.log("service = ", service);
+       
         const mapped = mapServicesDataToUserModel(service);
         setService(mapped);
        
@@ -83,15 +102,50 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
             const userdata = Array.isArray(data) ? data[0] : data;
             const mapped = mapUserDataToUserModel(userdata);
             setUser(mapped);
-            //console.log("id profile = ",user?.id);
+            
           } else {
-            alert('Erreur lors de la récupération d\'utilisateur');
+            Swal.fire({
+              toast: true, // active le mode toast
+              position: "top-end", // en haut à droite
+              showConfirmButton: false, // pas de bouton OK
+              timer: 1500, // durée d'affichage
+              timerProgressBar: true, // barre de progression
+              icon: "warning",
+              //title: selectedService ? "Service mis à jour" : "Service créé",
+              text: "Erreur lors de la récupération de données",
+              showClass: {
+                popup: "animate__animated animate__slideInRight", // entrée animée
+              },
+              hideClass: {
+                popup: "animate__animated animate__slideOutRight", // sortie animée
+              },
+              customClass: {
+                popup: "rounded-2xl shadow-lg p-4", // style chic
+              },
+            });
             return;
           }          
           
       } catch (error) {
-        console.error('Erreur réseau :', error);
-        alert('Erreur de connexion au serveur');
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "warning",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Erreur réseau",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
       }
     };
 
@@ -132,8 +186,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
       }
 
       const data = await res.json();
-      //console.log("Devis créé :", data);
-
+     
        Swal.fire({
         title: "Demande envoyée !",
         text: "Le professionnel vous répondra avec une proposition chiffrée.",
@@ -149,7 +202,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
       });
 
     } catch (err: any) {
-      console.error(err);
+      //console.error(err);
       Swal.fire("Erreur", err.message || "Erreur lors de l'envoi de la demande", "error");
     } finally {
       setLoading(false);
@@ -231,13 +284,33 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
         });
       } else {
         await navigator.clipboard.writeText(url);
-        alert("Lien du service copié");
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "success",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Lien du service copié",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
       }
     } catch (e) {
-      console.log("Share cancelled");
+      //console.log("Share cancelled");
     }
   };
-
+  const isArabic = (text: string) => {
+    return /[\u0600-\u06FF]/.test(text);
+  };
   // Affiche un message de chargement si le service n’est pas encore chargé
   if (!service) {
     return <div className="text-center py-10">Chargement du service...</div>;
@@ -437,7 +510,13 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
           {/* 2️⃣ DESCRIPTION & PROCESSUS */}
           <section className="bg-white rounded-3xl mb-6 md:mb-10 p-6 md:p-8 shadow-sm border border-gray-100">
             <h2 className="text-xl font-bold mb-4">Détails du service</h2>
-            <p className="text-gray-600 mb-8 leading-relaxed">{service.description}</p>
+            <p
+              dir={isArabic(service.description) ? "rtl" : "ltr"}
+              className={`text-gray-600 mb-8 leading-relaxed ${
+                isArabic(service.description) ? "text-right" : "text-left"
+              }`}
+            >{service.description}</p>
+            
 
             <div className="grid md:grid-cols-2 gap-6">
               {service.included && service.included.length > 0 && service.included[0] !== "" &&
@@ -546,13 +625,13 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
               </div>
             </div>*/}
           </div>
-          <div className="hidden lg:block bg-white p-4 rounded-lg shadow-md">
+          <div className="hidden lg:block bg-white p-4 rounded-[24px] shadow-md">
             <p className="text-sm text-gray-500 mb-2">Publicité</p>
             <div className="h-[600px] flex items-center justify-center border border-dashed border-gray-300">
               <span className="text-gray-400">Espace publicitaire disponible</span>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow-md">
+          <div className="bg-white p-4 rounded-[24px] shadow-md">
             <p className="text-sm text-gray-500 mb-2">Publicité</p>
             <div className="h-[250px] flex items-center justify-center border border-dashed border-gray-300">
               <span className="text-gray-400">Espace publicitaire disponible</span>
@@ -596,11 +675,23 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
               <label className="block text-sm font-semibold text-gray-700 mb-2 font-secondary">
                 Date d'intervention souhaitée
               </label>
-              <input 
+              
+              {/*<input 
                 type="date" 
                 className="w-full p-2 bg-gray-50 border border-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-orange-200 transition-all"
                 onChange={(e) => setQuoteDetails({...quoteDetails, date: e.target.value})}
                 required
+              />*/}
+              <CustomPicker
+                value={quoteDetails.date}
+                onChange={(date) =>
+                  setQuoteDetails(prev => ({
+                    ...prev,
+                    date
+                  }))
+                }
+                disablePastDates={true}   // optionnel : bloque les dates passées
+                required={true}
               />
             </div>
             <div>

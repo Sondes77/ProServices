@@ -25,6 +25,7 @@ router.post('/send-verification-code', verifyToken.verifyToken, utilisateurContr
 router.post('/send-phone-code', verifyToken.verifyToken, utilisateurController.sendPhoneCode);
 router.post('/forgot-password', utilisateurController.sendForgotPasswordlink);
 router.post('/contact', utilisateurController.contact);
+router.get('/reset-password/check/:token', utilisateurController.checkResetToken);
 router.post("/reset-password/:token", utilisateurController.resetPassword);
 router.put("/change-password", verifyToken.verifyToken, utilisateurController.changePassword);
 

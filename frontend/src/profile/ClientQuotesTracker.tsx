@@ -267,7 +267,7 @@ const ClientQuotesDashboard = () => {
       setShowDetails(false);
 
     } catch (error) {
-      console.error('Erreur réseau :', error);
+      //console.error('Erreur réseau :', error);
       Swal.fire({
         toast: true, // active le mode toast
         position: "top-end", // en haut à droite

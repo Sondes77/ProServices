@@ -107,7 +107,26 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onSubmit, onCancel})
 
     const total = existingImages.length + newFiles.length + files.length;
     if (total > 5) {
-      alert("Max 5 images");
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "error",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Max 5 images",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
+ 
       return;
     }
 
@@ -253,7 +272,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onSubmit, onCancel})
                       }));
                     }}
                     //disabled={!isEditing}
-                    required
+                    required = {true}
                     name="category"
                     placeholder='-- Sélectionner une catégorie --'
                     options={[
@@ -283,7 +302,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onSubmit, onCancel})
                       }));
                     }}
                     //disabled={!isEditing}
-                    required
+                    required = {true}
                     name="metier"
                     placeholder='-- Sélectionner un métier --'
                     options={[

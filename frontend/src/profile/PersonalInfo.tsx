@@ -28,7 +28,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
     address: user.address,
     apropos: user.apropos,
   });
-  console.log('Données utilisateur reçues dans PersonalInfo :', formData);
+
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
@@ -91,14 +91,14 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
       address: formData.address,
       apropos: formData.apropos,
     };
-    console.log('Données du formulaire:', formData);
+ 
     onSave(updatedUser);
     setIsEditing(false);
-    console.log('Données du formulaire:', formData);
+   
   
-    const token = localStorage.getItem('token');
+    //const token = localStorage.getItem('token');
     if (!token) {
-      console.error("Aucun token trouvé dans le localStorage");
+      //console.error("Aucun token trouvé dans le localStorage");
       return;
     }
   
@@ -114,12 +114,30 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
   
       const data = await response.json();
   
-      console.log('Réponse du backend:', data);
-      console.log('Statut HTTP:', response.status);
+      //console.log('Réponse du backend:', data);
+      //console.log('Statut HTTP:', response.status);
   
       if (response.status === 201 || response.status === 200) {
-        Swal.fire('succes','Mis à jour avec succès');
-        console.log('Utilisateur mis à jour avec succès');
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "success",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Mis à jour avec succès",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
+        //console.log('Utilisateur mis à jour avec succès');
   
       // Requête pour obtenir les infos complètes de l'utilisateur
       const userRes = await fetch(`http://localhost:5000/api/utilisateur?email=${encodeURIComponent(formData.email)}`, {
@@ -128,10 +146,10 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
           'Authorization': `Bearer ${token}`
         }
       });
-        const userData = await userRes.json();
+      const userData = await userRes.json();
         
         if (userRes.ok) {
-          console.log('Données utilisateur récupérées :', userData);
+          //console.log('Données utilisateur récupérées :', userData);
           localStorage.setItem('token', token);
           const user = mapUserDataToUserModel(userData);
           localStorage.setItem('currentUser', JSON.stringify(user));
@@ -146,13 +164,69 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
           }
           
         } else {
-          alert("Erreur lors de la récupération des données utilisateur");
+          Swal.fire({
+            toast: true, // active le mode toast
+            position: "top-end", // en haut à droite
+            showConfirmButton: false, // pas de bouton OK
+            timer: 1500, // durée d'affichage
+            timerProgressBar: true, // barre de progression
+            icon: "warning",
+            //title: selectedService ? "Service mis à jour" : "Service créé",
+            text: "Erreur lors de la récupération des données",
+            showClass: {
+              popup: "animate__animated animate__slideInRight", // entrée animée
+            },
+            hideClass: {
+              popup: "animate__animated animate__slideOutRight", // sortie animée
+            },
+            customClass: {
+              popup: "rounded-2xl shadow-lg p-4", // style chic
+            },
+          });
         }
       } else {
-        console.error("Erreur lors de la création de l'utilisateur :", data.message);
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "warning",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Erreur lors de la création de l'utilisateur",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
+        //console.error("Erreur lors de la création de l'utilisateur :", data.message);
       }
     } catch (error) {
-      console.error("Erreur lors de l'envoi:", error);
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "warning",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Erreur réseau !",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
+      //console.error("Erreur lors de l'envoi:", error);
     }
   };
   
@@ -164,7 +238,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
     if(user.phone !== '' && user.city !=='' && user.region !== '' && user.address !== '' && user.apropos !== ''){
       navigate('/dashboard', { replace: true });
     }
-    const token = localStorage.getItem('token');
+    //const token = localStorage.getItem('token');
     if (!token) {
       localStorage.removeItem("currentUser");
       navigate('/connexion', { replace: true });

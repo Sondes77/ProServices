@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, ShieldCheck, EyeOff, Eye, Lock, Phone, ArrowRight, CheckCircle } from 'lucide-react';
 import { useParams } from "react-router-dom";
@@ -7,71 +7,115 @@ import { useParams } from "react-router-dom";
 const ResetPassword = () => {
   const [error, setError] = useState('');
   const { token } = useParams<{ token: string }>();
-  let userId = JSON.parse(localStorage.getItem("currentUser") || '{}');
-  userId = userId?.id;
-  //const [token, setToken] = useState('');
   
-    /*useEffect(() => {
-      // Dans une vraie app, on utilise useSearchParams ou window.location
-      const queryParams = new URLSearchParams(window.location.search);
-      const urlToken = queryParams.get('token');
-      if (urlToken) setToken(urlToken);
-    }, []);*/
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirm, setShowConfirm] = useState(false);
-    
-    const [loading, setLoading] = useState(false);
-    const [isSuccess, setIsSuccess] = useState(false);
-    //const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      setError('');
-  
-      // Validation simple
-      if (password !== confirmPassword) {
-        setError("Les mots de passe ne correspondent pas.");
-        return;
-      }
-      if (password.length < 6) {
-        setError("Le mot de passe doit contenir au moins 6 caractères.");
-        return;
-      }
-  
-      setLoading(true);
-  
+  const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [tokenStatus, setTokenStatus] = useState<
+    "checking" | "valid" | "expired" | "not_found"
+  >("checking");
+
+  useEffect(() => {
+    const checkToken = async () => {
       try {
-        // Appel API réel
-        const response = await fetch(`http://localhost:5000/api/reset-password/${token}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password }),
-        });
-  
-        const data = await response.json();
-        console.log("dataaaaa = " , data);
-        if (response.ok) {
-          setIsSuccess(true);
-          // Redirection automatique après quelques secondes (optionnel)
-          setTimeout(() => {
-              window.location.href = '/connexion';
-          }, 3000);
-        } else {
-          setError(data.error || 'Le lien a expiré ou est invalide.');
+        const res = await fetch(
+          `http://localhost:5000/api/reset-password/check/${token}`
+        );
+
+        if (res.status === 404) {
+          setTokenStatus("not_found");
+          return;
         }
-      } catch (err) {
-        console.error(err);
-        // Simulation réussite pour démo UI
-        setTimeout(() => setIsSuccess(true), 1500);
-      } finally {
-        setLoading(false);
+
+        const data = await res.json();
+        setTokenStatus(data.status);
+      } catch {
+        setTokenStatus("not_found");
       }
     };
+
+    if (token) checkToken();
+  }, [token]);
+
   
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    // Validation simple
+    if (password !== confirmPassword) {
+      setError("Les mots de passe ne correspondent pas.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Le mot de passe doit contenir au moins 6 caractères.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Appel API réel
+      const response = await fetch(`http://localhost:5000/api/reset-password/${token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setIsSuccess(true);
+        // Redirection automatique après quelques secondes (optionnel)
+        setTimeout(() => {
+            window.location.href = '/connexion';
+        }, 3000);
+      } else {
+        setError(data.error || 'Le lien a expiré ou est invalide.');
+      }
+    } catch (err) {
+      //console.error(err);
+      // Simulation réussite pour démo UI
+      setTimeout(() => setIsSuccess(true), 1500);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (tokenStatus === "checking") {
+    return (
+      <div className="p-20 text-center">
+        <Loader2 className="animate-spin mx-auto" />
+        <p>Vérification du lien...</p>
+      </div>
+    );
+  }
+
+  if (tokenStatus === "expired") {
+    return (
+      <div className="p-16 text-center">
+        <h2 className="text-2xl font-bold mb-4">Lien expiré</h2>
+        <p className="text-gray-500 mb-6">
+          Ce lien de réinitialisation n'est plus valide.
+        </p>
+
+        <a
+          href="/mot-de-passe-oublie"
+          className="px-6 py-3 bg-[#e0692d] text-white rounded-xl"
+        >
+          Demander un nouveau lien
+        </a>
+      </div>
+    );
+  }
+
+  if (tokenStatus === "not_found") {
+    return <Navigate to="/404" replace />;
+  }
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden mb-4 md:mb-0 flex flex-col lg:flex-row">

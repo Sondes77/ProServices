@@ -26,7 +26,7 @@ const PhoneConfirmation = () => {
   }, [timer]);
 
   useEffect(() => {
-    console.log("ena userid = ", userId);
+    
     fetch("http://localhost:5000/api/send-phone-code", {
       method: "POST",
       headers: {
@@ -112,7 +112,7 @@ const PhoneConfirmation = () => {
       }),
     });
 
-    alert("Un nouveau code vous a été envoyé via WhatsApp");
+    //alert("Un nouveau code vous a été envoyé via WhatsApp");
   };
 
   const [step, setStep] = useState(1);

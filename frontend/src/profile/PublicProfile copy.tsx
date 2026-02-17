@@ -16,7 +16,8 @@ import {
   Lock,
   ArrowLeft,
   Briefcase,
-  Share2
+  Share2,
+  BadgeCheck
 } from 'lucide-react';
 import { User, Service, Review } from '../utils/types';
 import { mapUserDataToUserModel, mapServicesDataToUserModel } from '../utils/mapper';
@@ -33,10 +34,7 @@ interface PublicProfileProps {
 const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
   const routeParams = useParams<{ id?: string }>();
   const id = routeParams.id || user2?.id; 
-  
-  console.log("routeParams.id = ",routeParams.id);
-  console.log("id profile = ",user2?.id);
-  
+ 
   const navigate = useNavigate();
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [message, setMessage] = useState('');
@@ -59,18 +57,11 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
   const visibleReviews = reviews.slice(0, visibleCount);
   const hasMore = visibleCount < reviews.length;
 
-  console.log("user = ", user);
-  console.log("user2 = ", user2);
   useEffect(() => {
     
     const fetchService = async () => {
       
       try {  
-        //const token = localStorage.getItem('token');
-        //if (!token) {
-            //console.error("Aucun token trouvé dans le localStorage");
-            //return;
-        //}
         
         const response = await fetch(`http://localhost:5000/api/professional/${id}`, {
           method: 'GET',
@@ -81,12 +72,30 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
         });
 
         if (!response.ok) {
-          alert('Erreur lors de la récupération du Professionnel');
+          Swal.fire({
+            toast: true, // active le mode toast
+            position: "top-end", // en haut à droite
+            showConfirmButton: false, // pas de bouton OK
+            timer: 1500, // durée d'affichage
+            timerProgressBar: true, // barre de progression
+            icon: "warning",
+            //title: selectedService ? "Service mis à jour" : "Service créé",
+            text: "Erreur lors de la récupération de données",
+            showClass: {
+              popup: "animate__animated animate__slideInRight", // entrée animée
+            },
+            hideClass: {
+              popup: "animate__animated animate__slideOutRight", // sortie animée
+            },
+            customClass: {
+              popup: "rounded-2xl shadow-lg p-4", // style chic
+            },
+          });
           return;
         }
         
         const data = await response.json();
-        console.log("data = ",data);
+       
         const service = Array.isArray(data) ? data[0] : data;
         if (data[0].role === "user"){
           navigate(`/user/${id}`);
@@ -109,12 +118,47 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
 
           setServices(mapped);
         } else {
-          alert('Erreur lors de la récupération du service');
+          Swal.fire({
+            toast: true, // active le mode toast
+            position: "top-end", // en haut à droite
+            showConfirmButton: false, // pas de bouton OK
+            timer: 1500, // durée d'affichage
+            timerProgressBar: true, // barre de progression
+            icon: "warning",
+            //title: selectedService ? "Service mis à jour" : "Service créé",
+            text: "Erreur lors de la récupération de données",
+            showClass: {
+              popup: "animate__animated animate__slideInRight", // entrée animée
+            },
+            hideClass: {
+              popup: "animate__animated animate__slideOutRight", // sortie animée
+            },
+            customClass: {
+              popup: "rounded-2xl shadow-lg p-4", // style chic
+            },
+          });
           return;
         }
       } catch (error) {
-        console.error('Erreur réseau :', error);
-        alert('Erreur de connexion au serveur');
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "warning",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Erreur réseau",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
       }
     };
 
@@ -143,12 +187,47 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
 
           setReviews(sorted);
         } else {
-          alert('Erreur lors de la récupération de review');
+          Swal.fire({
+            toast: true, // active le mode toast
+            position: "top-end", // en haut à droite
+            showConfirmButton: false, // pas de bouton OK
+            timer: 1500, // durée d'affichage
+            timerProgressBar: true, // barre de progression
+            icon: "warning",
+            //title: selectedService ? "Service mis à jour" : "Service créé",
+            text: "Erreur lors de la récupération de données",
+            showClass: {
+              popup: "animate__animated animate__slideInRight", // entrée animée
+            },
+            hideClass: {
+              popup: "animate__animated animate__slideOutRight", // sortie animée
+            },
+            customClass: {
+              popup: "rounded-2xl shadow-lg p-4", // style chic
+            },
+          });
           return;
         }
       } catch (error) {
-        console.error('Erreur réseau :', error);
-        alert('Erreur de connexion au serveur');
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "warning",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Erreur réseau",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
       }
     };
   useEffect(() => {
@@ -242,7 +321,6 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
             popup: "rounded-2xl shadow-lg", // style chic
           }
         });
-        //alert('Veuillez vous connecter pour envoyer un message.');
         setTimeout(() => {
           setShowMessageModal(false);
           setShowLoginModal(true);
@@ -268,8 +346,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
       }
 
       const savedMessage = await res.json();
-      console.log('Message envoyé:', savedMessage);
-
+    
       // Réinitialiser le formulaire et fermer le modal
       setMessage('');
       setShowMessageModal(false);
@@ -294,10 +371,9 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
           popup: "rounded-2xl shadow-lg p-4", // style chic
         },
       });
-      //alert('Message envoyé avec succès !');
 
     } catch (error) {
-      //console.error('Erreur envoi message:', error);
+      
       Swal.fire({
         toast: true, // active le mode toast
         position: "top-end", // en haut à droite
@@ -317,7 +393,6 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
           popup: "rounded-2xl shadow-lg p-4", // style chic
         },
       });
-      //alert('Impossible d’envoyer le message. Veuillez réessayer.');
     }
 
   };
@@ -344,7 +419,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
           popup: "rounded-2xl shadow-lg p-4", // style chic
         },
       });
-      //alert('Veuillez attribuer une note');
+   
       return;
     }
     try {
@@ -362,7 +437,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
             popup: "rounded-2xl shadow-lg", // style chic
           }
         });
-        //alert('Veuillez vous connecter pour envoyer un message.');
+
         setTimeout(() => {
           setShowReviewModal(false);
           setShowLoginModal(true);
@@ -407,17 +482,32 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
         },
       });
       const savedReview = await res.json();
-      console.log('Review envoyé:', savedReview);
-      console.log('Review submitted:', { rating, comment: reviewComment });
+      
       setRating(0);
       setReviewComment('');
       setShowReviewModal(false);
       fetchReviews();
-      //alert('Review envoyé avec succès !');
 
     } catch (error) {
-      console.error('Erreur envoi message:', error);
-      //alert('Impossible d’envoyer le message. Veuillez réessayer.');
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "warning",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Impossible d’envoyer le message. Veuillez réessayer.",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
     }
   };
 
@@ -437,10 +527,28 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
         });
       } else {
         await navigator.clipboard.writeText(url);
-        alert("Lien du profil copié");
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "success",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Lien du profil copié",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
       }
     } catch (e) {
-      console.log("Share cancelled");
+      console.log("");
     }
   };
 
@@ -630,12 +738,12 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                     {/* Badge de disponibilité discret */}
                     <div className="flex justify-between items-start mb-4">
                       {/* Catégorie à gauche */}
-                      {service.category && (
-                        <span className="inline-flex items-center gap-1 bg-orange-50 text-[#e0692d] text-xs font-bold px-2 py-1 rounded-full">
-                          <Tag size={12} />
-                          {service.category}
-                        </span>
-                      )}
+                      
+                      <span className="inline-flex items-center gap-1 bg-orange-50 text-[#e0692d] text-xs font-bold px-2 py-1 rounded-full">
+                        <Briefcase size={12} />
+                        {service.metier}
+                      </span>
+                     
                       <div className="text-gray-300 group-hover:text-[#e0692d] transition-colors">
                         <ExternalLink size={18} />
                       </div>
@@ -659,8 +767,8 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                     {/* Footer de la carte : Catégorie & Prix */}
                     <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-50">
                       <div className="flex items-center text-gray-400 bg-gray-50 px-3 py-1.5 rounded-xl">
-                        <Briefcase  size={14} className="mr-2 text-[#e0692d]" />
-                        <span className="text-xs font-semibold">{service.metier}</span>
+                        <Tag  size={14} className="mr-2 text-[#e0692d]" />
+                        <span className="text-xs font-semibold">{service.category}</span>
                       </div>
 
                       {service.price && (
@@ -756,7 +864,39 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
 
         {/* Right Advertisement Column */}
         <div className="hidden lg:block lg:w-80 space-y-8">
-          <div className="bg-white p-4 rounded-lg shadow-md">
+          <div className="bg-slate-900 rounded-[24px] p-6 text-white overflow-hidden relative">
+            <div className="relative z-10">
+              <h4 className="text-lg font-bold mb-2">Vous êtes un pro ?</h4>
+              <p className="text-slate-400 text-sm mb-4">Augmentez votre visibilité et recevez plus de chantiers.</p>
+              <button onClick={() => navigate("/business")} className="w-full bg-[#e0692d] py-3 rounded-xl font-bold text-sm hover:scale-105 transition-transform">
+                S'inscrire comme Pro
+              </button>
+            </div>
+            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl"></div>
+          </div>
+
+          <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm">
+            <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <BadgeCheck size={18} className="text-[#e0692d]" />
+              Pourquoi nous ?
+            </h4>
+            <ul className="space-y-4">
+              {[
+                "Profils vérifiés manuellement",
+                "Avis clients 100% authentiques",
+                "Mise en relation gratuite",
+                "Experts de votre région"
+              ].map((text, i) => (
+                <li key={i} className="flex gap-3 text-sm text-slate-600 font-medium">
+                  <div className="w-5 h-5 bg-green-50 text-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    ✓
+                  </div>
+                  {text}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="bg-white p-4 rounded-[24px] shadow-md">
             <p className="text-sm text-gray-500 mb-2">Publicité</p>
             <div className="h-[600px] flex items-center justify-center border border-dashed border-gray-300">
               {/*<span className="text-gray-400">Espace publicitaire disponible</span> */}
@@ -768,7 +908,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                 /></a>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow-md">
+          <div className="bg-white p-4 rounded-[24px] shadow-md">
             <p className="text-sm text-gray-500 mb-2">Publicité</p>
             <div className="h-[350px] flex items-center justify-center border border-dashed border-gray-300">
               <span className="text-gray-400">Espace publicitaire disponible</span>

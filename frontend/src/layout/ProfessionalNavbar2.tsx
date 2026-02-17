@@ -50,7 +50,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
   // Fonction pour jouer le son
   const playNotificationSound = () => {
     const audio = new Audio('/sounds/notification_message.wav');
-    audio.play().catch(err => console.log("Audio play blocked", err));
+    audio.play().catch(err => console.log("Audio play blocked"));
   };
 
   // Simulation : jouer le son quand un message arrive
@@ -81,7 +81,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
         body: JSON.stringify({ ids })
       });
     } catch (e) {
-      console.log("Erreur update notified", e);
+      //console.log("Erreur update notified", e);
     }
   };
 
@@ -155,7 +155,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
         if (newUnread > unreadNotifications && newNotifiedNotifications.length > 0) playNotificationSound();
 
         setNotifications(data);
-      } catch (err) { console.log(err); }
+      } catch (err) { /*console.log(err);*/ }
     };
 
     const fetchMessages = async () => {
@@ -168,7 +168,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
             playNotificationSound();
           }*/
           //setUnreadMessages(data.count);
-        } catch (err) { console.log(err); }
+        } catch (err) { /*console.log(err);*/ }
       };
 
       //fetchNotifications();
@@ -199,7 +199,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
 
         setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
       } catch (err) {
-        console.error(err);
+        //console.error(err);
       }
     };
 
@@ -212,7 +212,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
 
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
       } catch (err) {
-        console.error(err);
+        //console.error(err);
       }
     };
     const handleNotificationClick = async (notif) => {

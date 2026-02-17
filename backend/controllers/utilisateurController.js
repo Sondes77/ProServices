@@ -406,15 +406,6 @@ exports.sendVerificationCode = (req, res) => {
       [code, email]
     );
 
-    // Transport mail (gmail en exemple)
-    /*const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS,
-      },
-    });*/
-
     const transporter = nodemailer.createTransport({
       //host: "ssl0.ovh.net",
       host: "smtp.mail.ovh.net",
@@ -577,7 +568,7 @@ exports.sendForgotPasswordlink = (req, res) => {
                   style="
                     display:inline-block;
                     padding:12px 20px;
-                    background:#2563eb;
+                    background:#e0692d;
                     color:#ffffff;
                     text-decoration:none;
                     border-radius:6px;
@@ -595,7 +586,10 @@ exports.sendForgotPasswordlink = (req, res) => {
 
               <p style="font-size:12px;">
                 Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br/>
-                <span>${resetLink}</span>
+                <a href="${resetLink}"
+                  style="color:#e0692d; word-break:break-all; text-decoration:none;">
+                  ${resetLink}
+                </a>
               </p>
             </body>
           </html>`,
@@ -607,6 +601,37 @@ exports.sendForgotPasswordlink = (req, res) => {
     console.error(error);
     res.status(500).json({ message: "Erreur serveur" });
   }
+};
+
+exports.checkResetToken = (req, res) => {
+  const { token } = req.params;
+
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex")
+  console.log("hashedToken = ", hashedToken);
+
+  db.query(
+    "SELECT reset_password_expires FROM utilisateurs WHERE reset_password_token=?",
+    [hashedToken],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: "Erreur serveur" });
+
+      if (!rows[0]) {
+        return res.status(404).json({ status: "not_found" });
+      }
+
+      const now = Date.now();
+      const expires = new Date(rows[0].reset_password_expires).getTime();
+
+      if (expires < now) {
+        return res.json({ status: "expired" });
+      }
+
+      return res.json({ status: "valid" });
+    }
+  );
 };
 
 // ⬅️ Réinitialiser le mot de passe avec le token

@@ -4,6 +4,7 @@ import { User, Home, Settings, Lock, MessageSquare, Star, Briefcase, LogOut, Shi
 import { User as UserType } from '../utils/types';
 import { mapUserDataToUserModel } from '../utils/mapper';
 import { useLocation, useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2';
 
 interface SidebarProps {
   activeSection: string;
@@ -87,6 +88,25 @@ const Sidebar: React.FC<SidebarProps> = ({
             // Par exemple, rediriger vers le dashboard
             window.location.reload();
           } else {
+            Swal.fire({
+              toast: true, // active le mode toast
+              position: "top-end", // en haut à droite
+              showConfirmButton: false, // pas de bouton OK
+              timer: 1500, // durée d'affichage
+              timerProgressBar: true, // barre de progression
+              icon: "warning",
+              //title: selectedService ? "Service mis à jour" : "Service créé",
+              text: "Erreur réseau !",
+              showClass: {
+                popup: "animate__animated animate__slideInRight", // entrée animée
+              },
+              hideClass: {
+                popup: "animate__animated animate__slideOutRight", // sortie animée
+              },
+              customClass: {
+                popup: "rounded-2xl shadow-lg p-4", // style chic
+              },
+            });
             alert("Erreur lors de la récupération des données utilisateur");
           }
         }
@@ -217,7 +237,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         {user.role === 'professional' && (
           <button
-            onClick={onViewPublicProfile}
+            onClick={() => navigate("/profile")}
             className="hidden md:flex mt-4 flex items-center text-sm text-[#e0692d] hover:text-[#f07e40] transition-colors duration-200"
           >
             <Eye size={16} className="mr-1" />

@@ -45,10 +45,6 @@ import UserProfile from './profile/UserProfile';
 import SearchProfessionals from './profile/SearchProfessionals';
 import AdminDashboard from './admin/AdminDashboard';
 import Home from './pages/Home';
-import Home1 from './pages/Home1';
-import Home2 from './pages/Home2';
-import Home3 from './pages/Home3';
-import Home4 from './pages/Home4';
 import About from './profile/About';
 import ServicesPage from './profile/Service';
 import Pricing from './profile/Pricing';
@@ -126,25 +122,25 @@ function App() {
         ...updatedUserData
       }));
       // In a real app, you would call an API to update the user data
-      console.log('User data updated:', updatedUserData);
+      //console.log('User data updated:', updatedUserData);
   };
 
   const handleUpdatePrivacySettings = (updatedSettings: PrivacySettingsType) => {
     setCurrentPrivacySettings(updatedSettings);
     // In a real app, you would call an API to update the settings
-    console.log('Privacy settings updated:', updatedSettings);
+    //console.log('Privacy settings updated:', updatedSettings);
   };
 
   const handleAddService = () => {
     // In a real app, this would navigate to a service creation form
-    console.log('Add service clicked');
-    alert('Fonctionnalité d\'ajout de service à implémenter');
+    //console.log('Add service clicked');
+    //alert('Fonctionnalité d\'ajout de service à implémenter');
   };
 
   const handleEditService = (serviceId: string) => {
     // In a real app, this would navigate to a service edit form
-    console.log('Edit service clicked:', serviceId);
-    alert(`Édition du service ${serviceId} à implémenter`);
+    //console.log('Edit service clicked:', serviceId);
+    //alert(`Édition du service ${serviceId} à implémenter`);
   };
 
   const handleDeleteService = async (serviceId: string) => {
@@ -165,7 +161,7 @@ function App() {
     const user = mapUserDataToUserModel(userData);
     localStorage.setItem("currentUser", JSON.stringify(user));
     window.location.reload();
-    console.log('Service deleted:', serviceId);
+    //console.log('Service deleted:', serviceId);
   };
 
   // Toggle between public and private view
@@ -291,7 +287,7 @@ function App() {
         {/*<Route path="/advertisement-request" element={<AdvertisementRequest />} />
         <Route path="/admin/advertisements" element={<AdvertisementAdmin />} />*/}
 
-        <Route path="/search" element={<SearchProfessionals onViewProfile={(id) => console.log('View profile:', id)} />} />
+        <Route path="/search" element={<SearchProfessionals onViewProfile={(id) => id} />} />
         <Route path="/service/:id" element={<ServiceDetail user2={currentUser}/>} />
         <Route path="/blog/:id" element={<ArticleDetail />} />
         <Route path="/proquote" element={<ProQuote user2={currentUser} />} />

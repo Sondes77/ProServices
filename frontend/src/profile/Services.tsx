@@ -49,7 +49,6 @@ const Services: React.FC<ServicesProps> = ({
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.error("Aucun token trouvé dans le localStorage");
         return;
       }
       const response = await fetch(`http://localhost:5000/api/mes-services`, {
@@ -80,7 +79,6 @@ const Services: React.FC<ServicesProps> = ({
             popup: "rounded-2xl shadow-lg p-4", // style chic
           },
         });
-        //alert('Erreur lors de la récupération des données utilisateur');
         return;
       }
         const prosData = await response.json();
@@ -89,12 +87,27 @@ const Services: React.FC<ServicesProps> = ({
         );
         
         setLocalServices(mappedProfessionals);
-      
-
-      //alert(`Nombre de professionnels : ${localServices.length}`);
+ 
     } catch (error) {
-      console.error('Erreur réseau :', error);
-      //alert('Erreur de connexion au serveur');
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "warning",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Erreur réseau",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
     }
   };
 
@@ -109,10 +122,6 @@ const Services: React.FC<ServicesProps> = ({
     const status = service.status || '';
     const sponsored = !!(service.verified && service.sponsored);
 
-    console.log ("prosData = ", localServices);
-    console.log ("status = ", status );
-    console.log ("sponsored = ", sponsored );
-    
     const matchesSearch =
       title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -165,8 +174,27 @@ const Services: React.FC<ServicesProps> = ({
         }
        
     } catch (error: any) {
-      alert(error.message || 'Erreur inconnue');
-      console.error(error);
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "warning",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Erreur réseau",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
+      //alert(error.message || 'Erreur inconnue');
+      //console.error(error);
     }
   };
 
@@ -197,7 +225,6 @@ const Services: React.FC<ServicesProps> = ({
   const handleServiceSubmit = async (serviceData: Partial<Service>) => {
     const token = localStorage.getItem('token');
     if (!token) {
-      alert('Token non trouvé. Veuillez vous reconnecter.');
       return;
     }
   
@@ -207,7 +234,7 @@ const Services: React.FC<ServicesProps> = ({
         : 'http://localhost:5000/api/service'; // Create
   
       const method = selectedService ? 'PUT' : 'POST';
-      //console.log(serviceData);
+     
       const response = await fetch(url, {
         method,
         headers: {
@@ -248,8 +275,25 @@ const Services: React.FC<ServicesProps> = ({
       await fetchUserData();
       
     } catch (error: any) {
-      console.error(error);
-      //alert(error.message || 'Erreur réseau');
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "warning",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Erreur réseau",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
     }
   
     setShowServiceForm(false);
@@ -264,7 +308,9 @@ const Services: React.FC<ServicesProps> = ({
       year: 'numeric'
     });
   };
-  
+  const isArabic = (text: string) => {
+    return /[\u0600-\u06FF]/.test(text);
+  };
   const getStatusBadge = (status: string, sponsored: boolean) => {
     //setSponsored(service.verified && service.sponsored ? true : false);
     switch (status) {
@@ -406,7 +452,6 @@ const Services: React.FC<ServicesProps> = ({
                     });
 
                   } catch (err) {
-                    console.error(err);
                     Swal.fire("Erreur", "Impossible de partager", "error");
                   }
                 };
@@ -420,9 +465,17 @@ const Services: React.FC<ServicesProps> = ({
                           {getStatusBadge(service.status, sponsored)}
                         </div>
                         
-                        <p className="text-gray-500 text-sm mb-4 line-clamp-2 leading-relaxed">
-                          {service.description}
-                        </p>
+                          <p
+                            dir={isArabic(service.description) ? "rtl" : "ltr"}
+                            className={`text-gray-500 text-sm mb-4 line-clamp-2 leading-relaxed ${
+                              isArabic(service.description) ? "text-right" : "text-left"
+                            }`}
+                          >
+                            {service.description.length > 150
+                              ? service.description.slice(0, 150) + "..."
+                              : service.description}
+                          </p> 
+                       
                         
                         <div className="flex flex-wrap gap-4 text-xs text-gray-400 font-medium">
                           <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-lg">

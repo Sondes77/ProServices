@@ -16,7 +16,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({ user, onEditProfile }
   const [avatarPreview, setAvatarPreview] = useState(user.avatar || defaultAvatar); // local preview
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-  console.log("user = ", user);
+ 
   useEffect(() => {
     if(!token)
     {

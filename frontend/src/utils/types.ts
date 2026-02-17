@@ -43,7 +43,6 @@ export interface Professional {
   prix: string;
   availability: string;
   verified: boolean;
-  
 }
 
 export interface PrivacySettings {

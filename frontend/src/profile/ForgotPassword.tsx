@@ -99,7 +99,7 @@ const ForgotPassword = (props) => {
                     <CheckCircle size={32} />
                   </div>
                   <h3 className="text-lg font-bold text-slate-800 mb-2">Vérifiez votre boîte mail</h3>
-                  <p className="text-slate-500 text-sm mb-6">Le lien est valide pendant 30 minutes.</p>
+                  <p className="text-slate-500 text-sm mb-6">Le lien est valide pendant 15 minutes.</p>
                   
                   <a href="/connexion" className="inline-flex items-center justify-center w-full py-4 rounded-2xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-all shadow-lg">
                     Retour à la connexion
@@ -165,8 +165,8 @@ const ForgotPassword = (props) => {
           >
             {/* Image de fond */}
             <img
-              alt={props.image1Alt}
-              src={props.image1Src}
+              alt='Forgot Password Image'
+              src='https://images.unsplash.com/photo-1497215728101-856f4ea42174?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080'
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2s] ease-out group-hover:scale-110"
             />
 

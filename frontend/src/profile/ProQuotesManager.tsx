@@ -11,18 +11,7 @@ import { User, Devis } from '../utils/types';
 import { mapDevisDataToUserModel } from '../utils/mapper';
 import { Navigate, useLocation } from "react-router-dom";
 import { useParams, useNavigate } from "react-router-dom";
-
-// Types pour la gestion des devis
-/*interface QuoteRequest {
-  id: string;
-  clientName: string;
-  serviceTitle: string;
-  requestDate: string;
-  status: 'pending' | 'accepted' | 'declined';
-  details: string;
-  interventionDate: string;
-  priceProposed?: number;
-}*/
+import CustomPicker from './CustomPicker';
 
 interface ProQuoteProps {
   user2: User;
@@ -66,7 +55,26 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
         });
 
         if (!response.ok) {
-          alert('Erreur lors de la récupération du service');
+          Swal.fire({
+            toast: true, // active le mode toast
+            position: "top-end", // en haut à droite
+            showConfirmButton: false, // pas de bouton OK
+            timer: 1500, // durée d'affichage
+            timerProgressBar: true, // barre de progression
+            icon: "warning",
+            //title: selectedService ? "Service mis à jour" : "Service créé",
+            text: "Erreur lors de la récupération de données",
+            showClass: {
+              popup: "animate__animated animate__slideInRight", // entrée animée
+            },
+            hideClass: {
+              popup: "animate__animated animate__slideOutRight", // sortie animée
+            },
+            customClass: {
+              popup: "rounded-2xl shadow-lg p-4", // style chic
+            },
+          });
+          
           return;
         }
         
@@ -94,8 +102,25 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
         } else setQuotes(mapped);
           
       } catch (error) {
-        console.error('Erreur réseau :', error);
-        alert('Erreur de connexion au serveur');
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "warning",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Erreur réseau",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
       }
     };
     fetchDevis();
@@ -137,7 +162,26 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
       );
 
       if (!response.ok) {
-        alert('Erreur lors de l’envoi de la proposition');
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "warning",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Erreur lors de l’envoi de la proposition",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
+        
         return;
       }
 
@@ -162,8 +206,26 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
 
 
     } catch (error) {
-      console.error(error);
-      alert('Erreur serveur');
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "warning",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Erreur serveur",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
+        
     }
   };
 
@@ -190,7 +252,25 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
       );
 
       if (!response.ok) {
-        alert('Erreur lors de l’annulation de la demande');
+        Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "warning",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: "Erreur lors de l’annulation de la demande",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
         return;
       }
 
@@ -208,8 +288,25 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
       setResponsePrice('');
 
     } catch (error) {
-      console.error(error);
-      alert('Erreur serveur');
+      Swal.fire({
+        toast: true, // active le mode toast
+        position: "top-end", // en haut à droite
+        showConfirmButton: false, // pas de bouton OK
+        timer: 1500, // durée d'affichage
+        timerProgressBar: true, // barre de progression
+        icon: "warning",
+        //title: selectedService ? "Service mis à jour" : "Service créé",
+        text: "Erreur serveur",
+        showClass: {
+          popup: "animate__animated animate__slideInRight", // entrée animée
+        },
+        hideClass: {
+          popup: "animate__animated animate__slideOutRight", // sortie animée
+        },
+        customClass: {
+          popup: "rounded-2xl shadow-lg p-4", // style chic
+        },
+      });
     }
   };
   
@@ -292,7 +389,11 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
         <div className="flex flex-col sm:flex-row gap-2 flex-[3]">
           {/* 2. Filtre par Date (Le look est épuré) */}
           <div className="relative flex-1">
-            <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <CustomPicker
+              value={filterDate}
+              onChange={setFilterDate}
+            />
+            {/*<Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <input 
               type="date"
               className="w-full pl-11 pr-4 py-3 bg-slate-50 border-none rounded-[18px] focus:ring-2 focus:ring-orange-100 outline-none text-sm text-slate-600 font-medium appearance-none"
@@ -306,7 +407,7 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
               >
                 <XCircle size={14} />
               </button>
-            )}
+            )}*/}
           </div>
 
           {/* 3. Filtre par Statut */}

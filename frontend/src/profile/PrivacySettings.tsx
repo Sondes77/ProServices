@@ -129,7 +129,7 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSave }) =
       Swal.fire("Erreur", "Mots de passe différents", "error");
       return;
     }
-    console.log("passwordForm = ", passwordForm);
+  
     const res = await fetch(`http://localhost:5000/api/change-password`, {
       method: 'PUT',
       headers: {  'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

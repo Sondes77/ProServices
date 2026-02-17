@@ -61,7 +61,6 @@ const Reviews: React.FC<ReviewsProps> = ({ user }) => {
         if (!res.ok) throw new Error('Erreur chargement avis');
 
         const data = await res.json();
-        console.log("reviews = ", data);
         setReviews(data);
       } catch (err: any) {
         setError(err.message || 'Erreur serveur');
@@ -254,7 +253,7 @@ const Reviews: React.FC<ReviewsProps> = ({ user }) => {
                     placeholder="Rechercher..."
                     className="
                     w-full
-                    py-4 pr-4 pl-12   /* ✅ padding gauche augmenté */
+                    py-3 pr-4 pl-12   /* ✅ padding gauche augmenté */
                     bg-gray-50
                     border border-transparent
                     focus:ring-2 focus:ring-orange-200

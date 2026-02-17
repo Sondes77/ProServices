@@ -113,7 +113,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+        <div className="border-t border-gray-800 mt-4 py-2 text-center text-gray-500 text-sm leading-tight">
           <p>© {new Date().getFullYear()} ServicePro. Tous droits réservés. 
             Développé par <Link to="https://datavancia.com" style={{ color: '#F07E40' }} className="text-gray-400 hover:text-[#e0692d]" > Datavancia</Link>
           </p>
