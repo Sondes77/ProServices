@@ -12,6 +12,7 @@ import { mapDevisDataToUserModel } from '../utils/mapper';
 import { Navigate, useLocation } from "react-router-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import CustomPicker from './CustomPicker';
+import CustomSelect from './CustomSelect';
 
 interface ProQuoteProps {
   user2: User;
@@ -361,7 +362,7 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
 
   if (Id && !checkingAccess) return null;
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10">
+    <div className="max-w-6xl mx-auto py-10">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-black text-gray-900">Gestion des Devis</h1>
@@ -412,22 +413,20 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
 
           {/* 3. Filtre par Statut */}
           <div className="relative flex-1">
-            <SlidersHorizontal size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-            <select 
-              className="w-full pl-11 pr-10 py-3 bg-slate-50 border-none rounded-[18px] focus:ring-2 focus:ring-orange-100 outline-none text-sm appearance-none cursor-pointer text-slate-600 font-medium"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="all">Tous les statuts</option>
-              <option value="pending_pro">À répondre (Nouveau)</option>
-              <option value="proposed">Offres envoyées</option>
-              <option value="accepted">Acceptés</option>
-              <option value="rejected">Refusés</option>
-              <option value="cancelled">Annulés</option>
-            </select>
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-              <ChevronRight size={16} className="rotate-90" />
-            </div>
+            <CustomSelect
+              name="filtre" 
+              value={filterStatus} 
+              onChange={(value: string) => setFilterStatus(value as 'all' | 'pending_pro' | 'proposed' | 'accepted' | 'rejected' | 'cancelled')}
+              options={[
+                {value:'all', label: 'Tous les statuts'},
+                {value:'pending_pro', label: 'À répondre (Nouveau)'},
+                {value:'proposed', label: 'Offres envoyées'},
+                {value:'accepted', label: 'Acceptés'},
+                {value:'rejected', label: 'Refusés'},
+                {value:'cancelled', label: 'Annulés'},
+              ]} 
+            />
+        
           </div>
         </div>
       </div>

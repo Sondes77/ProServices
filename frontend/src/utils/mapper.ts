@@ -74,11 +74,12 @@ export function mapProfessionalsDataToUserModel(prosData: any): Professional {
   const region = prosData.region || '';
   const address = prosData.adresse || '';
   const rating = prosData.rating || 0;
-  const reviews = prosData.rating || 0;
+  const reviews = prosData.review || 0;
   const avatar = prosData.photo || 'http://localhost:5000/uploads/ServicePro_avatar.png';
   const description = prosData.description || '';
+  const titre = prosData.titre || '';
   const prix = prosData.prix || '';
-  const availability = prosData.availability || 'Immédiat';
+  const availability = prosData.service_availability || 'Immédiat';
   const verified = prosData.verified || false;
   const sponsored = prosData.sponsored || false;
  
@@ -99,6 +100,7 @@ export function mapProfessionalsDataToUserModel(prosData: any): Professional {
       reviews,
       avatar,
       description,
+      titre,
       prix,
       availability,
       verified,
@@ -133,12 +135,12 @@ export function mapServicesDataToUserModel(prosData: any): Service {
   const notIncluded: string[] = Array.isArray(prosData.notIncluded)
   ? prosData.notIncluded.map((item: any) => item || '')
   : [];
-  /*const provider = {
-    name: prosData.nom_prestataire || 'Prestataire inconnu',
-    avatar: prosData.avatar || '/default-avatar.png',
-    rating: parseFloat(prosData.note) || 0,
-    reviews: parseInt(prosData.avis) || 0,
-  };*/
+  const provider = {
+    //name: prosData.nom_prestataire || 'Prestataire inconnu',
+    //avatar: prosData.avatar || '/default-avatar.png',
+    rating: parseFloat(prosData.rating) || 0,
+    reviews: parseInt(prosData.review) || 0,
+  };
 
   return {
    
@@ -157,7 +159,8 @@ export function mapServicesDataToUserModel(prosData: any): Service {
       updatedAt,
       gallery,
       included,
-      notIncluded
+      notIncluded,
+      provider
   };
 }
 

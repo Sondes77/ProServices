@@ -226,10 +226,7 @@ exports.getMyDevis = async (req,res)=>{
   const id = req['utilisateur'].id;
   console.log("userId = ", id);
   const [rows] = await db.promise().query(`
-    SELECT d.*, u.nom as pro_nom, u.prenom as pro_prenom, u.role, u.photo
-    FROM devis d
-    LEFT JOIN utilisateurs u ON u.id=d.pro_id
-    WHERE client_id=? order by d.created_at desc
+    SELECT d.*, u.nom as pro_nom, u.prenom as pro_prenom, u.role, u.photo, u.region, s.metier FROM devis d LEFT JOIN utilisateurs u ON u.id=d.pro_id LEFT JOIN services s ON s.id=d.service_id WHERE client_id= ? order by d.created_at desc;
   `,[id]);
 
   res.json(rows);

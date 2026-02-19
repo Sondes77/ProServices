@@ -260,17 +260,16 @@ const Reviews: React.FC<ReviewsProps> = ({ user }) => {
                     focus:bg-white
                     rounded-2xl
                     outline-none
-                    transition-all
-                  "                    value={searchQuery}
+                    transition-all" 
+                    value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
                 
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
-                    <Filter size={16} />
-                  </div>
+                 
                   <CustomSelect
+                    name="filtre"
                     value={filter}
                     onChange={(value: string) => setFilter(value as 'all' | 'positive' | 'negative')}
                     options={[

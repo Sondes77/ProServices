@@ -392,7 +392,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
                 }}
                 disabled={!isEditing}
                 required
-                name="ville"
+                name="mappin"
                 placeholder='-- Sélectionner une ville --'
                 options={[
                   { value: '', label: '-- Sélectionner une ville --' },
@@ -428,7 +428,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
                 }}
                 disabled={!isEditing}
                 required
-                name="region"
+                name="mappin"
                 placeholder='-- Sélectionner une région --'
                 options={[
                   { value: '', label: '-- Sélectionner une région --' },

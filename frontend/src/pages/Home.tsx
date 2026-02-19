@@ -21,13 +21,15 @@ import peintre from '../img/photo-1688372199140-cade7ae820fe.jfif';
 import jardinier from '../img/photo-1617576683096-00fc8eecb3af.jpeg';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, EffectFade } from 'swiper/modules';
+import { villesEtRegions } from '../components/villesRegions';
+import CustomSelect from '../profile/CustomSelect';
 
 // --- DONNÉES SEO & NAVIGATION ---
-const villesEtRegions: Record<string, string[]> = {
+/*const villesEtRegions: Record<string, string[]> = {
   "Tunis": ["La Marsa", "Carthage", "Le Bardo", "Centre Ville"],
   "Sousse": ["Kantaoui", "Sahloul", "Hammam Sousse"],
   "Sfax": ["Sakiet Ezzit", "Sakiet Eddaier", "Ville"],
-};
+};*/
 
 // Catégories avec descriptions riches (Bon pour le SEO)
 const topCategories = [
@@ -75,14 +77,14 @@ const popularSearches = [
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
-    if (motCle) params.append('motcle', motCle);
+    if (motCle) params.append('q', motCle);
     if (selectedCity) params.append('ville', selectedCity);
     if (selectedRegion) params.append('region', selectedRegion);
     navigate(`/search?${params.toString()}`);
   };
 
   const quickSearch = (q: string, c: string) => {
-    navigate(`/search?motcle=${q}&ville=${c}`);
+    navigate(`/search?q=${q}&ville=${c}`);
   };
 
   const testimonials = [
@@ -148,6 +150,7 @@ const popularSearches = [
                 
                 {/* Input Mot Clé */}
                 <div className="flex-1 relative group">
+                 
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <Search className="h-5 w-5 text-gray-400 group-focus-within:text-[#e0692d] transition-colors" />
                   </div>
@@ -162,46 +165,42 @@ const popularSearches = [
 
                 {/* Select Ville */}
                 <div className="flex-1 md:max-w-[200px] relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <MapPin className="h-5 w-5 text-gray-400 group-focus-within:text-[#e0692d] transition-colors" />
-                  </div>
-                  <select
-                    className="w-full h-14 pl-12 pr-8 rounded-2xl bg-gray-50 border-transparent focus:bg-white focus:ring-2 focus:ring-[#e0692d]/20 focus:border-[#e0692d] transition-all outline-none text-gray-700 appearance-none cursor-pointer"
+                  <CustomSelect
                     value={selectedCity}
-                    onChange={(e) => {
-                      setSelectedCity(e.target.value);
+                    onChange={(value: string) => {
+                      setSelectedCity(value);
                       setSelectedRegion('');
                     }}
-                  >
-                    <option value="">Ville</option>
-                    {Object.keys(villesEtRegions).map(v => (
-                      <option key={v} value={v}>{v}</option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
-                  </div>
+                    //required
+                    name="mappin"
+                    placeholder='Ville'
+                    options={[
+                      ...Object.keys(villesEtRegions).map((v) => ({
+                        value: v,
+                        label: v
+                      }))
+                    ]}
+                  ></CustomSelect>
                 </div>
 
                 {/* Select Région */}
                 <div className="flex-1 md:max-w-[200px] relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <MapPin className="h-5 w-5 text-gray-400 group-focus-within:text-[#e0692d] transition-colors" />
-                  </div>
-                  <select
-                    className="w-full h-14 pl-12 pr-8 rounded-2xl bg-gray-50 border-transparent focus:bg-white focus:ring-2 focus:ring-[#e0692d]/20 focus:border-[#e0692d] transition-all outline-none text-gray-700 appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  <CustomSelect
                     value={selectedRegion}
-                    onChange={(e) => setSelectedRegion(e.target.value)}
+                    onChange={(value: string) => {
+                      setSelectedRegion(value);
+                    }}
                     disabled={!selectedCity}
-                  >
-                    <option value="">Région</option>
-                    {selectedCity && villesEtRegions[selectedCity]?.map(r => (
-                      <option key={r} value={r}>{r}</option>
-                    ))}
-                  </select>
-                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
-                  </div>
+                    //required
+                    name="mappin"
+                    placeholder='Région'
+                    options={[
+                      ...(selectedCity ? villesEtRegions[selectedCity as keyof typeof villesEtRegions].map((r: string) => ({
+                        value: r,
+                        label: r
+                      })) : [])
+                    ]}
+                  />
                 </div>
 
                 {/* Bouton Rechercher */}

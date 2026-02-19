@@ -44,7 +44,8 @@ const Services: React.FC<ServicesProps> = ({
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   //const [sponsored, setSponsored] = useState(false);
-
+  const user = JSON.parse(localStorage.getItem("currentUser") || "null")?.region;
+ 
   const fetchUserData = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -194,7 +195,7 @@ const Services: React.FC<ServicesProps> = ({
         },
       });
       //alert(error.message || 'Erreur inconnue');
-      //console.error(error);
+      console.error(error);
     }
   };
 
@@ -244,33 +245,42 @@ const Services: React.FC<ServicesProps> = ({
         body: JSON.stringify(serviceData),
       });
   
+      const errorData = await response.json();
+
+      if (!errorData.success && method === "POST") {
+        Swal.fire("Attention", errorData.message, "warning");
+        return;
+      }
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Erreur lors de l\'enregistrement');
+        Swal.fire("Erreur", "Une erreur est survenue", "error");
+        return;
       }
   
-      const updatedService = await response.json();
-        Swal.fire({
-        toast: true, // active le mode toast
-        position: "top-end", // en haut à droite
-        showConfirmButton: false, // pas de bouton OK
-        timer: 1500, // durée d'affichage
-        timerProgressBar: true, // barre de progression
-        icon: "success",
-        //title: selectedService ? "Service mis à jour" : "Service créé",
-        text: selectedService
-          ? "Le service a été mis à jour avec succès."
-          : "Le service a été créé avec succès.",
-        showClass: {
-          popup: "animate__animated animate__slideInRight", // entrée animée
-        },
-        hideClass: {
-          popup: "animate__animated animate__slideOutRight", // sortie animée
-        },
-        customClass: {
-          popup: "rounded-2xl shadow-lg p-4", // style chic
-        },
-      });
+      //const updatedService = await response.json();
+       if(errorData.success && method === "PUT"){
+         Swal.fire({
+          toast: true, // active le mode toast
+          position: "top-end", // en haut à droite
+          showConfirmButton: false, // pas de bouton OK
+          timer: 1500, // durée d'affichage
+          timerProgressBar: true, // barre de progression
+          icon: "success",
+          //title: selectedService ? "Service mis à jour" : "Service créé",
+          text: selectedService
+            ? "Le service a été mis à jour avec succès."
+            : "Le service a été créé avec succès.",
+          showClass: {
+            popup: "animate__animated animate__slideInRight", // entrée animée
+          },
+          hideClass: {
+            popup: "animate__animated animate__slideOutRight", // sortie animée
+          },
+          customClass: {
+            popup: "rounded-2xl shadow-lg p-4", // style chic
+          },
+        });
+       }
       // Optionnel : mets à jour localement l’état
       await fetchUserData();
       
@@ -283,7 +293,7 @@ const Services: React.FC<ServicesProps> = ({
         timerProgressBar: true, // barre de progression
         icon: "warning",
         //title: selectedService ? "Service mis à jour" : "Service créé",
-        text: "Erreur réseau",
+        text: "Erreur réseau ",
         showClass: {
           popup: "animate__animated animate__slideInRight", // entrée animée
         },
@@ -300,7 +310,10 @@ const Services: React.FC<ServicesProps> = ({
     setSelectedService(null);
   };
   
-  
+  const handleServiceClick = (categorie:string, metier:string, ville: string, serviceId: string) => {
+    navigate(`/service/${categorie.toLowerCase()}/${metier.toLowerCase()}/${ville.toLowerCase()}/${serviceId}`);
+  };
+
   const formatDate = (timestamp: string) => {
     return new Date(timestamp).toLocaleDateString('fr-FR', {
       day: 'numeric',
@@ -393,10 +406,9 @@ const Services: React.FC<ServicesProps> = ({
             </div>
             
             <div className="relative sm:w-60">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
-                <Filter size={16} />
-              </div>
+              
               <CustomSelect
+                name="filtre"
                 value={filter}
                 onChange={(value) => setFilter(value as 'all' | 'active' | 'paused' | 'archived')}
                 options={[
@@ -418,7 +430,7 @@ const Services: React.FC<ServicesProps> = ({
                 const handleShare = async (e: React.MouseEvent) => {
                   e.stopPropagation();
 
-                  const url = `${window.location.origin}/service/${service.slug || service.id}`;
+                  const url = `${window.location.origin}/service/${service.category}/${service.metier}/${user}/${service.id}`;
 
                   const shareData = {
                     title: service.title,
@@ -464,10 +476,10 @@ const Services: React.FC<ServicesProps> = ({
                           <h3 className="text-xl font-bold text-gray-900 leading-tight">{service.title}</h3>
                           {getStatusBadge(service.status, sponsored)}
                         </div>
-                        
+                        <div className="flex flex-wrap gap-4 py-6">
                           <p
                             dir={isArabic(service.description) ? "rtl" : "ltr"}
-                            className={`text-gray-500 text-sm mb-4 line-clamp-2 leading-relaxed ${
+                            className={`text-gray-500 text-sm line-clamp-2 leading-relaxed ${
                               isArabic(service.description) ? "text-right" : "text-left"
                             }`}
                           >
@@ -475,9 +487,9 @@ const Services: React.FC<ServicesProps> = ({
                               ? service.description.slice(0, 150) + "..."
                               : service.description}
                           </p> 
-                       
+                        </div>
                         
-                        <div className="flex flex-wrap gap-4 text-xs text-gray-400 font-medium">
+                        <div className="flex flex-wrap gap-1 text-xs text-gray-400 font-medium">
                           <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-lg">
                             <Tag size={14} className="mr-1.5 text-[#e0692d]" />
                             {service.category}
@@ -499,15 +511,16 @@ const Services: React.FC<ServicesProps> = ({
                       </div>
                       
                       {/* ACTIONS BUTTONS */}
-                      <div className="flex md:flex-col gap-2 shrink-0">
+                      <div className="flex md:flex-col gap-3 shrink-0">
                         {/* Bouton Voir le service */}
-                        <button
-                          onClick={() => navigate(`/service/${service.id}`)}
-                          className="flex-1 md:w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-black transition-all"
-                        >
-                          <Eye size={16} /> <span>Aperçu</span>
-                        </button>
-
+                        {service.status === "active" && (
+                          <button
+                            onClick={() => handleServiceClick(service.category, service.metier,user,service.id)}
+                            className="flex-1 md:w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-black transition-all"
+                          >
+                            <Eye size={16} /> <span>Aperçu</span>
+                          </button>
+                        )}
                         <div className="flex gap-2">
                           {/* Bouton Partager */}
                           <button

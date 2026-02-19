@@ -40,6 +40,7 @@ export interface Professional {
   sponsored: boolean;
   avatar: string;
   description: string;
+  titre: string;
   prix: string;
   availability: string;
   verified: boolean;
@@ -110,12 +111,12 @@ export interface Service {
   gallery: string[];
   included: string[];
   notIncluded: string[];
-  /*provider: {
-    name: string;
-    avatar: string;
+  provider: {
+    //name: string;
+    //avatar: string;
     rating: number;
     reviews: number;
-  };*/
+  };
 }
 
 export interface Conversation {

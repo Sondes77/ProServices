@@ -46,7 +46,8 @@ import SearchProfessionals from './profile/SearchProfessionals';
 import AdminDashboard from './admin/AdminDashboard';
 import Home from './pages/Home';
 import About from './profile/About';
-import ServicesPage from './profile/Service';
+import MetiersPage from './profile/MetierPage';
+import CategoriesPage from './profile/CategoriePage';
 import Pricing from './profile/Pricing';
 import Contact from './profile/Contact';
 import Blog from './profile/Blog';
@@ -267,7 +268,8 @@ function App() {
         <Route path="*" element={<NotFound />} />
         
         <Route path="/a-propos" element={<About />} /> 
-        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/services" element={<MetiersPage />} />
+        <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/blog" element={<Blog />} />
@@ -288,12 +290,14 @@ function App() {
         <Route path="/admin/advertisements" element={<AdvertisementAdmin />} />*/}
 
         <Route path="/search" element={<SearchProfessionals onViewProfile={(id) => id} />} />
-        <Route path="/service/:id" element={<ServiceDetail user2={currentUser}/>} />
+        <Route path="/service/:categorie/:metier/:ville/:id" element={<ServiceDetail user2={currentUser}/>} />
         <Route path="/blog/:id" element={<ArticleDetail />} />
         <Route path="/proquote" element={<ProQuote user2={currentUser} />} />
         <Route path="/userquote" element={<UserQuote />} />
         <Route path="/blog/:id" element={<ArticleDetail />} />
-        <Route path="/professional/:id" element={
+        <Route path="/blog/:id" element={<ArticleDetail />} />
+        {/*<Route path="/professional/:id" element={*/}
+        <Route path="/pro/:metier/:ville/:slug/:id" element={
           <PublicProfile2
             user2={currentUser}
             //services={currentServices}

@@ -279,66 +279,39 @@ const handleSubmit = async (e) => {
                   </div>
                 </div>
 
-               <div className="space-y-2">
-                  {/* Category */}
-                  <div className="relative">
-                    <label className="text-sm font-bold text-slate-700 ml-1">
-                      Domaine d'activité
-                    </label>
-
+                {!formData.confirmRole && location.pathname === "/business" && (
+                  <div className="space-y-2">
+                    {/* Category */}
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
-                        <MapPin size={18} />
-                      </div>
+                      <label className="text-sm font-bold text-slate-700 ml-1">
+                        Domaine d'activité
+                      </label>
 
-                      <CustomSelect
-                        value={formData.category}
-                        onChange={(value) => {
-                          setFormData(prev => ({
-                            ...prev,
-                            category: value,
-                            metier: '' // reset métier
-                          }));
-                        }}
-                        name="Domaine d'activité"
-                        placeholder="-- Sélectionner une catégorie --"
-                        options={Object.keys(Metier).map(c => ({
-                          value: c,
-                          label: c
-                        }))}
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                          <MapPin size={18} />
+                        </div>
+
+                        <CustomSelect
+                          value={formData.category}
+                          onChange={(value) => {
+                            setFormData(prev => ({
+                              ...prev,
+                              category: value,
+                              metier: '' // reset métier
+                            }));
+                          }}
+                          name="category"
+                          placeholder="-- Sélectionner une catégorie --"
+                          options={Object.keys(Metier).map(c => ({
+                            value: c,
+                            label: c
+                          }))}
+                        />
+                      </div>
                     </div>
                   </div>
-                  {/* Métier  
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Métier
-                    </label>
-
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
-                        <MapPin size={18} />
-                      </div>
-
-                      <CustomSelect
-                        value={formData.metier}
-                        onChange={(value) => {
-                          setFormData(prev => ({
-                            ...prev,
-                            metier: value
-                          }));
-                        }}
-                        required
-                        name="metier"
-                        placeholder="-- Sélectionner un métier --"
-                        options={metierDisponibles.map(m => ({
-                          value: m,
-                          label: m
-                        }))}
-                      />
-                    </div>
-                  </div>*/}
-                </div>
+                )}
 
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 ml-1">Mot de passe</label>
@@ -370,15 +343,16 @@ const handleSubmit = async (e) => {
                       onChange={handleChange}
                       className="
                         ml-2 h-5 w-5
-                        rounded-md
+                        rounded-lg
                         border-gray-300
-                        text-orange-500
+                        accent-[#e0692d]
+                        cursor-pointer
+                        transition
                         focus:ring-2
                         focus:ring-orange-200
-                        transition
                       "
                     />
-                    <span className="text-sm font-semibold text-slate-700">
+                    <span className="text-sm font-semibold text-slate-500">
                       Je ne suis pas un professionnel
                     </span>
 

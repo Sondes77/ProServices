@@ -837,7 +837,7 @@ exports.getMyPrivacy = (req, res) => {
 exports.updateMyPrivacy = (req, res) => {
   try {
     const userId = req["utilisateur"].id;
-    console.log("userId pour updateMyPrivacy =", userId);
+    console.log("userId pour updateMyPrivacy =", req.body);
     const {
       show_phone,
       show_address,

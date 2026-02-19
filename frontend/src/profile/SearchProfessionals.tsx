@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
@@ -9,7 +9,8 @@ import { Search, MapPin, Filter, Star, MessageSquare, ChevronDown, ChevronUp, Ch
   Megaphone,
   ArrowRight,
   Info,
-  Calendar
+  Calendar,
+  X
  } from 'lucide-react';
 import { Professional } from '../utils/types';
 import { mapProfessionalsDataToUserModel, mapUserDataToUserModel } from '../utils/mapper';
@@ -18,7 +19,8 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import Swal from "sweetalert2";
 import CustomSelect from './CustomSelect';
-import {  Categorie, Metier } from '../components/categoryMetier';
+import { Categorie, Metier } from '../components/categoryMetier';
+import { normalize, expandQuery, matchesQuery } from "../utils/searchEngine";
 
 interface SearchProfessionalsProps {
   onViewProfile: (professionalId: string) => void;
@@ -42,17 +44,6 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const categories = [
-    'Plombier',
-    'Plomberie',
-    'Électricien',
-    'Menuisier',
-    'Climatisation',
-    'Maçon',
-    'Peintre',
-    'Jardinier',
-    'Mécanicien'
-  ];
   const [professionals, setProfessionals] = useState<Professional[]>([]);
   const [resultats, setResultats] = useState<Professional[]>([]);
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -65,14 +56,18 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
   
   const [ville, setVille] = useState(query.get('ville') || '');
   const [region, setRegion] = useState(query.get('region') || '');
-  const [motCle, setMotCle] = useState(query.get('motcle') || '');
-  const [selectedCategorie, setSelectedCategorie] = useState<Categorie | ''>('');
-  const [selectedMetier, setSelectedMetier] = useState('');
+  const [motCle, setMotCle] = useState(query.get('q') || '');
+  const cFromQuery = query.get('c') as Categorie | null;
+  const [selectedCategorie, setSelectedCategorie] = useState<Categorie | ''>(cFromQuery ?? '');
+  const [selectedMetier, setSelectedMetier] = useState(query.get('m') || '');
+  const words = useMemo(() => expandQuery(motCle), [motCle]);
+  const [hasMetierMatch, setHasMetierMatch] = useState(false);
 
   const metierDisponibles =
   selectedCategorie && Metier[selectedCategorie]
     ? Metier[selectedCategorie]
     : [];
+
   var i=0;
   
   useEffect(() => {
@@ -206,12 +201,12 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
         }
       };
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (!professionals.length) return;
     if (professionals.length) {
       const filtres = professionals.filter((item) =>
         (!ville || item.city.toLowerCase().includes(ville.toLowerCase())) &&
-        (!motCle || item.profession.toLowerCase().includes(motCle.toLowerCase()) || item.description.toLowerCase().includes(motCle.toLowerCase()) || item.name.toLowerCase().includes(motCle.toLowerCase())) &&
+        (!words || item.profession.toLowerCase().includes(motCle.toLowerCase()) || item.description.toLowerCase().includes(motCle.toLowerCase()) || item.name.toLowerCase().includes(motCle.toLowerCase())) &&
         (!region || item.region.toLowerCase().includes(region.toLowerCase())) &&
         (filters.minRating === 0 || item.rating >= filters.minRating) &&
         (
@@ -224,15 +219,105 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
           (filters.availability === item.availability)
         )
       );
-
+     
       setResultats(filtres);
     }
-  }, [professionals, ville, region, motCle, filters.minRating, filters.availability, selectedCategorie, selectedMetier]);
+  }, [professionals, ville, region, motCle, filters.minRating, filters.availability, selectedCategorie, selectedMetier]);*/
+
+  useEffect(() => {
+    if (!professionals.length) return;
+
+    let metierMatchFound = false;
+
+    const filtres = professionals.filter((item) => {
+
+      const matchesVille =
+        !ville || item.city.toLowerCase().includes(ville.toLowerCase());
+
+      const matchesRegion =
+        !region || item.region.toLowerCase().includes(region.toLowerCase());
+
+      const matchesRating =
+        filters.minRating === 0 || item.rating >= filters.minRating;
+
+      const matchesCategorie =
+        !selectedCategorie ||
+        item.profession.toLowerCase() === selectedCategorie.toLowerCase();
+
+      const matchesMetier =
+        !selectedMetier ||
+        item.metier.toLowerCase() === selectedMetier.toLowerCase();
+
+        const matchesAvailability =
+        filters.availability === "Tous" ||
+        filters.availability === item.availability;
+
+      const matchesKeyword =
+        !words.length || matchesQuery(item, words);
+
+      const metierQueryMatch =
+        motCle.length>0 && words.some(w => normalize(item.metier).includes(w));
+    
+      if (words.length>0 && (metierQueryMatch || selectedMetier || selectedCategorie)) {
+        metierMatchFound = true;
+      }
+
+      return (
+        matchesVille &&
+        matchesRegion &&
+        matchesRating &&
+        matchesCategorie &&
+        matchesMetier &&
+        matchesAvailability &&
+        matchesKeyword &&
+        !item.metier.includes("Toutes les catégories")
+      );
+    });
+
+    setResultats(filtres);
+
+    setHasMetierMatch(prev =>
+      prev !== metierMatchFound ? metierMatchFound : prev
+    );
+
+  }, [
+    professionals,
+    ville,
+    region,
+    words,
+    filters.minRating,
+    filters.availability,
+    selectedCategorie,
+    selectedMetier
+  ]);
 
   const handleSearch = (e: React.FormEvent) => {
+      e.preventDefault();
+      const params = new URLSearchParams();
+      if (motCle) params.append('q', motCle);
+      if (ville) params.append('ville', ville);
+      if (region) params.append('region', region);
+      if (selectedCategorie) params.append('c', selectedCategorie);
+      if (selectedMetier) params.append('m', selectedMetier);
+      navigate(`/search?${params.toString()}`);
+    };
+  
+  const handleServiceClick = (categorie:string, metier:string, ville: string, serviceId: string) => {
+    navigate(`/service/${categorie.toLowerCase()}/${metier.toLowerCase()}/${ville.toLowerCase()}/${serviceId}`);
+  };
+  const handleClean = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate(`/search?ville=${ville}&region=${region}&motcle=${motCle}`);
-    //setCurrentPage(1);
+    setMotCle('');
+    setVille('');
+    setRegion('');
+    setSelectedCategorie('');
+    setSelectedMetier('');
+    setFilters({
+      minRating: 0,
+      maxPrice: '',
+      categories: [] as string[],
+      availability: 'Tous',
+    });
   };
 
   const handlePageChange = (page: number) => {
@@ -240,16 +325,23 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleProfileClick = (professionalId: string) => {
-    navigate(`/professional/${professionalId}`);
+  const handleProfileClick = (metier: string, region: string, nom: string, professionalId: string) => {
+    navigate(`/pro/${slugify(metier)}/${slugify(region)}/${slugify(nom)}/${professionalId}`);
   };
-
+  
+  const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+    
   const resultatsSansDoublons = Array.from(
   new Map(resultats.map(item => [item.id, item])).values()
   );
   const sponsoredProfessionals = resultatsSansDoublons.filter((pro) => pro.sponsored);
   const regularProfessionals = resultatsSansDoublons.filter((pro) => !pro.sponsored);
-
   const currentsponsoredProfessionals = sponsoredProfessionals.slice();
   const itemsPerPage = 10;
   const totalPages = Math.ceil(regularProfessionals.length / itemsPerPage);
@@ -283,7 +375,7 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
     <div className="min-h-screen bg-[#f8fbfc] mx-auto py-8">
       {/* 1. TOP AD BANNER (FULL WIDTH) */}
       <div className="bg-white pt-8 -mt-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto p-6">
           <AdBanner type="horizontal" />
         </div>
       </div>
@@ -304,9 +396,9 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
       <div className="max-w-7xl mx-auto px-4 -mt-20">
         <div className="bg-white rounded-[22px] shadow-xl p-4 shadow-slate-200/50 p-3 md:p-4 mb-10 border border-slate-100">
           <form onSubmit={handleSearch}>
-            <div className="grid grid-cols-1 md:grid-cols-[2fr_1.25fr_1.25fr_0.8fr] gap-4">
-              <div className="relative flex-[2]">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
+              <div className="md:col-span-4 relative">
+                <Search className="pointer-events-none absolute left-4 top-1/2 sm:top-1/4 -translate-y-1/2 text-slate-400 w-5 h-5" />
                 <input
                   type="text"
                   placeholder="Quel métier ou service cherchez-vous ?"
@@ -315,9 +407,9 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                   onChange={(e) => setMotCle(e.target.value)}
                 />
               </div>
-              <div className="relative flex-1">
+              <div className="md:col-span-3">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MapPin className="h-5 w-5 text-gray-400" />
+                  {/*<MapPin className="h-5 w-5 text-gray-400" />*/}
                 </div>
                 <CustomSelect
                   value={ville}
@@ -325,8 +417,8 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                     setVille(value);
                     setRegion('');
                   }}
-                  required
-                  name="ville"
+                  //required
+                  name="mappin"
                   placeholder='Ville'
                   options={[
                     ...Object.keys(villesEtRegions).map((v) => ({
@@ -336,9 +428,9 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                   ]}
                 />
               </div>
-              <div className="relative">
+              <div className="md:col-span-3">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MapPin className="h-5 w-5 text-gray-400" />
+                  {/*<MapPin className="h-5 w-5 text-gray-400" />*/}
                 </div>
                 <CustomSelect
                   value={region}
@@ -346,8 +438,8 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                     setRegion(value);
                   }}
                   disabled={!ville}
-                  required
-                  name="region"
+                  //required
+                  name="mappin"
                   placeholder='Région'
                   options={[
                     ...(ville ? villesEtRegions[ville as keyof typeof villesEtRegions].map((r: string) => ({
@@ -357,13 +449,17 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                   ]}
                 />
               </div>
-              <button type="submit" className="bg-[#e0692d] hover:bg-[#c45a25] text-white px-8 py-3 rounded-[20px] font-bold transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
-                <Search size={18} />
-                <span>Trouver</span>
-              </button>
-            </div>
-
-            <div className="mt-4 px-2">
+              <div className="md:col-span-2 flex flex-col gap-2">
+                <button type="submit" className="h-[52px] bg-[#e0692d] hover:bg-[#c45a25] text-white px-8 py-3 rounded-[20px] font-bold transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2">
+                  <Search size={18} />
+                  <span>Trouver</span>
+                </button>
+                <button type="button" onClick={handleClean} className="h-[52px] bg-white hover:bg-slate-100 text-[#e0692d] border border-[#e0692d] px-8 py-3 rounded-[20px] font-bold transition-all shadow flex items-center justify-center gap-2">
+                  <span>Réinitialisé</span>
+                </button>
+              </div>
+            </div>      
+            <div className="mt-3 px-2">
               <button 
                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                 className="flex items-center gap-2 text-sm font-semibold text-[#e0692d] hover:text-slate-600 transition-colors"
@@ -374,10 +470,11 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
               </button>
 
               {showAdvancedFilters && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-slate-50 animate-in fade-in slide-in-from-top-2">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 pt-1 border-t border-slate-50 animate-in fade-in slide-in-from-top-2">
                   <div className="space-y-1">
                     <label className="text-[11px] font-bold text-slate-400 uppercase ml-2">Catégorie</label>
                     <CustomSelect 
+                      name="category"
                       value={selectedCategorie} 
                       onChange={(v) => { setSelectedCategorie(v as Categorie); setSelectedMetier(''); }}
                       options={Object.keys(Metier).map(c => ({ value: c, label: c }))} 
@@ -385,7 +482,8 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                   </div>
                   <div className="space-y-1">
                     <label className="text-[11px] font-bold text-slate-400 uppercase ml-2">Métier précis</label>
-                    <CustomSelect 
+                    <CustomSelect
+                      name="metier" 
                       value={selectedMetier} 
                       disabled={!selectedCategorie}
                       onChange={setSelectedMetier}
@@ -395,6 +493,7 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                   <div className="space-y-1">
                     <label className="text-[11px] font-bold text-slate-400 uppercase ml-2">Disponibilité</label>
                     <CustomSelect 
+                      name="disponibility"
                       value={filters.availability} 
                       onChange={(v) => setFilters({...filters, availability: v})}
                       options={["Tous", "Immédiat", "24h à 48h", "Disponible"].map(a => ({ value: a, label: a }))} 
@@ -429,7 +528,7 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
               <div className="p-2 ml-4 bg-orange-100 rounded-lg text-[#e0692d]">
                 <Star size={20} fill="currentColor" />
               </div>
-              <h2 className="text-xl font-bold text-slate-800 tracking-tight">Professionnels Recommandés</h2>
+              <h2 className="text-xl font-bold text-slate-800 tracking-tight">Services Sponsorisés</h2>
             </div>
             <Swiper
               modules={[Autoplay, Pagination, Navigation]}
@@ -458,12 +557,12 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                         src={professional.avatar}
                         alt={professional.name}
                         className="w-16 h-16 rounded-full object-cover border-2 border-[#e0692d] cursor-pointer group-hover:scale-105 transition-transform"
-                        onClick={() => handleProfileClick(professional.professional_id)}
+                        onClick={() => handleProfileClick(professional.metier, professional.region, professional.name, professional.professional_id)}
                       />
                       <div className="ml-4 flex-1">
                         <div className="flex items-center">
                           <h3 className="text-lg font-semibold text-gray-900 hover:text-[#e0692d] cursor-pointer"
-                            onClick={() => handleProfileClick(professional.professional_id)}
+                            onClick={() => handleProfileClick(professional.metier, professional.region, professional.name, professional.professional_id)}
                           >
                             {professional.name}
                           </h3>
@@ -494,12 +593,12 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                     </div>
                     <div className="mt-4 flex items-center justify-between">
                       <div className="flex items-center">
-                        {professional.reviews > -1 && (
+                        {professional.reviews > 0 && (
                           <>
-                            <Star size={14} className="text-yellow-400 fill-yellow-400" />
-                            <span className="text-sm font-bold">{professional.rating}</span>
+                            <Star size={14} className="text-yellow-400 mr-1 fill-yellow-400" />
+                            <span className="text-xs font-bold  text-slate-700">{professional.rating}</span>
                             <span className="mx-1 text-gray-400">•</span>
-                            <span className="text-sm font-semibold text-gray-600">{professional.reviews} avis</span>
+                            <span className="text-xs text-slate-700">{professional.reviews} avis</span>
                           </>
                         )}
                       </div>
@@ -516,10 +615,10 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                       {id !== professional.professional_id && (
                         <div className="flex flex-col sm:flex-row gap-4 max-w-md">
                           <button 
-                              onClick={() => navigate(`/professional/${professional.professional_id}`)}
+                              onClick={() => handleServiceClick(professional.profession, professional.metier, professional.region ,professional.id)}
                               className="bg-[#e0692d] text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-900 transition-colors flex items-center gap-2"
                             >
-                              Voir Profil <ArrowRight size={12} />
+                              Voir Service <ArrowRight size={12} />
                             </button>
                           {/*<button
                             onClick={() => {
@@ -556,7 +655,6 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
             </h2>
             <div className="space-y-4">
               {currentProfessionals.map(professional => (
-                
                 <div
                   key={professional.id}
                   className="bg-white rounded-[24px] shadow-md p-6 px-8 hover:shadow-lg transition-shadow duration-200"
@@ -569,9 +667,8 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                         src={professional.avatar}
                         alt={professional.name}
                         className="w-16 h-16 rounded-full object-cover cursor-pointer shrink-0"
-                        onClick={() => handleProfileClick(professional.professional_id)}
+                        onClick={() => handleProfileClick(professional.metier, professional.region, professional.name, professional.professional_id)}
                       />
-
                       {/* NOM + CATEGORIE + PRIX */}
                       <div className="flex-1 flex justify-between gap-3">
 
@@ -579,7 +676,7 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                           <div className="flex items-center">
                             <h3
                               className="text-lg font-semibold text-gray-900 hover:text-[#e0692d] cursor-pointer truncate"
-                              onClick={() => handleProfileClick(professional.professional_id)}
+                              onClick={() => handleProfileClick(professional.metier, professional.region, professional.name, professional.professional_id)}
                             >
                               {professional.name}
                             </h3>
@@ -590,7 +687,22 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                           </div>
 
                           <div className="flex items-center py-1">
-                            <p className="text-[11px] text-[#e0692d] font-black uppercase tracking-widest">{professional.profession}</p>
+                            <p
+                              className={`
+                                text-[11px] font-black uppercase tracking-widest text-[#e0692d] 
+                                ${!hasMetierMatch ? "cursor-pointer hover:text-orange-400" : "cursor-default"}
+                              `}
+                              onClick={() => {
+                                const param = hasMetierMatch ? "m" : "c";
+                                const value = hasMetierMatch
+                                  ? professional.metier
+                                  : professional.profession;
+
+                                window.location.href = `/search?${param}=${encodeURIComponent(value)}`;
+                              }}
+                            >
+                              {hasMetierMatch ? professional.metier : professional.profession}
+                            </p>
                             <span className="mx-1 text-gray-400 hidden sm:inline-flex">•</span>
                             <span className="flex items-center gap-1 text-gray-500 text-xs font-medium hidden sm:inline-flex">
                               <MapPin size={14} className="text-[#e0692d]" /> {professional.city}, {professional.region}
@@ -616,7 +728,11 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
 
                     {/* ===== LIGNE 2 — FULL WIDTH MOBILE ===== */}
                     <div className="mt-3 space-y-3">
-
+                      <h3 onClick= {() => handleServiceClick(professional.profession, professional.metier, professional.region, professional.id)}
+                       dir={isArabic(professional.titre) ? "rtl" : "ltr"}
+                        className={`text-base sm:text-lg font-semibold text-slate-800 cursor-pointer transition-colors hover:text-[#e0692d] ${
+                          isArabic(professional.titre) ? "text-right" : "text-left"
+                        }`} >{professional.titre}</h3>        
                       {/* DESCRIPTION */}
                       <p
                         dir={isArabic(professional.description) ? "rtl" : "ltr"}
@@ -666,10 +782,17 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                                 setShowLoginModal(true);
                               }
                             }}
+                           /*onClick={() =>handleServiceClick(professional.profession, professional.metier, professional.region ,professional.id)}
+                              if (hasMetierMatch) {
+                                navigate(`/service/${professional.id}`);
+                              } else {
+                                handleProfileClick(professional.metier, professional.region, professional.name, professional.professional_id)}
+                              }
+                            }}*/
                             className="bg-[#e0692d] text-white px-3 sm:px-4 py-2 rounded-xl text-xs font-bold 
                                       hover:bg-slate-900 transition-colors flex items-center gap-2 shrink-0"
                           >
-                            <MessageSquare className="h-4 w-4" />
+                            {/*Voir <span className="hidden sm:inline">Service</span>*/} <MessageSquare size={12}/>
                             <span className="hidden sm:inline">Contacter</span>
                           </button>
                         )}
@@ -733,38 +856,42 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
         
         {/* Right Advertisement Column */}
         <div className="lg:w-80 space-y-8">
-          <div className="bg-slate-900 rounded-[24px] p-6 text-white overflow-hidden relative">
-            <div className="relative z-10">
-              <h4 className="text-lg font-bold mb-2">Vous êtes un pro ?</h4>
-              <p className="text-slate-400 text-sm mb-4">Augmentez votre visibilité et recevez plus de chantiers.</p>
-              <button onClick={() => navigate("/business")} className="w-full bg-[#e0692d] py-3 rounded-xl font-bold text-sm hover:scale-105 transition-transform">
-                S'inscrire comme Pro
-              </button>
-            </div>
-            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl"></div>
-          </div>
+          {!token && (
+            <>
+              <div className="bg-slate-900 rounded-[24px] p-6 text-white overflow-hidden relative">
+                <div className="relative z-10">
+                  <h4 className="text-lg font-bold mb-2">Vous êtes un pro ?</h4>
+                  <p className="text-slate-400 text-sm mb-4">Augmentez votre visibilité et recevez plus de chantiers.</p>
+                  <button onClick={() => navigate("/business")} className="w-full bg-[#e0692d] py-3 rounded-xl font-bold text-sm hover:scale-105 transition-transform">
+                    S'inscrire comme Pro
+                  </button>
+                </div>
+                <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl"></div>
+              </div>
 
-          <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm">
-            <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <BadgeCheck size={18} className="text-[#e0692d]" />
-              Pourquoi nous ?
-            </h4>
-            <ul className="space-y-4">
-              {[
-                "Profils vérifiés manuellement",
-                "Avis clients 100% authentiques",
-                "Mise en relation gratuite",
-                "Experts de votre région"
-              ].map((text, i) => (
-                <li key={i} className="flex gap-3 text-sm text-slate-600 font-medium">
-                  <div className="w-5 h-5 bg-green-50 text-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    ✓
-                  </div>
-                  {text}
-                </li>
-              ))}
-            </ul>
-          </div>
+              <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm">
+                <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <BadgeCheck size={18} className="text-[#e0692d]" />
+                  Pourquoi nous ?
+                </h4>
+                <ul className="space-y-4">
+                  {[
+                    "Profils vérifiés manuellement",
+                    "Avis clients 100% authentiques",
+                    "Mise en relation gratuite",
+                    "Experts de votre région"
+                  ].map((text, i) => (
+                    <li key={i} className="flex gap-3 text-sm text-slate-600 font-medium">
+                      <div className="w-5 h-5 bg-green-50 text-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        ✓
+                      </div>
+                      {text}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              </>
+          )}
             <div className="bg-white hidden lg:block p-4 rounded-[24px] shadow-md">
               <p className="text-sm text-gray-500 mb-2">Publicité</p>
               <div className="h-[600px] flex items-center justify-center border border-dashed border-gray-300">

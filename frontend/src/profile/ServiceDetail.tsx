@@ -46,12 +46,6 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
   useEffect(() => {
     const fetchService = async () => {
       try {
-        /*const token = localStorage.getItem('token');
-        if (!token) {
-            console.error("Aucun token trouvé dans le localStorage");
-            return;
-        }*/
-        
         const response = await fetch(`http://localhost:5000/api/service/${id}`, {
           method: 'GET',
           headers: {
@@ -85,7 +79,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
         
         const data = await response.json();
         const service = Array.isArray(data) ? data[0] : data;
-       
+        if (service.statut !== "active") navigate('/404');
         const mapped = mapServicesDataToUserModel(service);
         setService(mapped);
        
@@ -153,8 +147,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
       fetchService();
     }
   }, [id]);
-  
-
+  console.log ("user = ", user);
   // Fonction pour gérer la demande de devis
   const handleQuoteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -445,7 +438,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
                   <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
                     <div className="flex items-center text-yellow-500 font-bold">
                       <Star size={16} fill="currentColor" className="mr-1" />
-                      4.9
+                      {service.provider.rating}
                       <span className="text-gray-400 font-normal ml-1">
                         ({user.stats.reviewsPosted} avis)
                       </span>
@@ -556,7 +549,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
                   {user.fullName} <CheckCircle size={16} className="ml-1 text-orange-500 fill-orange-500 text-white" />
                 </h4>
                 <div className="flex items-center text-yellow-500 text-sm font-bold">
-                  <Star size={14} fill="currentColor" className="mr-1" /> 4.8 <span className="text-gray-400 font-normal ml-1">({user.stats.reviewsPosted})</span>
+                  <Star size={14} fill="currentColor" className="mr-1" /> {service.provider.rating} <span className="text-gray-400 font-normal ml-1">({user.stats.reviewsPosted})</span>
                 </div>
               </div>
             </div>
@@ -605,15 +598,17 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
                     </button>
                   </>
               )}
-              <button 
-                onClick={() => setShowPhone(!showPhone)}
-                className={`w-full border-2 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${
-                  showPhone ? "border-green-500 text-green-600 bg-green-50" : "border-gray-100 text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <Phone size={18} /> 
-                {showPhone ? user?.phone || "+216 55 289 528" : "Voir le numéro"}
-              </button>
+              {user.show_phone && (
+                <button 
+                  onClick={() => setShowPhone(!showPhone)}
+                  className={`w-full border-2 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all ${
+                    showPhone ? "border-green-500 text-green-600 bg-green-50" : "border-gray-100 text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  <Phone size={18} /> 
+                  {showPhone ? user?.phone || "+216 55 289 528" : "Voir le numéro"}
+                </button>
+              )}
             </div>
 
             {/*<div className="mt-6 pt-6 border-t space-y-3">

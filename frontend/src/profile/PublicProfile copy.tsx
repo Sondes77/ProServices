@@ -56,7 +56,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
   const [visibleCount, setVisibleCount] = useState(5);
   const visibleReviews = reviews.slice(0, visibleCount);
   const hasMore = visibleCount < reviews.length;
-
+  
   useEffect(() => {
     
     const fetchService = async () => {
@@ -511,8 +511,8 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
     }
   };
 
-  const handleServiceClick = (serviceId: string) => {
-    navigate(`/service/${serviceId}`);
+  const handleServiceClick = (categorie:string, metier:string, ville: string, serviceId: string) => {
+    navigate(`/service/${categorie.toLowerCase()}/${metier.toLowerCase()}/${ville.toLowerCase()}/${serviceId}`);
   };
 
   const handleShareProfile = async () => {
@@ -633,7 +633,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                     alt={user.fullName} 
                     className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
                   />
-                  <span className="absolute bottom-1 right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></span>
+                  {/*<span className="absolute bottom-1 right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-white"></span>*/}
                 </div>
 
                 <div className="md:ml-6 text-center md:text-left">
@@ -733,7 +733,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                   <div 
                     key={service.id} 
                     className="group relative bg-white rounded-lg p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-orange-500/5 hover:border-orange-200 transition-all duration-300 cursor-pointer"
-                    onClick={() => handleServiceClick(service.id)}
+                    onClick={() => handleServiceClick(service.category, service.metier,user.region,service.id)}
                   >
                     {/* Badge de disponibilité discret */}
                     <div className="flex justify-between items-start mb-4">
@@ -864,38 +864,42 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
 
         {/* Right Advertisement Column */}
         <div className="hidden lg:block lg:w-80 space-y-8">
-          <div className="bg-slate-900 rounded-[24px] p-6 text-white overflow-hidden relative">
-            <div className="relative z-10">
-              <h4 className="text-lg font-bold mb-2">Vous êtes un pro ?</h4>
-              <p className="text-slate-400 text-sm mb-4">Augmentez votre visibilité et recevez plus de chantiers.</p>
-              <button onClick={() => navigate("/business")} className="w-full bg-[#e0692d] py-3 rounded-xl font-bold text-sm hover:scale-105 transition-transform">
-                S'inscrire comme Pro
-              </button>
-            </div>
-            <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl"></div>
-          </div>
+          {!token && (
+            <>
+              <div className="bg-slate-900 rounded-[24px] p-6 text-white overflow-hidden relative">
+                <div className="relative z-10">
+                  <h4 className="text-lg font-bold mb-2">Vous êtes un pro ?</h4>
+                  <p className="text-slate-400 text-sm mb-4">Augmentez votre visibilité et recevez plus de chantiers.</p>
+                  <button onClick={() => navigate("/business")} className="w-full bg-[#e0692d] py-3 rounded-xl font-bold text-sm hover:scale-105 transition-transform">
+                    S'inscrire comme Pro
+                  </button>
+                </div>
+                <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl"></div>
+              </div>
 
-          <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm">
-            <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <BadgeCheck size={18} className="text-[#e0692d]" />
-              Pourquoi nous ?
-            </h4>
-            <ul className="space-y-4">
-              {[
-                "Profils vérifiés manuellement",
-                "Avis clients 100% authentiques",
-                "Mise en relation gratuite",
-                "Experts de votre région"
-              ].map((text, i) => (
-                <li key={i} className="flex gap-3 text-sm text-slate-600 font-medium">
-                  <div className="w-5 h-5 bg-green-50 text-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                    ✓
-                  </div>
-                  {text}
-                </li>
-              ))}
-            </ul>
-          </div>
+              <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm">
+                <h4 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <BadgeCheck size={18} className="text-[#e0692d]" />
+                  Pourquoi nous ?
+                </h4>
+                <ul className="space-y-4">
+                  {[
+                    "Profils vérifiés manuellement",
+                    "Avis clients 100% authentiques",
+                    "Mise en relation gratuite",
+                    "Experts de votre région"
+                  ].map((text, i) => (
+                    <li key={i} className="flex gap-3 text-sm text-slate-600 font-medium">
+                      <div className="w-5 h-5 bg-green-50 text-green-600 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        ✓
+                      </div>
+                      {text}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </>
+          )}
           <div className="bg-white p-4 rounded-[24px] shadow-md">
             <p className="text-sm text-gray-500 mb-2">Publicité</p>
             <div className="h-[600px] flex items-center justify-center border border-dashed border-gray-300">

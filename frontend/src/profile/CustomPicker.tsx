@@ -30,7 +30,13 @@ export default function CustomPicker({
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  const format = (d: Date) => d.toISOString().split("T")[0];
+  const format = (d: Date) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+  
   const style1 = `
   w-full pl-10 pr-3 py-2 sm:py-3
             bg-gray-50 border border-gray-100 rounded-xl cursor-pointer
@@ -86,7 +92,7 @@ export default function CustomPicker({
       {/* INPUT */}
       <div className="relative w-full">
         <Calendar
-            size={16}
+            size={20}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-[#e0692d]/50 pointer-events-none"
         />
             <div

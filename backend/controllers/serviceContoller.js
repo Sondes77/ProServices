@@ -10,7 +10,7 @@ require('dotenv').config();
 console.log(process.env.GOOGLE_CLIENT_ID);
 
 // Créer un service via le formulaire 
-exports.creerService = async (req, res) => {
+/*exports.creerService = async (req, res) => {
     try {
         const authHeader = req.headers['authorization'];
         if (!authHeader) return res.status(401).json({ message: 'Token manquant' });
@@ -46,8 +46,105 @@ exports.creerService = async (req, res) => {
     console.error('Erreur lors de la création du sevice:', error);
     return res.status(500).json({ message: 'Erreur interne du serveur' });
     }
-  };
-  
+  };*/
+
+exports.creerService = async (req, res) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) return res.status(401).json({ message: 'Token manquant' });
+
+    const token = authHeader.split(' ')[1];
+    if (!token) return res.status(401).json({ message: 'Token invalide' });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    const { title, description, category, metier, price, status, duration, gallery, included, notIncluded } = req.body;
+    const date_creation = new Date();
+
+    // ✅ 1️⃣ Vérifier si un service existe déjà pour ce métier
+    const checkQuery = `
+      SELECT id FROM services 
+      WHERE professionnel_id = ? 
+      AND metier = ? 
+      LIMIT 1
+    `;
+
+    db.query(checkQuery, [userId, metier], (checkErr, checkResults) => {
+      if (checkErr) {
+        console.error('Erreur lors de la vérification :', checkErr);
+        return res.status(500).json({ message: 'Erreur serveur' });
+      }
+      
+      if (checkResults.length > 0) {
+        return res.status(200).json({
+          success: false,
+          message: "Vous avez déjà un service pour ce métier."
+        });
+      }
+
+      // 🔹 Vérifier même titre
+      const checkTitre = `
+        SELECT id FROM services 
+        WHERE professionnel_id = ? 
+        AND titre = ? 
+        LIMIT 1
+      `;
+
+      db.query(checkTitre, [userId, title], (errTitre, resultTitre) => {
+        if (errTitre) {
+          console.error('Erreur vérification titre :', errTitre);
+          return res.status(500).json({ message: 'Erreur serveur' });
+        }
+
+        if (resultTitre.length > 0) {
+          return res.status(200).json({
+            success: false,
+            message: "Vous avez déjà utilisé ce titre. Le titre doit être unique."
+          });
+        }  
+        // ✅ 2️⃣ Si aucun service trouvé → insertion
+        const insertQuery = `
+          INSERT INTO services 
+          (professionnel_id, titre, description, categorie, metier, prix, statut, availability, gallery, included, notIncluded, date_creation) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const values = [
+          userId,
+          title,
+          description,
+          category,
+          metier,
+          price,
+          status,
+          duration,
+          JSON.stringify(gallery),
+          JSON.stringify(included),
+          JSON.stringify(notIncluded),
+          date_creation
+        ];
+
+        db.query(insertQuery, values, (err, results) => {
+          if (err) {
+            console.error('Erreur lors de la création :', err);
+            return res.status(500).json({ message: 'Erreur serveur' });
+          }
+
+          res.status(200).json({
+            success:true,
+            userId: userId,
+            message: 'Service créé avec succès'
+          });
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Erreur lors de la création du service:', error);
+    return res.status(500).json({ message: 'Erreur interne du serveur' });
+  }
+};
+
 exports.updateService = async (req, res) => {
   try {
     const authHeader = req.headers['authorization'];
@@ -69,8 +166,8 @@ exports.updateService = async (req, res) => {
           console.error('Erreur lors de la mise à jour :', err);
           return res.status(500).json({ message: 'Erreur serveur' });
         }
-        //console.error('okijjjjjjjjjjjjjjjjjjjj', results);
-        res.status(200).json({ message: 'Service mis à jour avec succès' });
+        
+        res.status(200).json({ success: true, message: 'Service mis à jour avec succès' });
       });
 
   } catch (error) {
@@ -138,7 +235,7 @@ exports.getUtilisateur = (req, res) => {
 // Récupérer tous les utilisateurs
 exports.getServices = (req, res) => {
   //db.query('SELECT * FROM utilisateurs, services where utilisateurs.id = services.professionnel_id and services.statut = "active"', (err, result) => {
-  db.query('SELECT u.id as professional_id, u.nom, u.prenom, u.ville, u.region, u.photo, u.availability, u.apropos, s.id as service_id, s.titre, s.description, s.categorie, s.metier, s.availability, s.prix, s.sponsored, s.verified FROM utilisateurs u, services s where u.id = s.professionnel_id and s.statut = "active"', (err, result) => {
+  db.query('SELECT u.id AS professional_id, u.nom, u.prenom, u.ville, u.region, u.photo, u.availability, u.apropos, s.id AS service_id, s.titre, s.description, s.categorie, s.metier, s.availability AS service_availability, s.prix, s.sponsored, s.verified, COUNT(r.id) AS review, IFNULL(ROUND(AVG(r.rating),1), 0) AS rating FROM utilisateurs u JOIN services s ON u.id = s.professionnel_id LEFT JOIN reviews r ON u.id = r.recipient_id WHERE s.statut = ? GROUP BY u.id, s.id', ["active"], (err, result) => {
     if (err) {
       console.error('Erreur lors de la récupération des services:', err);
       return res.status(500).send('Erreur serveur');
@@ -178,7 +275,7 @@ exports.getServicesById = (req, res) => {
 
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
   console.log(id);*/
-  db.query('SELECT * FROM services where id = ? and statut = "active"', [id], (err, result) => {
+  db.query('SELECT s.*, COUNT(r.id) AS review, IFNULL(ROUND(AVG(r.rating),1), 0) AS rating FROM services s left join reviews r on r.recipient_id = s.professionnel_id where s.id = ? and s.statut = "active"', [id], (err, result) => {
     if (err) {
       console.error('Erreur lors de la récupération des services:', err);
       return res.status(500).send('Erreur serveur');

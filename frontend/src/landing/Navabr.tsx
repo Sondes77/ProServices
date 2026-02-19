@@ -40,12 +40,7 @@ const Navbar = () => {
           </div>
 
           {/* CENTER – DESKTOP NAVIGATION */}
-          {/*<div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center space-x-10">
-            <Link to="/" className="nav-link">Accueil</Link>
-            <Link to="/a-propos" className="nav-link">À propos</Link>
-            <Link to="/services" className="nav-link">Services</Link>
-            <Link to="/contact" className="nav-link">Contact</Link>
-          </div>*/}
+          
           {/* --- CENTRE : BARRE DE RECHERCHE (DESKTOP) --- */}
           {currentPath !== "/search" && (
             <div className="hidden lg:flex flex-1 max-w-md mx-8">
@@ -54,7 +49,7 @@ const Navbar = () => {
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (searchQuery.trim()) {
-                      navigate(`/search?motcle=${encodeURIComponent(searchQuery.trim().toLowerCase())}`);
+                      navigate(`/search?q=${encodeURIComponent(searchQuery.trim().toLowerCase())}`);
                     }
                   }}
                 >

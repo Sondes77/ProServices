@@ -313,7 +313,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
               onSubmit={(e) => {
                 e.preventDefault();
                 if (searchQuery.trim()) {
-                  navigate(`/search?motcle=${encodeURIComponent(searchQuery.trim().toLowerCase())}`);
+                  navigate(`/search?q=${encodeURIComponent(searchQuery.trim().toLowerCase())}`);
                 }
               }}
             >
@@ -632,7 +632,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
                     e.preventDefault();
                     if (searchQuery.trim()) {
                       setShowMobileSearch(false);
-                      navigate(`/search?motcle=${encodeURIComponent(searchQuery.trim().toLowerCase())}`);
+                      navigate(`/search?q=${encodeURIComponent(searchQuery.trim().toLowerCase())}`);
                     }
                   }}
                   className="relative"

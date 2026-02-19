@@ -211,7 +211,14 @@ const ClientQuotesDashboard = () => {
 
     return map[statut] || "bg-gray-50 border-gray-200 text-gray-700";
   };
-
+  const slugify = (text: string) =>
+    text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  
   const handleUpdateStatus = async (id: string, newStatus: 'accepted' | 'rejected', proId: string) => {
     
     try {
@@ -289,6 +296,7 @@ const ClientQuotesDashboard = () => {
       });
     }
   };
+
   const statusOptions = [
     { value: 'all', label: `Tous (${countByStatus.all})` },
     { value: 'pending', label: `En attente (${countByStatus.pending})` },
@@ -297,7 +305,11 @@ const ClientQuotesDashboard = () => {
     { value: 'declined', label: `Refusés (${countByStatus.declined})` },
     { value: 'cancelled', label: `Annulés (${countByStatus.cancelled})` }
   ];
-  
+
+  const handleProfileClick = (metier: string, region: string, nom: string, professionalId: string) => {
+    navigate(`/pro/${slugify(metier)}/${slugify(region)}/${slugify(nom)}/${professionalId}`);
+  };
+
   return  (
     <div className="min-h-screen bg-[#F8F9FB] p-4 md:p-10">
       <div className="max-w-7xl mx-auto flex flex-col gap-6">
@@ -370,7 +382,7 @@ const ClientQuotesDashboard = () => {
                     <p className="text-[10px] text-slate-400 font-bold uppercase">REF: DV-{d.id}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="font-semibold text-slate-600 text-sm cursor-pointer hover:text-[#e0692d]" onClick={() => navigate(`/professional/${d.pro_id}`)}>{d.pro_nom}</p>
+                    <p className="font-semibold text-slate-600 text-sm cursor-pointer hover:text-[#e0692d]" onClick={() => handleProfileClick$( d.pro_nom, d.pro_id)}>{d.pro_nom}</p>
                     {d.pro_role === 'professional' ? (
                       <p className="text-[10px] text-slate-400 font-semibold uppercase">(Pro)</p>
                     ):(
