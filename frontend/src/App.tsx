@@ -290,6 +290,9 @@ function App() {
         <Route path="/admin/advertisements" element={<AdvertisementAdmin />} />*/}
 
         <Route path="/search" element={<SearchProfessionals onViewProfile={(id) => id} />} />
+        <Route path="/services/:metier" element={<SearchProfessionals onViewProfile={(id) => id} />} />
+        <Route path="/categories/:categorie" element={<SearchProfessionals onViewProfile={(id) => id} />} />
+        <Route path="/categories/:categorie/:metier" element={<SearchProfessionals onViewProfile={(id) => id} />} />
         <Route path="/service/:categorie/:metier/:ville/:id" element={<ServiceDetail user2={currentUser}/>} />
         <Route path="/blog/:id" element={<ArticleDetail />} />
         <Route path="/proquote" element={<ProQuote user2={currentUser} />} />

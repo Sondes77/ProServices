@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate, useParams } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { villesEtRegions } from '../components/villesRegions';
@@ -62,24 +62,70 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
   const [selectedMetier, setSelectedMetier] = useState(query.get('m') || '');
   const words = useMemo(() => expandQuery(motCle), [motCle]);
   const [hasMetierMatch, setHasMetierMatch] = useState(false);
-
+  const { metier, categorie, v } = useParams();
+  
   const metierDisponibles =
   selectedCategorie && Metier[selectedCategorie]
     ? Metier[selectedCategorie]
     : [];
 
   var i=0;
-  
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        
+      
         const response = await fetch(`http://localhost:5000/api/all`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         });
+        
+        // 🎯 PRIORITÉ : Routes SEO
+        if (metier) {
+          //url = `http://localhost:5000/api/professionals?metier=${encodeURIComponent(metier)}`;
+          setSelectedMetier(metier);
+        }
+
+        if (categorie && metier) {
+          /*url = `http://localhost:5000/api/professionals?metier=${encodeURIComponent(
+            metier
+          )}&ville=${encodeURIComponent(v)}`;*/
+          setSelectedCategorie(categorie);
+          setSelectedMetier(metier);
+        }
+
+        if (metier && v) {
+          /*url = `http://localhost:5000/api/professionals?metier=${encodeURIComponent(
+            metier
+          )}&ville=${encodeURIComponent(v)}`;*/
+          setSelectedMetier(metier);
+          setVille(v);
+        }
+
+        if (categorie) {
+          /*url = `http://localhost:5000/api/professionals?categorie=${encodeURIComponent(
+            categorie
+          )}`;*/
+          setSelectedCategorie(categorie);
+        }
+
+        // 🎯 Support fallback /search?m=...&ville=...
+        /*if (!metier && !categorie) {
+          const params = new URLSearchParams(location.search);
+
+          const m = params.get("m");
+          const c = params.get("c");
+          const ville = params.get("ville");
+
+          if (m) url = `http://localhost:5000/search?m=${encodeURIComponent(m)}`;
+          if (c) url = `http://localhost:5000/search?c=${encodeURIComponent(c)}`;
+          if (m && ville)
+            url = `http://localhost:5000/search?m=${encodeURIComponent(
+              m
+            )}&ville=${encodeURIComponent(ville)}`;
+        }*/
 
         if (!response.ok) {
           Swal.fire({
@@ -136,7 +182,90 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
     };
 
     fetchUserData();
-  }, []);
+  }, [metier, categorie, v, location.search]);
+
+  /*useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        let url = "http://localhost:5000/api/all?";
+
+        // 🎯 PRIORITÉ : Routes SEO
+        if (metier) {
+          url = `http://localhost:5000/api/professionals?metier=${encodeURIComponent(metier)}`;
+        }
+
+        if (metier && v) {
+          url = `http://localhost:5000/api/professionals?metier=${encodeURIComponent(
+            metier
+          )}&ville=${encodeURIComponent(v)}`;
+        }
+
+        if (categorie) {
+          /*url = `http://localhost:5000/api/professionals?categorie=${encodeURIComponent(
+            categorie
+          )}`;
+          setSelectedCategorie(categorie);
+        }
+
+        // 🎯 Support fallback /search?m=...&ville=...
+        if (!metier && !categorie) {
+          const params = new URLSearchParams(location.search);
+
+          const m = params.get("m");
+          const c = params.get("c");
+          const ville = params.get("ville");
+
+          if (m) url = `http://localhost:5000/api/professionals?metier=${encodeURIComponent(m)}`;
+          if (c) url = `http://localhost:5000/api/professionals?categorie=${encodeURIComponent(c)}`;
+          if (m && ville)
+            url = `http://localhost:5000/api/professionals?metier=${encodeURIComponent(
+              m
+            )}&ville=${encodeURIComponent(ville)}`;
+        }
+
+        const response = await fetch(url, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          Swal.fire({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true,
+            icon: "warning",
+            text: "Erreur lors de la récupération de données",
+          });
+          return;
+        }
+
+        const prosData = await response.json();
+
+        const mappedProfessionals = prosData.map((element: any) =>
+          mapProfessionalsDataToUserModel(element)
+        );
+
+        setProfessionals(mappedProfessionals);
+
+      } catch (error) {
+        Swal.fire({
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true,
+          icon: "warning",
+          text: "Erreur réseau",
+        });
+      }
+    };
+
+    fetchUserData();
+  }, [metier, categorie, v, location.search]);*/
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -232,8 +361,8 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
     const filtres = professionals.filter((item) => {
 
       const matchesVille =
-        !ville || item.city.toLowerCase().includes(ville.toLowerCase());
-
+        !ville || slugify(item.city.toLowerCase()).includes(slugify(ville.toLowerCase()));
+       
       const matchesRegion =
         !region || item.region.toLowerCase().includes(region.toLowerCase());
 
@@ -242,11 +371,13 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
 
       const matchesCategorie =
         !selectedCategorie ||
-        item.profession.toLowerCase() === selectedCategorie.toLowerCase();
+        slugify(item.profession.toLowerCase()) === slugify(selectedCategorie.toLowerCase());
+        //item.profession.toLowerCase() === selectedCategorie.toLowerCase();
 
       const matchesMetier =
         !selectedMetier ||
-        item.metier.toLowerCase() === selectedMetier.toLowerCase();
+        slugify(item.metier.toLowerCase()) === slugify(selectedMetier.toLowerCase());
+        //item.metier.toLowerCase() === selectedMetier.toLowerCase();
 
         const matchesAvailability =
         filters.availability === "Tous" ||
@@ -690,15 +821,15 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                             <p
                               className={`
                                 text-[11px] font-black uppercase tracking-widest text-[#e0692d] 
-                                ${!hasMetierMatch ? "cursor-pointer hover:text-orange-400" : "cursor-default"}
+                                ${!hasMetierMatch ? "cursor-pointer hover:text-orange-400" : "cursor-pointer hover:text-orange-400"}
                               `}
                               onClick={() => {
-                                const param = hasMetierMatch ? "m" : "c";
+                                const param = hasMetierMatch ? "services" : "categories";
                                 const value = hasMetierMatch
                                   ? professional.metier
                                   : professional.profession;
 
-                                window.location.href = `/search?${param}=${encodeURIComponent(value)}`;
+                                navigate(`/${param}/${encodeURIComponent(value)}`);
                               }}
                             >
                               {hasMetierMatch ? professional.metier : professional.profession}

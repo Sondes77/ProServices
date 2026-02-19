@@ -270,7 +270,7 @@ const popularSearches = [
               <p className="text-[#e0692d] mt-2">Explorez nos professionnels par domaine d'expertise</p>
             </div>
             <div className="flex flex-col md:flex-row justify-end items-end mb-8">
-              <Link to="/search" className="text-[#e0692d] font-semibold flex items-center gap-1 hover:gap-2 transition-all mt-4 md:mt-0">
+              <Link to="/categories" className="text-[#e0692d] font-semibold flex items-center gap-1 hover:gap-2 transition-all mt-4 md:mt-0">
                 Voir tout le catalogue <ArrowRight className="w-4 h-4" />
               </Link> 
             </div>  
