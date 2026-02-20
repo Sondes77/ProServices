@@ -4,6 +4,7 @@ import { Mail, Lock, Eye, EyeOff, Facebook, Chrome, ArrowRight, Loader2 } from '
 import PropTypes from 'prop-types';
 import { mapUserDataToUserModel } from '../utils/mapper';
 import './sign-in4.css';
+import { urlBase } from "../config.js";
 
 const SignIn4 = (props) => {
   const [email, setEmail] = useState('');
@@ -22,7 +23,7 @@ const SignIn4 = (props) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      const response = await fetch(`${urlBase}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

@@ -10,6 +10,7 @@ import Footer from '../landing/Footer';
 import Swal from "sweetalert2";
 import CustomSelect from './CustomSelect';
 import { Categorie, Metier } from '../components/categoryMetier';
+import { urlBase } from "../config.js";
 
 interface FirstServiceProps {
   user: UserType;
@@ -155,7 +156,7 @@ const FirstService: React.FC<FirstServiceProps> = ({  user, service, onSubmit, o
       newFiles.forEach(f => fd.append("images", f));
 
       const uploadRes = await fetch(
-        "http://localhost:5000/api/upload-gallery",
+        `${urlBase}/upload-gallery`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
@@ -194,7 +195,7 @@ const FirstService: React.FC<FirstServiceProps> = ({  user, service, onSubmit, o
 
       
 
-      const response = await fetch('http://localhost:5000/api/service', {
+      const response = await fetch(`${urlBase}/service`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -231,7 +232,7 @@ const FirstService: React.FC<FirstServiceProps> = ({  user, service, onSubmit, o
         });
   
       // Requête pour obtenir les infos complètes de l'utilisateur
-      const userRes = await fetch(`http://localhost:5000/api/utilisateurId?id=${encodeURIComponent(data.userId)}`, {
+      const userRes = await fetch(`${urlBase}/utilisateurId?id=${encodeURIComponent(data.userId)}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`

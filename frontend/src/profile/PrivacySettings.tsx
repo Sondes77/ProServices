@@ -3,6 +3,7 @@ import { Save, Eye, EyeOff, MessageSquare, Bell, BellOff, Lock, Share, Share2 } 
 import { PrivacySettings as PrivacySettingsType } from '../utils/types';
 import { useNavigate } from 'react-router-dom';
 import Swal from "sweetalert2";
+import { urlBase } from "../config.js";
 
 interface PrivacySettingsProps {
   settings: PrivacySettingsType;
@@ -130,7 +131,7 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSave }) =
       return;
     }
   
-    const res = await fetch(`http://localhost:5000/api/change-password`, {
+    const res = await fetch(`${urlBase}/change-password`, {
       method: 'PUT',
       headers: {  'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(passwordForm)
@@ -150,7 +151,7 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSave }) =
   };
   
   const getPrivacySettings = async (token: string) => {
-    const res = await fetch(`http://localhost:5000/api/privacy`, {
+    const res = await fetch(`${urlBase}/privacy`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -162,7 +163,7 @@ const PrivacySettings: React.FC<PrivacySettingsProps> = ({ settings, onSave }) =
   };
 
   const savePrivacySettings = async (token: string, data: any) => {
-    const res = await fetch("http://localhost:5000/api/privacy", {
+    const res = await fetch(`${urlBase}/privacy`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

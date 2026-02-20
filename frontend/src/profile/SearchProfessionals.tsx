@@ -21,12 +21,27 @@ import Swal from "sweetalert2";
 import CustomSelect from './CustomSelect';
 import { Categorie, Metier } from '../components/categoryMetier';
 import { normalize, expandQuery, matchesQuery } from "../utils/searchEngine";
+import { Helmet } from 'react-helmet-async';
+import { urlBase } from "../config.js";
 
 interface SearchProfessionalsProps {
   onViewProfile: (professionalId: string) => void;
 }
 
 const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile }) => {
+  const location = useLocation();
+  const query = new URLSearchParams(location.search);
+  const isSearchPage = location.pathname.startsWith("/search");
+  const isServicesPage = location.pathname.startsWith("/services/");
+  const isCategoriesPage = location.pathname.startsWith("/categories/");
+
+const params = useParams<{
+  metier?: string;
+  ville?: string;
+  categorie?: string;
+}>();
+  const shouldNoIndex = isSearchPage; // 🎯 SEO : only noindex /search
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('');
@@ -51,13 +66,23 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
   const [message, setMessage] = useState('');
   
   const navigate = useNavigate();
-  const location = useLocation();
-  const query = new URLSearchParams(location.search);
   
+  
+  const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
   const [ville, setVille] = useState(query.get('ville') || '');
   const [region, setRegion] = useState(query.get('region') || '');
   const [motCle, setMotCle] = useState(query.get('q') || '');
-  const cFromQuery = query.get('c') as Categorie | null;
+  const cFromQuery: Categorie | null = (() => {
+    const value = query.get('c');
+    return value ? (slugify(value) as Categorie) : null;
+  })();
   const [selectedCategorie, setSelectedCategorie] = useState<Categorie | ''>(cFromQuery ?? '');
   const [selectedMetier, setSelectedMetier] = useState(query.get('m') || '');
   const words = useMemo(() => expandQuery(motCle), [motCle]);
@@ -75,7 +100,7 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
     const fetchUserData = async () => {
       try {
       
-        const response = await fetch(`http://localhost:5000/api/all`, {
+        const response = await fetch(`${urlBase}/all`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -84,12 +109,12 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
         
         // 🎯 PRIORITÉ : Routes SEO
         if (metier) {
-          //url = `http://localhost:5000/api/professionals?metier=${encodeURIComponent(metier)}`;
+          //url = `${urlBase}/professionals?metier=${encodeURIComponent(metier)}`;
           setSelectedMetier(metier);
         }
 
         if (categorie && metier) {
-          /*url = `http://localhost:5000/api/professionals?metier=${encodeURIComponent(
+          /*url = `${urlBase}/professionals?metier=${encodeURIComponent(
             metier
           )}&ville=${encodeURIComponent(v)}`;*/
           setSelectedCategorie(categorie);
@@ -97,7 +122,7 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
         }
 
         if (metier && v) {
-          /*url = `http://localhost:5000/api/professionals?metier=${encodeURIComponent(
+          /*url = `${urlBase}/professionals?metier=${encodeURIComponent(
             metier
           )}&ville=${encodeURIComponent(v)}`;*/
           setSelectedMetier(metier);
@@ -105,7 +130,7 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
         }
 
         if (categorie) {
-          /*url = `http://localhost:5000/api/professionals?categorie=${encodeURIComponent(
+          /*url = `${urlBase}/professionals?categorie=${encodeURIComponent(
             categorie
           )}`;*/
           setSelectedCategorie(categorie);
@@ -187,21 +212,21 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
   /*useEffect(() => {
     const fetchUserData = async () => {
       try {
-        let url = "http://localhost:5000/api/all?";
+        let url = "${urlBase}/all?";
 
         // 🎯 PRIORITÉ : Routes SEO
         if (metier) {
-          url = `http://localhost:5000/api/professionals?metier=${encodeURIComponent(metier)}`;
+          url = `${urlBase}/professionals?metier=${encodeURIComponent(metier)}`;
         }
 
         if (metier && v) {
-          url = `http://localhost:5000/api/professionals?metier=${encodeURIComponent(
+          url = `${urlBase}/professionals?metier=${encodeURIComponent(
             metier
           )}&ville=${encodeURIComponent(v)}`;
         }
 
         if (categorie) {
-          /*url = `http://localhost:5000/api/professionals?categorie=${encodeURIComponent(
+          /*url = `${urlBase}/professionals?categorie=${encodeURIComponent(
             categorie
           )}`;
           setSelectedCategorie(categorie);
@@ -215,10 +240,10 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
           const c = params.get("c");
           const ville = params.get("ville");
 
-          if (m) url = `http://localhost:5000/api/professionals?metier=${encodeURIComponent(m)}`;
-          if (c) url = `http://localhost:5000/api/professionals?categorie=${encodeURIComponent(c)}`;
+          if (m) url = `${urlBase}/professionals?metier=${encodeURIComponent(m)}`;
+          if (c) url = `${urlBase}/professionals?categorie=${encodeURIComponent(c)}`;
           if (m && ville)
-            url = `http://localhost:5000/api/professionals?metier=${encodeURIComponent(
+            url = `${urlBase}/professionals?metier=${encodeURIComponent(
               m
             )}&ville=${encodeURIComponent(ville)}`;
         }
@@ -272,7 +297,7 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
     if (!token) return Swal.fire("Connexion requise", "Connectez-vous pour envoyer un message", "info");
 
     try {
-      const res = await fetch(`http://localhost:5000/api/message`, {
+      const res = await fetch(`${urlBase}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ recipientId: user?.id, content: message })
@@ -307,7 +332,7 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
   const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-          const response = await fetch('http://localhost:5000/api/login', {
+          const response = await fetch(`${urlBase}/login`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -434,7 +459,7 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
     };
   
   const handleServiceClick = (categorie:string, metier:string, ville: string, serviceId: string) => {
-    navigate(`/service/${categorie.toLowerCase()}/${metier.toLowerCase()}/${ville.toLowerCase()}/${serviceId}`);
+    navigate(`/service/${slugify(categorie.toLowerCase())}/${slugify(metier.toLowerCase())}/${ville.toLowerCase()}/${serviceId}`);
   };
   const handleClean = (e: React.FormEvent) => {
     e.preventDefault();
@@ -460,13 +485,7 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
     navigate(`/pro/${slugify(metier)}/${slugify(region)}/${slugify(nom)}/${professionalId}`);
   };
   
-  const slugify = (text: string) =>
-  text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+  
     
   const resultatsSansDoublons = Array.from(
   new Map(resultats.map(item => [item.id, item])).values()
@@ -504,6 +523,22 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
 
   return (
     <div className="min-h-screen bg-[#f8fbfc] mx-auto py-8">
+      <>
+        <Helmet>
+          <title>
+          {isServicesPage
+              ? `${params.metier} à ${params.ville || ""} | ServicePro`
+              : isCategoriesPage
+              ? `${params.categorie} | ServicePro`
+              : "Rechercher des professionnels | ServicePro"}
+          </title>
+          {shouldNoIndex ? (
+            <meta name="robots" content="noindex, follow" />
+          ) : (
+            <meta name="robots" content="index, follow" />
+          )}
+        </Helmet>
+      </>
       {/* 1. TOP AD BANNER (FULL WIDTH) */}
       <div className="bg-white pt-8 -mt-8">
         <div className="max-w-7xl mx-auto p-6">
@@ -807,7 +842,12 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                           <div className="flex items-center">
                             <h3
                               className="text-lg font-semibold text-gray-900 hover:text-[#e0692d] cursor-pointer truncate"
-                              onClick={() => handleProfileClick(professional.metier, professional.region, professional.name, professional.professional_id)}
+                              onClick={() => 
+                                hasMetierMatch 
+                                ? handleServiceClick(professional.metier, professional.region, professional.region, professional.id)
+                                : handleProfileClick(professional.metier, professional.region, professional.name, professional.professional_id)
+                              }
+                                
                             >
                               {professional.name}
                             </h3>
@@ -829,7 +869,7 @@ const SearchProfessionals: React.FC<SearchProfessionalsProps> = ({ onViewProfile
                                   ? professional.metier
                                   : professional.profession;
 
-                                navigate(`/${param}/${encodeURIComponent(value)}`);
+                                navigate(`/${param}/${slugify(value)}`);
                               }}
                             >
                               {hasMetierMatch ? professional.metier : professional.profession}

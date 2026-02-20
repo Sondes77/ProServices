@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Phone, ArrowRight, CheckCircle } from 'lucide-react';
 import ProgressSteps from '../profile/ProgressSteps';
+import { urlBase } from "../config.js";
 
 const PhoneConfirmation = () => {
   const [phone, setPhone] = useState(''); // In a real app, this would come from auth context
@@ -27,7 +28,7 @@ const PhoneConfirmation = () => {
 
   useEffect(() => {
     
-    fetch("http://localhost:5000/api/send-phone-code", {
+    fetch(`${urlBase}/send-phone-code`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -77,7 +78,7 @@ const PhoneConfirmation = () => {
       return;
     }
 
-    const res = await fetch("http://localhost:5000/api/verify-phone-code", {
+    const res = await fetch(`${urlBase}/verify-phone-code`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -101,7 +102,7 @@ const PhoneConfirmation = () => {
 
     //const phoneNumber = localStorage.getItem("userPhone");
 
-    await fetch("http://localhost:5000/api/send-phone-code", {
+    await fetch(`${urlBase}/send-phone-code`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",

@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, ShieldCheck, EyeOff, Eye, Lock, Phone, ArrowRight, CheckCircle } from 'lucide-react';
 import { useParams } from "react-router-dom";
+import { urlBase } from "../config.js";
 
 const ResetPassword = () => {
   const [error, setError] = useState('');
@@ -24,7 +25,7 @@ const ResetPassword = () => {
     const checkToken = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/reset-password/check/${token}`
+          `${urlBase}/reset-password/check/${token}`
         );
 
         if (res.status === 404) {
@@ -61,7 +62,7 @@ const ResetPassword = () => {
 
     try {
       // Appel API réel
-      const response = await fetch(`http://localhost:5000/api/reset-password/${token}`, {
+      const response = await fetch(`${urlBase}/reset-password/${token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),

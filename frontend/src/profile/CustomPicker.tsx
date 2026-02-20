@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Calendar, ChevronLeft, ChevronRight, XCircle } from "lucide-react";
+import { Calendar, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, XCircle } from "lucide-react";
 
 type Props = {
   value?: string;
@@ -109,18 +109,66 @@ export default function CustomPicker({
             <span className="text-slate-400">{placeholder}</span>
             )}
 
-            {value && (
-            <button
-                onClick={(e) => {
-                e.stopPropagation();
-                onChange("");
-                setTouched(true);
-                }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-300 hover:text-red-400"
-            >
-                <XCircle size={14} />
-            </button>
+            {open ? (
+
+                value ? ( 
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                        e.stopPropagation(); // empêche le toggle du div parent
+                        //onChange("");        // vide la date
+                        setOpen(false);      // ferme le calendrier
+                        setTouched(true);
+                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-300 hover:text-red-400"
+                        >
+                    <XCircle size={14} />
+                    </button>
+                ) : (
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                        e.stopPropagation(); // empêche le toggle du div parent
+                        //onChange("");        // vide la date
+                        setOpen(true);      // ferme le calendrier
+                        setTouched(true);
+                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-300 hover:text-red-400"
+                        >
+                            <ChevronDown size={14} />
+                    </button>
+                )
+            ) : (
+                value ? (
+                    <button
+                    type="button"
+                    onClick={(e) => {
+                    e.stopPropagation(); // empêche le toggle du div parent
+                    onChange("");        // vide la date
+                    setOpen(false);      // ferme le calendrier
+                    setTouched(true);
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-300 hover:text-red-400"
+                    >
+                        <XCircle size={14} />
+                </button>
+                ) : (
+                    <button
+                    type="button"
+                    onClick={(e) => {
+                    e.stopPropagation(); // empêche le toggle du div parent
+                    onChange("");        // vide la date
+                    setOpen(false);      // ferme le calendrier
+                    setTouched(true);
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-300 hover:text-red-400"
+                    >
+                        <XCircle size={14} />
+                    </button>
+                )
+               
             )}
+            
 
             {/* Hidden input pour focus */}
             <input

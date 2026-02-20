@@ -24,6 +24,7 @@ import { mapUserDataToUserModel, mapServicesDataToUserModel } from '../utils/map
 import pubImage from '../img/Datavancia cover.png';
 import pubVideo from '../img/1000x300.mp4';
 import Swal from "sweetalert2";
+import { urlBase } from "../config.js";
 
 interface PublicProfileProps {
   user2: User;
@@ -63,7 +64,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
       
       try {  
         
-        const response = await fetch(`http://localhost:5000/api/professional/${id}`, {
+        const response = await fetch(`${urlBase}/professional/${id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -102,7 +103,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
         }
         const mapped = mapUserDataToUserModel(service);
         setUser(mapped);
-        const resp = await fetch(`http://localhost:5000/api/pro-service/${id}`, {
+        const resp = await fetch(`${urlBase}/pro-service/${id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -170,7 +171,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
   const fetchReviews = async () => {
       
       try {  
-        const resp = await fetch(`http://localhost:5000/api/pro-review/${id}`, {
+        const resp = await fetch(`${urlBase}/pro-review/${id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -271,7 +272,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      const response = await fetch(`${urlBase}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -329,7 +330,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
       }
 
       // Crée ou récupère la conversation avec ce professionnel
-      const res = await fetch(`http://localhost:5000/api/message`, {
+      const res = await fetch(`${urlBase}/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -446,7 +447,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
       }
 
       // Crée ou récupère la conversation avec ce professionnel
-      const res = await fetch(`http://localhost:5000/api/review`, {
+      const res = await fetch(`${urlBase}/review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

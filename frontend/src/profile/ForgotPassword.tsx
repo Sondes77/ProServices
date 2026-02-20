@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types'
 import { Mail, ArrowRight, Loader2, ArrowLeft, CheckCircle, ShieldCheck } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { urlBase } from "../config.js"; 
 
 const ForgotPassword = (props) => {
   const [email, setEmail] = useState('');
@@ -15,7 +16,7 @@ const ForgotPassword = (props) => {
 
     try {
       // Simulation ou appel API réel
-      const response = await fetch('http://localhost:5000/api/forgot-password', {
+      const response = await fetch(`${urlBase}/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

@@ -3,6 +3,7 @@ import { Star, MessageSquare, Search, Filter, Loader2 } from 'lucide-react';
 import { Review, User } from '../utils/types';
 import { useNavigate } from 'react-router-dom';
 import CustomSelect from './CustomSelect';
+import { urlBase } from "../config.js";
 
 interface ReviewsProps {
   user: User;
@@ -51,7 +52,7 @@ const Reviews: React.FC<ReviewsProps> = ({ user }) => {
       } 
       try {
         setLoading(true);
-        const res = await fetch(`http://localhost:5000/api/mes-reviews`, {
+        const res = await fetch(`${urlBase}/mes-reviews`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -126,7 +127,7 @@ const Reviews: React.FC<ReviewsProps> = ({ user }) => {
     if (!replyText.trim()) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/reviews/${reviewId}/reply`, {
+      const res = await fetch(`${urlBase}/reviews/${reviewId}/reply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -157,8 +158,8 @@ const Reviews: React.FC<ReviewsProps> = ({ user }) => {
 
     try {
       const url = selectedService
-        ? `http://localhost:5000/api/services/${selectedService.id}` // Update
-        : 'http://localhost:5000/api/service'; // Create
+        ? `${urlBase}/services/${selectedService.id}` // Update
+        : `${urlBase}/service`; // Create
 
       const method = selectedService ? 'PUT' : 'POST';
       console.log(serviceData);

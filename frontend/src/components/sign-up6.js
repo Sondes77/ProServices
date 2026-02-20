@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import CustomSelect from '../profile/CustomSelect';
 import { Categorie, Metier } from './categoryMetier';
 import Swal from "sweetalert2";
+import { urlBase } from "../config.js";
 
 const SignUp6 = (props) => {
 const location = useLocation();
@@ -90,7 +91,7 @@ const handleSubmit = async (e) => {
     setLoading(true);
 
     const response = await fetch(
-      "http://localhost:5000/api/utilisateur",
+      `${urlBase}/utilisateur`,
       {
         method: "POST",
         headers: {
@@ -113,7 +114,7 @@ const handleSubmit = async (e) => {
 
     // 🔁 Récupérer l'utilisateur complet
     const userRes = await fetch(
-      `http://localhost:5000/api/utilisateur?email=${encodeURIComponent(
+      `${urlBase}/utilisateur?email=${encodeURIComponent(
         payload.email
       )}`,
       {

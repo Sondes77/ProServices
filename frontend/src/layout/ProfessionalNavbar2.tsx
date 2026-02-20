@@ -11,6 +11,7 @@ import logo from '../img/noBgColor5.png';
 import { User as UserType } from '../utils/types';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { urlBase } from "../config.js";
 
 interface ProfessionalNavbarProps {
   user: UserType;
@@ -75,7 +76,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
 
   const markAsNotified = async (ids: string[]) => {
     try {
-      await fetch("http://localhost:5000/api/notifications/notified", {
+      await fetch(`${urlBase}/notifications/notified`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ids })
@@ -140,7 +141,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/notifications", {
+        const res = await fetch(`${urlBase}/notifications`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         if (res.status === 401) {
@@ -160,7 +161,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
 
     const fetchMessages = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/messages/unread", {
+        const res = await fetch(`${urlBase}/messages/unread`, {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           });
           const data = await res.json();
@@ -186,7 +187,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
     const markAllAsRead = async (type: string) => {
       try {
        
-        await fetch(`http://localhost:5000/api/notifications/read-all`, {
+        await fetch(`${urlBase}/notifications/read-all`, {
           method: 'PATCH',
           body: JSON.stringify({
             type: type
@@ -205,7 +206,7 @@ const ProfessionalNavbar: React.FC<ProfessionalNavbarProps> = ({ user }) => {
 
     const markAsRead = async (id: string) => {
       try {
-        await fetch(`http://localhost:5000/api/notifications/read/${id}`, {
+        await fetch(`${urlBase}/notifications/read/${id}`, {
           method: 'PATCH',
           headers: { Authorization: `Bearer ${token}` }
         });

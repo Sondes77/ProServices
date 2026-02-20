@@ -13,6 +13,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import CustomPicker from './CustomPicker';
 import CustomSelect from './CustomSelect';
+import { urlBase } from "../config.js";
 
 interface ProQuoteProps {
   user2: User;
@@ -49,7 +50,7 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
     const fetchDevis = async () => {
       try {
         
-        const response = await fetch(`http://localhost:5000/api/devis/pro`, {
+        const response = await fetch(`${urlBase}/devis/pro`, {
           method: 'GET',
           headers: {'Authorization': `Bearer ${token}`,
           }
@@ -146,7 +147,7 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/devis/${quoteId}/propose`,
+        `${urlBase}/devis/${quoteId}/propose`,
         {
           method: 'PUT',
           headers: {
@@ -239,7 +240,7 @@ const ProQuotesManager:  React.FC<ProQuoteProps> = ({ user2 }) => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/devis/${quoteId}/cancelled`,
+        `${urlBase}/devis/${quoteId}/cancelled`,
         {
           method: 'PUT',
           headers: {

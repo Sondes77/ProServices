@@ -5,6 +5,7 @@ import { User as UserType } from '../utils/types';
 import { mapUserDataToUserModel } from '../utils/mapper';
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
+import { urlBase } from "../config.js";
 
 interface SidebarProps {
   activeSection: string;
@@ -58,7 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         const formData = new FormData();
         formData.append('avatar', file);
 
-        const response = await fetch('http://localhost:5000/api/upload-avatar', {
+        const response = await fetch(`${urlBase}/upload-avatar`, {
           method: 'POST',
           body: formData,
           headers: {
@@ -71,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         if (response.ok) {
                    
           // Faire une requête pour obtenir l'utilisateur à partir de l'email
-          const userRes = await fetch(`http://localhost:5000/api/utilisateurId?id=${encodeURIComponent(data.userId)}`, {
+          const userRes = await fetch(`${urlBase}/utilisateurId?id=${encodeURIComponent(data.userId)}`, {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`

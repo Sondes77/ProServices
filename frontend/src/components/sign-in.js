@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react'
 
-import { Helmet } from 'react-helmet'
+import { Helmet } from 'react-helmet-async'
 
 import Navbar8 from '../components/navbar8'
 import SignIn1 from '../components/sign-in1'

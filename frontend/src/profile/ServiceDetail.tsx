@@ -4,10 +4,9 @@ import { Calendar, MapPin, Clock, Tag, MessageSquare, Star, Send, Lock, Users, X
 import { User, Service } from '../utils/types';
 import { mapServicesDataToUserModel, mapUserDataToUserModel } from '../utils/mapper';
 import Swal from 'sweetalert2';
-import { Helmet as HelmetProviderBase } from "react-helmet-async";
+import { Helmet  } from "react-helmet-async";
 import CustomPicker from './CustomPicker';
-
-const Helmet = HelmetProviderBase as any;
+import { urlBase } from "../config.js";
 
 interface ServiceDetailProps {
     user2: User;
@@ -46,7 +45,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
   useEffect(() => {
     const fetchService = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/service/${id}`, {
+        const response = await fetch(`${urlBase}/service/${id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -83,7 +82,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
         const mapped = mapServicesDataToUserModel(service);
         setService(mapped);
        
-        const resp = await fetch(`http://localhost:5000/api/utilisateurId?id=${service.professionnel_id}`, {
+        const resp = await fetch(`${urlBase}/utilisateurId?id=${service.professionnel_id}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -157,7 +156,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
 
       const token = localStorage.getItem("token");
 
-      const res = await fetch("http://localhost:5000/api/devis", {
+      const res = await fetch(`${urlBase}/devis`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -208,7 +207,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
     if (!token) return Swal.fire("Connexion requise", "Connectez-vous pour envoyer un message", "info");
 
     try {
-      const res = await fetch(`http://localhost:5000/api/message`, {
+      const res = await fetch(`${urlBase}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ recipientId: user?.id, content: message })
@@ -243,7 +242,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
   const handleLogin = async (e: React.FormEvent) => {
       e.preventDefault();
       try {
-        const response = await fetch('http://localhost:5000/api/login', {
+        const response = await fetch(`${urlBase}/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

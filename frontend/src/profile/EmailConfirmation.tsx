@@ -5,6 +5,7 @@ import ProgressSteps from '../profile/ProgressSteps';
 import Navbar from '../layout/ProfessionalNavbar';
 import Footer from '../landing/Footer';
 import Swal from "sweetalert2";
+import { urlBase } from "../config.js";
 
 const EmailConfirmation = () => {
   const [email, setEmail] = useState("");
@@ -53,7 +54,7 @@ const EmailConfirmation = () => {
   useEffect(() => {
     if (!email || !token) return;
 
-    fetch("http://localhost:5000/api/send-verification-code", {
+    fetch(`${urlBase}/send-verification-code`, {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
@@ -71,7 +72,7 @@ const EmailConfirmation = () => {
       return;
     }
   
-    const res = await fetch("http://localhost:5000/api/verify-email-code", {
+    const res = await fetch(`${urlBase}/verify-email-code`, {
       method: "POST",
       headers: { "Content-Type": "application/json",
         Authorization: `Bearer ${token}` 
@@ -110,7 +111,7 @@ const EmailConfirmation = () => {
 
   const handleResendCode = () => {
     // In a real app, this would trigger a new email
-    fetch("http://localhost:5000/api/send-verification-code", {
+    fetch(`${urlBase}/send-verification-code`, {
       method: "POST",
       headers: { "Content-Type": "application/json",
         Authorization: `Bearer ${token}`, 

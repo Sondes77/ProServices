@@ -9,6 +9,7 @@ import { Service } from '../utils/types';
 import Select from 'react-select';
 import CustomSelect from './CustomSelect';
 import {  Categorie, Metier } from '../components/categoryMetier';
+import { urlBase } from "../config.js";
 
 interface ServiceFormProps {
   onCancel: () => void;
@@ -73,7 +74,7 @@ const ServiceForm: React.FC<ServiceFormProps> = ({ service, onSubmit, onCancel})
       newFiles.forEach(f => fd.append("images", f));
 
       const uploadRes = await fetch(
-        "http://localhost:5000/api/upload-gallery",
+        `${urlBase}/upload-gallery`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },

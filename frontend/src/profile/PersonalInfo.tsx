@@ -8,6 +8,7 @@ import { villesEtRegions, Ville } from '../components/villesRegions';
 import {  Categorie, Metier } from '../components/categoryMetier';
 import Swal from "sweetalert2";
 import CustomSelect from './CustomSelect';
+import { urlBase } from "../config.js";
 
 interface PersonalInfoProps {
   user: UserType;
@@ -103,7 +104,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
     }
   
     try {
-      const response = await fetch('http://localhost:5000/api/update-user', {
+      const response = await fetch(`${urlBase}/update-user`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +141,7 @@ const PersonalInfo: React.FC<PersonalInfoProps> = ({ user, onSave }) => {
         //console.log('Utilisateur mis à jour avec succès');
   
       // Requête pour obtenir les infos complètes de l'utilisateur
-      const userRes = await fetch(`http://localhost:5000/api/utilisateur?email=${encodeURIComponent(formData.email)}`, {
+      const userRes = await fetch(`${urlBase}/utilisateur?email=${encodeURIComponent(formData.email)}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`

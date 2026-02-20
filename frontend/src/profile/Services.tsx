@@ -20,6 +20,7 @@ import ServiceForm from './ServiceForm';
 import { mapServicesDataToUserModel } from '../utils/mapper';
 import Swal from "sweetalert2";
 import CustomSelect from './CustomSelect';
+import { urlBase } from "../config.js";
 
 interface ServicesProps {
   services: Service[];
@@ -52,7 +53,7 @@ const Services: React.FC<ServicesProps> = ({
       if (!token) {
         return;
       }
-      const response = await fetch(`http://localhost:5000/api/mes-services`, {
+      const response = await fetch(`${urlBase}/mes-services`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -137,7 +138,7 @@ const Services: React.FC<ServicesProps> = ({
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Token manquant');
   
-        const response = await fetch(`http://localhost:5000/api/services/${serviceId}`, {
+        const response = await fetch(`${urlBase}/services/${serviceId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -231,8 +232,8 @@ const Services: React.FC<ServicesProps> = ({
   
     try {
       const url = selectedService
-        ? `http://localhost:5000/api/services/${selectedService.id}` // Update
-        : 'http://localhost:5000/api/service'; // Create
+        ? `${urlBase}/services/${selectedService.id}` // Update
+        : `${urlBase}/service`; // Create
   
       const method = selectedService ? 'PUT' : 'POST';
      

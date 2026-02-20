@@ -1,10 +1,11 @@
 import React, { Fragment, useEffect } from 'react'
 import { useLocation } from 'react-router-dom';
-import { Helmet } from 'react-helmet'
+import { Helmet } from 'react-helmet-async'
 import { mapUserDataToUserModel } from '../utils/mapper';
 import SignIn4 from '../components/sign-in4'
 import Navbar from '../landing/Navabr';
 import './sign-in.css'
+import { urlBase } from "../config.js";
 
 const SignIn = (props) => {
   localStorage.removeItem('token');
@@ -34,87 +35,12 @@ const SignIn = (props) => {
     document.head.appendChild(script);
   }, []); 
  
-  {/*async function handleCredentialResponse(response) {
-    const currentPath = location.pathname;
-    const role = currentPath === "/business" ? "professional" : "user";
-    console.log("role = ", role);
-  
-    // Envoi de la requête à l'API Google pour obtenir le token
-    const res = await fetch("http://localhost:5000/api/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ credential: response.credential, role: role }), // Ajout du rôle ici
-    });
-  
-    const data = await res.json();
-    const token = data.token;
-  
-    if (res.ok) {
-      console.log(data.user);
-      console.log(token);
-      alert("Bienvenue " + data.user.nom);
-  
-      // Faire une requête pour obtenir l'utilisateur à partir de l'email
-      const userRes = await fetch(`http://localhost:5000/api/utilisateur?email=${encodeURIComponent(data.user.email)}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const userData = await userRes.json();
-  
-      if (userRes.ok) {
-        console.log("Données utilisateur récupérées : ", userData);
-        // Utilisation de ipify pour obtenir l'IP publique de l'utilisateur
-        async function getUserIp() {
-          const response = await fetch('https://api.ipify.org?format=json');
-          const data = await response.json();
-          return data.ip;  // Retourne l'adresse IP publique de l'utilisateur
-        }
-
-        // Exemple d'appel pour obtenir l'IP côté client
-        const userIp = await getUserIp();
-        console.log('IP de l\'utilisateur côté client :', userIp);
-
-        // Récupérer la localisation de l'utilisateur
-        const locationRes = await fetch('http://localhost:5000/api/user-location', {
-          method: 'GET',
-          headers: {
-            //'Authorization': `Bearer ${token}`,
-            'x-forwarded-for': userIp // Envoie l'IP de l'utilisateur dans l'en-tête
-          }
-        });
-        const locationData = await locationRes.json();
-        
-        if (locationRes.ok) {
-          console.log('Localisation de l\'utilisateur : ', locationData);
-          // Enregistrer la localisation dans le localStorage si nécessaire
-          localStorage.setItem('userLocation', JSON.stringify(locationData));
-        } else {
-          console.error('Erreur lors de la récupération de la localisation');
-        }
-  
-        // Sauvegarder le token et les données utilisateur
-        localStorage.setItem('token', token);
-        const user = mapUserDataToUserModel(userData);
-        localStorage.setItem('currentUser', JSON.stringify(user));
-  
-        // Redirection vers le dashboard
-        //window.location.href = `/dashboard`;
-      } else {
-        alert("Erreur lors de la récupération des données utilisateur");
-      }
-    } else {
-      alert("Erreur : " + data.error);
-    }
-  }*/}
-  
   async function handleCredentialResponse(response) {
     const currentPath = location.pathname;
     const role = currentPath === "/business" ? "professional" : "user";
     console.log("role = ", role);
   
-    const res = await fetch("http://localhost:5000/api/google", {
+    const res = await fetch(`${urlBase}/google`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ credential: response.credential, role }),
@@ -131,7 +57,7 @@ const SignIn = (props) => {
     //alert("Bienvenue " + data.user.nom);
   
     const userRes = await fetch(
-      `http://localhost:5000/api/utilisateur?email=${encodeURIComponent(data.user.email)}`,
+      `${urlBase}/utilisateur?email=${encodeURIComponent(data.user.email)}`,
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
@@ -154,7 +80,7 @@ const SignIn = (props) => {
         const { latitude, longitude } = position.coords;
         console.log("Position GPS :", latitude, longitude);
   
-        const locRes = await fetch("http://localhost:5000/api/user-location", {
+        const locRes = await fetch(`${urlBase}/user-location`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

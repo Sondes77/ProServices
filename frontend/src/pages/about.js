@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react'
-import { Helmet } from 'react-helmet'
+import { Helmet } from 'react-helmet-async'
 import Hero8 from '../components/hero8'
 import Stats2 from '../components/stats2'
 import Logos1 from '../components/logos1'

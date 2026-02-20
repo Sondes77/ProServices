@@ -15,6 +15,7 @@ import { mapUserDataToUserModel } from '../utils/mapper';
 import pubImage from '../img/Datavancia cover.png';
 import pubVideo from '../img/1000x300.mp4';
 import Swal from "sweetalert2";
+import { urlBase } from "../config.js";
 
 interface PublicProfileProps {
   user2: User;
@@ -51,7 +52,7 @@ const UserProfile:  React.FC<PublicProfileProps> = ({ user2 }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const userRes = await fetch(`http://localhost:5000/api/professional/${id}`);
+        const userRes = await fetch(`${urlBase}/professional/${id}`);
         const userData = await userRes.json();
         if (userData[0].role === "professional"){
           navigate(`/professional/${id}`);
@@ -59,7 +60,7 @@ const UserProfile:  React.FC<PublicProfileProps> = ({ user2 }) => {
         
         setUser(mapUserDataToUserModel(Array.isArray(userData) ? userData[0] : userData));
 
-        const reviewsRes = await fetch(`http://localhost:5000/api/pro-review/${id}`);
+        const reviewsRes = await fetch(`${urlBase}/pro-review/${id}`);
         if (reviewsRes.ok) {
 
           const data = await reviewsRes.json();
@@ -101,7 +102,7 @@ const UserProfile:  React.FC<PublicProfileProps> = ({ user2 }) => {
     if (!token) return Swal.fire("Connexion requise", "Connectez-vous pour envoyer un message", "info");
 
     try {
-      const res = await fetch(`http://localhost:5000/api/message`, {
+      const res = await fetch(`${urlBase}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ recipientId: user?.id, content: message })
@@ -147,7 +148,7 @@ const UserProfile:  React.FC<PublicProfileProps> = ({ user2 }) => {
     if (rating === 0) return Swal.fire("Note manquante", "Veuillez choisir une note", "warning");
 
     try {
-      const res = await fetch(`http://localhost:5000/api/review`, {
+      const res = await fetch(`${urlBase}/review`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ recipientId: user?.id, content: reviewComment, rating })
@@ -176,7 +177,7 @@ const UserProfile:  React.FC<PublicProfileProps> = ({ user2 }) => {
         setReviewComment('');
         setShowReviewModal(false);
         // Refresh reviews
-        const reviewsRes = await fetch(`http://localhost:5000/api/pro-review/${id}`);
+        const reviewsRes = await fetch(`${urlBase}/pro-review/${id}`);
         if (reviewsRes.ok) {
 
           const data = await reviewsRes.json();
@@ -213,7 +214,7 @@ const UserProfile:  React.FC<PublicProfileProps> = ({ user2 }) => {
   const handleLogin = async (e: React.FormEvent) => {
       e.preventDefault();
       try {
-        const response = await fetch('http://localhost:5000/api/login', {
+        const response = await fetch(`${urlBase}/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

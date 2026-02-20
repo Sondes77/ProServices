@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { User, Mail, Phone, Lock, Eye, EyeOff, Facebook, Chrome, ArrowRight } from 'lucide-react';
 import { mapUserDataToUserModel } from '../utils/mapper';
 import PropTypes from 'prop-types';
+import { urlBase } from "../config.js";
 
 const SignUp6 = (props) => {
   const location = useLocation();
@@ -37,7 +38,7 @@ const SignUp6 = (props) => {
     const payload = { ...formData, role };
 
     try {
-      const response = await fetch('http://localhost:5000/api/utilisateur', {
+      const response = await fetch(`${urlBase}/utilisateur`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

@@ -1,9 +1,10 @@
 import React, { Fragment, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import SignUp6 from '../components/sign-up6';
 import { mapUserDataToUserModel } from '../utils/mapper';
 import './sign-up.css';
+import { urlBase } from "../config.js";
 
 const SignUp = (props) => {
   const location = useLocation();
@@ -37,7 +38,7 @@ const SignUp = (props) => {
     const role = currentPath === "/business" ? "professional" : "user";
     console.log("role = ", role);
 
-    const res = await fetch("http://localhost:5000/api/google", {
+    const res = await fetch(`${urlBase}/google`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ credential: response.credential, role: role}), // Ajout du rôle ici
@@ -51,7 +52,7 @@ const SignUp = (props) => {
       //alert("Bienvenue " + data.user.nom);
   
       // Faire une requête pour obtenir l'utilisateur à partir de l'email
-      const userRes = await fetch(`http://localhost:5000/api/utilisateur?email=${encodeURIComponent(data.user.email)}`, {
+      const userRes = await fetch(`${urlBase}/utilisateur?email=${encodeURIComponent(data.user.email)}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`

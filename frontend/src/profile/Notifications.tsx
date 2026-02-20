@@ -18,6 +18,7 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import Swal from "sweetalert2";
+import { urlBase } from "../config.js";
 
 interface NotificationsProps {
   user: User;
@@ -39,7 +40,7 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
   // =========================
   const fetchNotifications = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/notifications', {
+      const res = await fetch(`${urlBase}/notifications`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -90,7 +91,7 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
 
   const markAsRead = async (id: string) => {
     try {
-      await fetch(`http://localhost:5000/api/notifications/read/${id}`, {
+      await fetch(`${urlBase}/notifications/read/${id}`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -105,7 +106,7 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
 
   const markAllAsRead = async () => {
     try {
-      await fetch(`http://localhost:5000/api/notifications/read-all`, {
+      await fetch(`${urlBase}/notifications/read-all`, {
         method: 'PATCH',
         body: JSON.stringify({
           type: "notifications"
@@ -124,7 +125,7 @@ const Notifications: React.FC<NotificationsProps> = ({ user }) => {
 
   const deleteNotification = async (id: string) => {
     try {
-      await fetch(`http://localhost:5000/api/notifications/${id}`, {
+      await fetch(`${urlBase}/notifications/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });

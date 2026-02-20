@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import Navbar from '../landing/Navabr';
 import Footer from '../landing/Footer';
 import Swal from 'sweetalert2';
+import { urlBase } from "../config.js";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -16,7 +17,7 @@ const Contact = () => {
     e.preventDefault();
     // Handle form submission
       try {
-      const res = await fetch("http://localhost:5000/api/contact", {
+      const res = await fetch(`${urlBase}/contact`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

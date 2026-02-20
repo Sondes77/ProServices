@@ -20,6 +20,7 @@ import Swal from "sweetalert2";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useParams } from "react-router-dom";
 import { formatDate } from 'date-fns';
+import { urlBase } from "../config.js";
 
 //import { io } from "socket.io-client";
 //const socket = io("http://localhost:5000", { transports: ["websocket"] });
@@ -184,7 +185,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
       } 
       setLoadingConversations(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/conversations/${user.id}`, {
+        const res = await fetch(`${urlBase}/conversations/${user.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Erreur API conversations');
@@ -206,7 +207,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
       setSelectedConversation(conversation);
       setLoadingMessages(true);
       try {
-        const res = await fetch(`http://localhost:5000/api/messages/${conversation.id}`, {
+        const res = await fetch(`${urlBase}/messages/${conversation.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
   
@@ -235,7 +236,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
       const fd = new FormData();
       fd.append("file", file);
 
-      const up = await fetch("http://localhost:5000/api/upload-message-file", {
+      const up = await fetch(`${urlBase}/upload-message-file`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: fd
@@ -243,7 +244,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
 
       const upData = await up.json();
 
-      const msg = await fetch("http://localhost:5000/api/messagecontainer", {
+      const msg = await fetch(`${urlBase}/messagecontainer`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -261,7 +262,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
     saved.push(...await Promise.all(uploads));
 
     if (newMessage.trim()) {
-      const res = await fetch("http://localhost:5000/api/messagecontainer", {
+      const res = await fetch(`${urlBase}/messagecontainer`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({

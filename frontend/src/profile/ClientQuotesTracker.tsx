@@ -9,6 +9,7 @@ import { Devis } from '../utils/types';
 import { mapDevisDataToUserModel } from '../utils/mapper';
 import { useNavigate } from 'react-router-dom';
 import CustomSelect from './CustomSelect';
+import { urlBase } from "../config.js";
 
 const ClientQuotesDashboard = () => {
   const [search, setSearch] = useState('');
@@ -26,7 +27,7 @@ const ClientQuotesDashboard = () => {
   useEffect(() => {
     const fetchDevis = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/devis/me`, {
+        const response = await fetch(`${urlBase}/devis/me`, {
           method: 'GET',
           headers: { 'Authorization': `Bearer ${token}` },
         });
@@ -223,7 +224,7 @@ const ClientQuotesDashboard = () => {
     
     try {
         
-      const response = await fetch(`http://localhost:5000/api/devis/${id}/${newStatus}`, {
+      const response = await fetch(`${urlBase}/devis/${id}/${newStatus}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
