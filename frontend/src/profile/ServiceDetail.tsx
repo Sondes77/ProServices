@@ -41,7 +41,14 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
     setCurrentImg((i) => (i + 1) % gallery.length);
   const prev = () =>
     setCurrentImg((i) => (i - 1 + gallery.length) % gallery.length);
-  
+  const slugify = (text: string) =>
+    text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
   useEffect(() => {
     const fetchService = async () => {
       try {
@@ -146,7 +153,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
       fetchService();
     }
   }, [id]);
-  console.log ("user = ", user);
+
   // Fonction pour gérer la demande de devis
   const handleQuoteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -239,31 +246,32 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
       Swal.fire("Erreur", "L'envoi a échoué", "error");
     }
   };
+
   const handleLogin = async (e: React.FormEvent) => {
-      e.preventDefault();
-      try {
-        const response = await fetch(`${urlBase}/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password }),
-        });
-  
-        if (response.ok) {
-          const data = await response.json();
-          localStorage.setItem('token', data.token);
-          const user = mapUserDataToUserModel(data.user);
-          localStorage.setItem('currentUser', JSON.stringify(user));
-          setShowLoginModal(false);
-          window.location.reload();
-        } else {
-          setLoginError('Email ou mot de passe incorrect');
-        }
-      } catch (error) {
-        setLoginError('Erreur de connexion au serveur');
+    e.preventDefault();
+    try {
+      const response = await fetch(`${urlBase}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        const user = mapUserDataToUserModel(data.user);
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        setShowLoginModal(false);
+        window.location.reload();
+      } else {
+        setLoginError('Email ou mot de passe incorrect');
       }
-    };
+    } catch (error) {
+      setLoginError('Erreur de connexion au serveur');
+    }
+  };
   
   const handleShareService = async () => {
     const url = window.location.href;
@@ -300,9 +308,11 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
       //console.log("Share cancelled");
     }
   };
+
   const isArabic = (text: string) => {
     return /[\u0600-\u06FF]/.test(text);
   };
+
   // Affiche un message de chargement si le service n’est pas encore chargé
   if (!service) {
     return <div className="text-center py-10">Chargement du service...</div>;
@@ -311,6 +321,10 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
   if (!user) {
     return <div className="text-center py-10">Chargement du service...</div>;
   }
+
+  const handleProfileClick = (metier: string, region: string, nom: string, professionalId: string) => {
+    navigate(`/pro/${slugify(metier)}/${slugify(region)}/${slugify(nom)}/${professionalId}`);
+  };
 
   return (
     <>
@@ -553,7 +567,7 @@ const ServiceDetail : React.FC<ServiceDetailProps> = ({ user2 }) => {
               </div>
             </div>
             <button 
-              onClick={() => navigate(`/professional/${user.id}`)}
+              onClick={() => handleProfileClick(service.metier, user.region, user.fullName, user.id)}
               className="w-full bg-gray-50 text-gray-700 py-2 rounded-xl text-sm font-bold hover:bg-gray-100 transition-all flex items-center justify-center"
             >
               Voir le profil complet <ChevronRight size={16} />

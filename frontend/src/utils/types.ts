@@ -7,6 +7,7 @@ export interface User {
   email: string;
   email_verified: boolean;
   phone_verified: boolean;
+  categorie: string;
   phone: string;
   city: string;
   region: string;

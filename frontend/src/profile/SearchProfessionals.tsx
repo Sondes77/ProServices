@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useNavigate, useLocation, Navigate, useParams } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate, useParams, Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { villesEtRegions } from '../components/villesRegions';
 import { Search, MapPin, Filter, Star, MessageSquare, ChevronDown, ChevronUp, ChevronRight, BadgeCheck,
-  Users, Link, XCircle, Send, Lock,
+  Users, XCircle, Send, Lock,
   LayoutGrid,
   Megaphone,
   ArrowRight,
@@ -23,6 +23,7 @@ import { Categorie, Metier } from '../components/categoryMetier';
 import { normalize, expandQuery, matchesQuery } from "../utils/searchEngine";
 import { Helmet } from 'react-helmet-async';
 import { urlBase } from "../config.js";
+import { Categories } from 'emoji-picker-react';
 
 interface SearchProfessionalsProps {
   onViewProfile: (professionalId: string) => void;
@@ -53,6 +54,7 @@ const params = useParams<{
     categories: [] as string[],
     availability: 'Tous',
   });
+  
   const token = localStorage.getItem('token');
   const id = token ? JSON.parse(atob(token.split('.')[1])).id : null;
   const [user, setUser] = useState<{ id: string } | null>(null);
@@ -66,28 +68,85 @@ const params = useParams<{
   const [message, setMessage] = useState('');
   
   const navigate = useNavigate();
-  
-  
   const slugify = (text: string) =>
   text
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/[^\p{L}\p{N}]+/gu, "-") // 👈 support unicode (inclut arabe)
     .replace(/^-+|-+$/g, "");
 
+  /*const decodeSlug = (
+    slug: string | null | undefined,
+    options: string[] | Record<string, any>
+  ): string => {
+    if (!slug) return "";
+    if (Array.isArray(options)) {
+      return options.find(opt => slugify(opt) === slug) || "";
+    }
+    return Object.keys(options).find(key => slugify(key) === slug) || "";
+  };*/
+
+  const decodeSlug = (slug: string, options: string[] | Record<string, any>): string => {
+    if (!slug) return "";
+    if (Array.isArray(options)) return options.find(opt => slugify(opt) === slug) || "";
+    return Object.keys(options).find(key => slugify(key) === slug) || "";
+  };
+
+  function detectVilleEtRegionFromSlug(slug: string): { ville: string; region: string } | null {
+    // On caste les clés pour que TS comprenne que c'est bien un Ville
+    const villes = Object.keys(villesEtRegions) as (keyof typeof villesEtRegions)[];
+
+    for (const v of villes) {
+      // Vérifie si le slug correspond à la ville
+      if (slugify(v) === slug) {
+        return { ville: v, region: '' };
+      }
+
+      // Vérifie si le slug correspond à une région dans cette ville
+      const regions = villesEtRegions[v];
+      for (const r of regions) {
+        if (slugify(r) === slug) {
+          return { ville: v, region: r };
+        }
+      }
+    }
+
+    return null; // Aucun match
+  }
   const [ville, setVille] = useState(query.get('ville') || '');
   const [region, setRegion] = useState(query.get('region') || '');
   const [motCle, setMotCle] = useState(query.get('q') || '');
-  const cFromQuery: Categorie | null = (() => {
-    const value = query.get('c');
-    return value ? (slugify(value) as Categorie) : null;
-  })();
-  const [selectedCategorie, setSelectedCategorie] = useState<Categorie | ''>(cFromQuery ?? '');
-  const [selectedMetier, setSelectedMetier] = useState(query.get('m') || '');
+  //const cFromQuery= query.get('c') as Categorie | null ;
+  
+  //const [selectedCategorie, setSelectedCategorie] = useState<Categorie | ''>(cFromQuery ?? '');
+  //const [selectedMetier, setSelectedMetier] = useState(query.get('m') || '');
+  const [selectedCategorie, setSelectedCategorie] = useState<Categorie | ''>(() => {
+    const cSlug = params.categorie || query.get("c");
+    return cSlug
+      ? (decodeSlug(cSlug, Object.keys(Metier)) as Categorie)
+      : "";
+  });
+
+   const [selectedMetier, setSelectedMetier] = useState<string>(() => {
+    const mSlug = params.metier || query.get("m");
+    if (!mSlug) return "";
+
+    for (const categorie of Object.keys(Metier) as Categorie[]) {
+      const match = Metier[categorie].find(
+        met => slugify(met) === mSlug
+      );
+      if (match) {
+        return match; // ✅ retourne le vrai métier, pas le slug
+      }
+    }
+
+    return "";
+  });
+  
   const words = useMemo(() => expandQuery(motCle), [motCle]);
   const [hasMetierMatch, setHasMetierMatch] = useState(false);
-  const { metier, categorie, v } = useParams();
+  //const { metier, categorie, v } = useParams();
   
   const metierDisponibles =
   selectedCategorie && Metier[selectedCategorie]
@@ -99,7 +158,8 @@ const params = useParams<{
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-      
+        
+
         const response = await fetch(`${urlBase}/all`, {
           method: 'GET',
           headers: {
@@ -107,49 +167,26 @@ const params = useParams<{
           },
         });
         
-        // 🎯 PRIORITÉ : Routes SEO
-        if (metier) {
-          //url = `${urlBase}/professionals?metier=${encodeURIComponent(metier)}`;
-          setSelectedMetier(metier);
+          // Décodage de la catégorie depuis le slug SEO
+        /*if (params.categorie || query.get('c')) {
+          const c = params.categorie || query.get('c');
+          const cat = decodeSlug(c, Object.keys(Metier));
+          setSelectedCategorie(cat);
+
+          // Si un métier est fourni, on le décode dans la catégorie choisie
+          if (params.metier) {
+            const met = decodeSlug(params.metier, Metier[cat] || []);
+            setSelectedMetier(met);
+          }
         }
 
-        if (categorie && metier) {
-          /*url = `${urlBase}/professionals?metier=${encodeURIComponent(
-            metier
-          )}&ville=${encodeURIComponent(v)}`;*/
-          setSelectedCategorie(categorie);
-          setSelectedMetier(metier);
-        }
-
-        if (metier && v) {
-          /*url = `${urlBase}/professionals?metier=${encodeURIComponent(
-            metier
-          )}&ville=${encodeURIComponent(v)}`;*/
-          setSelectedMetier(metier);
-          setVille(v);
-        }
-
-        if (categorie) {
-          /*url = `${urlBase}/professionals?categorie=${encodeURIComponent(
-            categorie
-          )}`;*/
-          setSelectedCategorie(categorie);
-        }
-
-        // 🎯 Support fallback /search?m=...&ville=...
-        /*if (!metier && !categorie) {
-          const params = new URLSearchParams(location.search);
-
-          const m = params.get("m");
-          const c = params.get("c");
-          const ville = params.get("ville");
-
-          if (m) url = `http://localhost:5000/search?m=${encodeURIComponent(m)}`;
-          if (c) url = `http://localhost:5000/search?c=${encodeURIComponent(c)}`;
-          if (m && ville)
-            url = `http://localhost:5000/search?m=${encodeURIComponent(
-              m
-            )}&ville=${encodeURIComponent(ville)}`;
+        if (params.metier && params.ville) {
+          const detected = detectVilleEtRegionFromSlug(params.ville);
+          if (detected) {
+            setVille(detected.ville);
+            setRegion(detected.region);
+          }
+          setSelectedMetier(decodeSlug(params.metier, Metier[cat] || []));
         }*/
 
         if (!response.ok) {
@@ -181,6 +218,15 @@ const params = useParams<{
             mapProfessionalsDataToUserModel(element)
           );
           setProfessionals(mappedProfessionals);
+          
+          // 🎯 Gestion ville depuis URL SEO
+          if (params.ville) {
+            const detected = detectVilleEtRegionFromSlug(params.ville);
+            if (detected) {
+              setVille(detected.ville);
+              setRegion(detected.region);
+            }
+          }
       }
         //alert(`Nombre de professionnels : ${mappedProfessionals.length}`);
       } catch (error) {
@@ -207,7 +253,7 @@ const params = useParams<{
     };
 
     fetchUserData();
-  }, [metier, categorie, v, location.search]);
+  }, [params.metier, params.categorie, params.ville, location.search]);
 
   /*useEffect(() => {
     const fetchUserData = async () => {
@@ -448,19 +494,20 @@ const params = useParams<{
   ]);
 
   const handleSearch = (e: React.FormEvent) => {
-      e.preventDefault();
-      const params = new URLSearchParams();
-      if (motCle) params.append('q', motCle);
-      if (ville) params.append('ville', ville);
-      if (region) params.append('region', region);
-      if (selectedCategorie) params.append('c', selectedCategorie);
-      if (selectedMetier) params.append('m', selectedMetier);
-      navigate(`/search?${params.toString()}`);
-    };
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (motCle) params.append('q', motCle);
+    if (ville) params.append('ville', slugify(ville));
+    if (region) params.append('region', region);
+    if (selectedCategorie) params.append('c', slugify(selectedCategorie));
+    if (selectedMetier) params.append('m', slugify(selectedMetier));
+    navigate(`/search?${params.toString()}`);
+  };
   
   const handleServiceClick = (categorie:string, metier:string, ville: string, serviceId: string) => {
-    navigate(`/service/${slugify(categorie.toLowerCase())}/${slugify(metier.toLowerCase())}/${ville.toLowerCase()}/${serviceId}`);
+    navigate(`/service/${slugify(categorie.toLowerCase())}/${slugify(metier.toLowerCase())}/${slugify(ville.toLowerCase())}/${serviceId}`);
   };
+
   const handleClean = (e: React.FormEvent) => {
     e.preventDefault();
     setMotCle('');
@@ -484,9 +531,7 @@ const params = useParams<{
   const handleProfileClick = (metier: string, region: string, nom: string, professionalId: string) => {
     navigate(`/pro/${slugify(metier)}/${slugify(region)}/${slugify(nom)}/${professionalId}`);
   };
-  
-  
-    
+      
   const resultatsSansDoublons = Array.from(
   new Map(resultats.map(item => [item.id, item])).values()
   );
@@ -587,7 +632,7 @@ const params = useParams<{
                   name="mappin"
                   placeholder='Ville'
                   options={[
-                    ...Object.keys(villesEtRegions).map((v) => ({
+                    ...Object.keys(villesEtRegions).sort().map((v) => ({
                       value: v,
                       label: v
                     }))
@@ -608,7 +653,7 @@ const params = useParams<{
                   name="mappin"
                   placeholder='Région'
                   options={[
-                    ...(ville ? villesEtRegions[ville as keyof typeof villesEtRegions].map((r: string) => ({
+                    ...(ville ? villesEtRegions[ville as keyof typeof villesEtRegions].sort().map((r: string) => ({
                       value: r,
                       label: r
                     })) : [])
@@ -869,7 +914,7 @@ const params = useParams<{
                                   ? professional.metier
                                   : professional.profession;
 
-                                navigate(`/${param}/${slugify(value)}`);
+                                window.location.href=`/${param}/${slugify(value)}`;
                               }}
                             >
                               {hasMetierMatch ? professional.metier : professional.profession}

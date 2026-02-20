@@ -242,20 +242,7 @@ function App() {
     }
   };
   
-  /*useEffect(() => { 
-      const verifNavbar = () => {
-        if (token && currentUser.role === 'professional')  {
-          return <div className="pb-16"><NavbarPro2 user={currentUser}/></div>;
-          //return <div className="pb-16"><NavbarPro /></div>;
-        } else if (token && currentUser.role === 'user') {
-          return <div className="pb-16"><NavbarUser /></div>;
-        } else if (!token) {
-          return <div className="pb-20"><Navbar2 /></div>;
-        }
-      };
-    });*/
-
-  return (
+    return (
     
     <Router>
       {<div className="pb-16">
@@ -291,6 +278,7 @@ function App() {
 
         <Route path="/search" element={<SearchProfessionals onViewProfile={(id) => id} />} />
         <Route path="/services/:metier" element={<SearchProfessionals onViewProfile={(id) => id} />} />
+        <Route path="/services/:metier/:ville" element={<SearchProfessionals onViewProfile={(id) => id} />} />
         <Route path="/categories/:categorie" element={<SearchProfessionals onViewProfile={(id) => id} />} />
         <Route path="/categories/:categorie/:metier" element={<SearchProfessionals onViewProfile={(id) => id} />} />
         <Route path="/service/:categorie/:metier/:ville/:id" element={<ServiceDetail user2={currentUser}/>} />
@@ -307,7 +295,14 @@ function App() {
             reviews={reviews}
           />
         }/>
-        <Route path="/user/:id" element={
+        <Route path="/pro/:slug/:id" element={
+          <PublicProfile2
+            user2={currentUser}
+            //services={currentServices}
+            reviews={reviews}
+          />
+        }/>
+        <Route path="/user/:slug/:id" element={
           <UserProfile
             user2={currentUser}
             //services={currentServices}

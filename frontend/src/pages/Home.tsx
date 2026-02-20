@@ -44,7 +44,7 @@ const popularSearches = [
   { label: "Plombier à Tunis", query: "plombier", city: "Tunis" },
   { label: "Électricien à Sousse", query: "electricien", city: "Sousse" },
   { label: "Peintre à Sfax", query: "peintre", city: "Sfax" },
-  { label: "Femme de ménage La Marsa", query: "menage", city: "Tunis" },
+  { label: "Femme de ménage La Marsa", query: "menage", city: "La Marsa" },
 ];
 // Données enrichies pour le slider avec images réelles
   const serviceSlides = [
@@ -73,7 +73,14 @@ const popularSearches = [
   const [motCle, setMotCle] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('');
-
+  const slugify = (text: string) =>
+    text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
@@ -84,7 +91,7 @@ const popularSearches = [
   };
 
   const quickSearch = (q: string, c: string) => {
-    navigate(`/search?q=${q}&ville=${c}`);
+    window.location.href =`/services/${slugify(q)}/${slugify(c)}`;
   };
 
   const testimonials = [

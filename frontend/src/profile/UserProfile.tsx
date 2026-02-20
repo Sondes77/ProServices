@@ -55,7 +55,8 @@ const UserProfile:  React.FC<PublicProfileProps> = ({ user2 }) => {
         const userRes = await fetch(`${urlBase}/professional/${id}`);
         const userData = await userRes.json();
         if (userData[0].role === "professional"){
-          navigate(`/professional/${id}`);
+          const nom = userData[0].nom + ' ' + userData[0].prenom;
+          handleProfileClick('', '', nom, id);
         }
         
         setUser(mapUserDataToUserModel(Array.isArray(userData) ? userData[0] : userData));
@@ -236,6 +237,23 @@ const UserProfile:  React.FC<PublicProfileProps> = ({ user2 }) => {
         setLoginError('Erreur de connexion au serveur');
       }
     };
+  
+  const slugify = (text: string) =>
+    text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+  const handleProfileClick = (metier: string, region: string, nom: string, professionalId: string) => {
+    if (!metier && !region) 
+    {
+      navigate(`/pro/${slugify(nom)}/${professionalId}`);
+    } else {
+      navigate(`/pro/${slugify(metier)}/${slugify(region)}/${slugify(nom)}/${professionalId}`);
+    }  
+  };   
 
   if (loading) return <div className="text-center py-20 italic">Chargement...</div>;
   if (!user) return <div className="text-center py-20 font-bold">Utilisateur introuvable</div>;
@@ -366,7 +384,7 @@ const UserProfile:  React.FC<PublicProfileProps> = ({ user2 }) => {
 
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                       <span className="font-semibold cursor-pointer hover:text-[#e0692d]" onClick={() => navigate(`/professional/${r.author_id}`)}> {r.author_nom}</span>
+                       <span className="font-semibold cursor-pointer hover:text-[#e0692d]" onClick={() => handleProfileClick('', '', r.author_nom, r.author_id)}> {r.author_nom}</span>
 
                         <div className="flex text-yellow-400">
                           {[...Array(5)].map((_, i) => (

@@ -57,6 +57,13 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
   const [visibleCount, setVisibleCount] = useState(5);
   const visibleReviews = reviews.slice(0, visibleCount);
   const hasMore = visibleCount < reviews.length;
+  const slugify = (text: string) =>
+    text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
   
   useEffect(() => {
     
@@ -99,7 +106,8 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
        
         const service = Array.isArray(data) ? data[0] : data;
         if (data[0].role === "user"){
-          navigate(`/user/${id}`);
+          const nom = data[0].nom + " " + data[0].prenom;
+          navigate(`/user/${slugify(nom)}/${id}`);
         }
         const mapped = mapUserDataToUserModel(service);
         setUser(mapped);
@@ -231,6 +239,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
         });
       }
     };
+
   useEffect(() => {
     
     if (id) {
@@ -512,9 +521,22 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
     }
   };
 
-  const handleServiceClick = (categorie:string, metier:string, ville: string, serviceId: string) => {
-    navigate(`/service/${categorie.toLowerCase()}/${metier.toLowerCase()}/${ville.toLowerCase()}/${serviceId}`);
+  const isArabic = (text: string) => {
+    return /[\u0600-\u06FF]/.test(text);
   };
+
+  const handleServiceClick = (categorie:string, metier:string, ville: string, serviceId: string) => {
+    navigate(`/service/${slugify(categorie.toLowerCase())}/${slugify(metier.toLowerCase())}/${slugify(ville.toLowerCase())}/${serviceId}`);
+  };
+
+  const handleProfileClick = (metier: string, region: string, nom: string, professionalId: string) => {
+    if (!metier && !region) 
+    {
+      navigate(`/pro/${slugify(nom)}/${professionalId}`);
+    } else {
+      navigate(`/pro/${slugify(metier)}/${slugify(region)}/${slugify(nom)}/${professionalId}`);
+    }  
+  };  
 
   const handleShareProfile = async () => {
     const url = window.location.href;
@@ -720,7 +742,13 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
 
               <div className="mt-6 border-t pt-6">
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">À propos</h2>
-                <p className="text-gray-600">{user.apropos}</p>
+                <p
+                  dir={isArabic(user.apropos) ? "rtl" : "ltr"}
+                  className={`text-gray-600 ${
+                    isArabic(user.apropos) ? "text-right" : "text-left"
+                  }`}
+                >{user.apropos}</p>
+                
               </div>
             </div>
           </div>
@@ -761,9 +789,12 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                         </span>
                     </div>
 
-                    <p className="text-gray-500 text-sm leading-relaxed line-clamp-2">
-                      {service.description}
-                    </p>
+                    <p
+                      dir={isArabic(service.description) ? "rtl" : "ltr"}
+                      className={`text-gray-500 text-sm leading-relaxed line-clamp-2 ${
+                        isArabic(service.description) ? "text-right" : "text-left"
+                      }`}
+                    >{service.description}</p>
 
                     {/* Footer de la carte : Catégorie & Prix */}
                     <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-50">
@@ -827,7 +858,7 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
                         />
                         <div className="ml-4">
                           <div className="flex items-center">
-                            <h4 className="font-medium text-gray-900 font-semibold cursor-pointer hover:text-[#e0692d]" onClick={() => navigate(`/professional/${review.author_id}`)}>{review.author_nom}</h4>
+                            <h4 className="font-medium text-gray-900 font-semibold cursor-pointer hover:text-[#e0692d]" onClick={() => handleProfileClick('','', review.author_nom, review.author_id)}>{review.author_nom}</h4>
                             <span className="mx-2 text-gray-300">•</span>
                             <span className="text-sm text-gray-500">{formatDate(review.created_at)}</span>
                           </div>

@@ -44,27 +44,42 @@ const Navbar = () => {
           {/* --- CENTRE : BARRE DE RECHERCHE (DESKTOP) --- */}
           {currentPath !== "/search" && (
             <div className="hidden lg:flex flex-1 max-w-md mx-8">
-                <form 
-                  className="relative w-full group"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (searchQuery.trim()) {
-                      navigate(`/search?q=${encodeURIComponent(searchQuery.trim().toLowerCase())}`);
-                    }
-                  }}
-                >
-                
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Rechercher un service, un pro..."
-                  className="w-full bg-slate-100 dark:bg-gray-800 border-none rounded-2xl py-2.5 pl-11 pr-4 text-sm font-medium focus:ring-2 focus:ring-[#e0692d]/50 focus:bg-white dark:focus:bg-gray-700 transition-all outline-none text-slate-900 dark:text-white"
-                />
-                <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden xl:inline-flex items-center gap-1 px-2 py-0.5 border border-slate-300 dark:border-gray-600 rounded text-[10px] font-bold text-slate-400">
-                  ENTRER
-                </kbd>
-              </form>
+                <form
+  className="relative w-full group"
+  onSubmit={(e) => {
+    e.preventDefault();
+
+    const trimmed = searchQuery.trim();
+
+    if (trimmed) {
+      navigate(`/search?q=${encodeURIComponent(trimmed.toLowerCase())}`);
+    } else {
+      navigate("/search");
+    }
+  }}
+>
+  <input
+    type="text"
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    placeholder="Rechercher un service, un pro..."
+    className="w-full bg-slate-100 dark:bg-gray-800 border-none rounded-2xl py-2.5 pl-11 pr-12 text-sm font-medium focus:ring-2 focus:ring-[#e0692d]/50 focus:bg-white dark:focus:bg-gray-700 transition-all outline-none text-slate-900 dark:text-white"
+  />
+
+  {/* Icône gauche */}
+  <Search
+    size={16}
+    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+  />
+
+  {/* Bouton droit */}
+  <button
+    type="submit"
+    className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#e0692d] hover:bg-[#f07e40] text-white p-2 rounded-xl transition-all"
+  >
+    <Search size={16} />
+  </button>
+</form>
             </div>
           )}
           {/* RIGHT – ACTIONS */}
@@ -75,7 +90,6 @@ const Navbar = () => {
                 <span className="text-center text-[#e0692d] text-sm font-semibold transition-all italic  hidden md:block">Contactez-nous : +216 55 289 528 </span>
                 
               </div>
-              
             <Link
               to="/business"
               className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-full group flex items-center gap-2 px-5 py-2.5 text-slate-600 font-bold text-sm hover:text-[#e0692d] transition-all"

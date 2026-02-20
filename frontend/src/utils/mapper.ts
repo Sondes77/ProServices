@@ -8,7 +8,7 @@ export function mapUserDataToUserModel(userData: any): User {
   const id = String(userData.id);
   const firstName = userData.prenom || '';
   const lastName = userData.nom || '';
-  const fullName = `${firstName} ${lastName}`;
+  const fullName = `${lastName} ${firstName}`;
   const role = userData.role || '';
   const email = userData.email;
   const email_verified = userData.email_verified || false;
@@ -65,7 +65,7 @@ export function mapProfessionalsDataToUserModel(prosData: any): Professional {
   const professional_id = String(prosData.professional_id)
   const firstName = prosData.prenom || '';
   const lastName = prosData.nom || '';
-  const name = `${firstName} ${lastName}`;
+  const name = `${lastName} ${firstName}`;
   const profession = prosData.categorie || '';
   const metier = prosData.metier || '';
   const email = prosData.email;
