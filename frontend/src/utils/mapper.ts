@@ -1,5 +1,6 @@
 import { use } from 'react';
 import { User, Professional, Service, Devis } from './types';
+import { urlBaseAvatar } from '../config.js';
 
 export function mapUserDataToUserModel(userData: any): User {
 
@@ -18,7 +19,7 @@ export function mapUserDataToUserModel(userData: any): User {
   const region = userData.region || '';
   const address = userData.adresse || '';
   const apropos = userData.apropos || '';
-  const avatar = userData.photo || 'http://localhost:5000/uploads/ServicePro_avatar.png';
+  const avatar = userData.photo || `${urlBaseAvatar}/uploads/ServicePro_avatar.png`;
   const memberSince = userData.date_creation?.split('T')[0] || '2024-01-01';
   const stats = {
     messagesSent: userData.nb_conversations  || 0,
@@ -75,7 +76,7 @@ export function mapProfessionalsDataToUserModel(prosData: any): Professional {
   const address = prosData.adresse || '';
   const rating = prosData.rating || 0;
   const reviews = prosData.review || 0;
-  const avatar = prosData.photo || 'http://localhost:5000/uploads/ServicePro_avatar.png';
+  const avatar = prosData.photo || `${urlBaseAvatar}/uploads/ServicePro_avatar.png`;
   const description = prosData.description || '';
   const titre = prosData.titre || '';
   const prix = prosData.prix || '';
