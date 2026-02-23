@@ -107,7 +107,7 @@ const popularSearches = [
 
       <main>
         {/* --- HERO SECTION --- */}
-        <section className="relative h-[90vh] min-h-[600px] flex items-center justify-center overflow-hidden bg-slate-900">
+        <section className="relative min-h-[85svh] md:min-h-[90svh] flex items-center justify-center overflow-hidden bg-slate-900 px-4">
           
           {/* Background Slider */}
           <div className="absolute inset-0 z-0">
@@ -131,7 +131,7 @@ const popularSearches = [
           </div>
 
           {/* Hero Content */}
-          <div className="relative z-10 w-full max-w-5xl px-4 mx-auto text-center md:text-left">
+          <div className="relative z-10 w-full max-w-5xl px-4 py-16  md:pb-12 md:py-0 mx-auto text-center md:text-left">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -143,11 +143,11 @@ const popularSearches = [
               </div>
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6">
                  Trouvez l'expert <br className="hidden md:block" />
-                <span className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-[#e0692d] thq-link-h1-home"> près de chez vous,</span> 
+                <span className="text-4xl md:text-6xl lg:text-7xl font-bold text-[#e0692d] block md:inline thq-link-h1-home">{" "}près de chez vous,</span> 
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#e0692d] to-orange-400"> en un clic.</span>
               </h1>
-              
-              <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-auto font-light">
+
+              <p className="text-lg md:text-xl sm:text-l text-gray-200 mb-10 max-w-auto font-light">
                 La plateforme N°1 en Tunisie de confiance qui connecte vos besoins avec les meilleurs artisans de votre région.
               </p>
                 
@@ -270,33 +270,93 @@ const popularSearches = [
         </div>*/}
 
         {/* --- CATEGORIES / SERVICES --- */}
-        <section className="py-20 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl md:text-4xl mb-4 font-bold mt-2 text-slate-900">Nos Catégories</h2>
-              <p className="text-[#e0692d] mt-2">Explorez nos professionnels par domaine d'expertise</p>
+        <section className="py-14 sm:py-16 md:py-20 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+
+            {/* Header */}
+            <div className="text-center mb-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-900">
+                Nos Catégories
+              </h2>
+              <p className="text-[#e0692d] mt-3 text-sm sm:text-base">
+                Explorez nos professionnels par domaine d'expertise
+              </p>
             </div>
-            <div className="flex flex-col md:flex-row justify-end items-end mb-8">
-              <Link to="/categories" className="text-[#e0692d] font-semibold flex items-center gap-1 hover:gap-2 transition-all mt-4 md:mt-0">
-                Voir tout le catalogue <ArrowRight className="w-4 h-4" />
-              </Link> 
-            </div>  
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+
+            {/* Voir tout */}
+            <div className="flex justify-center md:justify-end mb-8">
+              <Link
+                to="/categories"
+                className="text-[#e0692d] font-semibold flex items-center gap-2 text-sm sm:text-base transition-all hover:gap-3"
+              >
+                Voir tout le catalogue
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Grid */}
+            <div className="
+              grid
+              grid-cols-2
+              sm:grid-cols-3
+              md:grid-cols-4
+              lg:grid-cols-6
+              gap-4 sm:gap-6
+            ">
               {services.map((item, idx) => (
                 <motion.div
                   key={idx}
                   whileHover={{ y: -5 }}
-                  className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-xl transition-all border border-gray-100 group cursor-pointer text-center"
-                  onClick={() => { setMotCle(item.name); window.scrollTo({top: 0, behavior: 'smooth'}); }}
+                  whileTap={{ scale: 0.97 }}
+                  className="
+                    bg-white
+                    p-4 sm:p-6
+                    rounded-2xl
+                    shadow-sm
+                    hover:shadow-lg
+                    transition-all
+                    border border-gray-100
+                    group
+                    cursor-pointer
+                    text-center
+                    min-h-[150px]
+                    flex flex-col justify-center
+                  "
+                  onClick={() => {
+                    setMotCle(item.name);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
                 >
-                  <div className={`w-14 h-14 mx-auto rounded-full flex items-center justify-center mb-4 transition-colors ${item.color} group-hover:bg-[#e0692d] group-hover:text-white`}>
-                    <item.icon className="w-7 h-7" />
+                  {/* Icon */}
+                  <div
+                    className={`
+                      w-12 h-12 sm:w-14 sm:h-14
+                      mx-auto
+                      rounded-full
+                      flex items-center justify-center
+                      mb-3
+                      transition-colors
+                      ${item.color}
+                      group-hover:bg-[#e0692d]
+                      group-hover:text-white
+                    `}
+                  >
+                    <item.icon className="w-6 h-6 sm:w-7 sm:h-7" />
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-1">{item.name}</h3>
-                  <p className="text-xs text-gray-500">{item.desc}</p>
+
+                  {/* Title */}
+                  <h3 className="font-semibold text-gray-900 text-sm sm:text-base leading-snug">
+                    {item.name}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                    {item.desc}
+                  </p>
                 </motion.div>
               ))}
             </div>
+
           </div>
         </section>
         

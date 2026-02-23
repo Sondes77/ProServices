@@ -83,7 +83,7 @@ const SignIn4 = (props) => {
   };
 
   return (
-    <div className="min-h-screen mt-2 p-4 flex items-center justify-center bg-orange-50 relative overflow-hidden font-sans">
+    <div className="min-h-screen mt-2 md:p-4 flex items-center justify-center bg-orange-50 relative overflow-hidden font-sans">
       {/* Éléments de design en arrière-plan */}
       <div className="absolute top-0 left-0 w-64 h-64 bg-[#e0692d]/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />

@@ -45,41 +45,41 @@ const Navbar = () => {
           {currentPath !== "/search" && (
             <div className="hidden lg:flex flex-1 max-w-md mx-8">
                 <form
-  className="relative w-full group"
-  onSubmit={(e) => {
-    e.preventDefault();
+                className="relative w-full group"
+                onSubmit={(e) => {
+                  e.preventDefault();
 
-    const trimmed = searchQuery.trim();
+                  const trimmed = searchQuery.trim();
 
-    if (trimmed) {
-      navigate(`/search?q=${encodeURIComponent(trimmed.toLowerCase())}`);
-    } else {
-      navigate("/search");
-    }
-  }}
->
-  <input
-    type="text"
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-    placeholder="Rechercher un service, un pro..."
-    className="w-full bg-slate-100 dark:bg-gray-800 border-none rounded-2xl py-2.5 pl-11 pr-12 text-sm font-medium focus:ring-2 focus:ring-[#e0692d]/50 focus:bg-white dark:focus:bg-gray-700 transition-all outline-none text-slate-900 dark:text-white"
-  />
+                  if (trimmed) {
+                    navigate(`/search?q=${encodeURIComponent(trimmed.toLowerCase())}`);
+                  } else {
+                    navigate("/search");
+                  }
+                }}
+              >
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Rechercher un service, un pro..."
+                  className="w-full bg-slate-100 dark:bg-gray-800 border-none rounded-2xl py-2.5 pl-11 pr-12 text-sm font-medium focus:ring-2 focus:ring-[#e0692d]/50 focus:bg-white dark:focus:bg-gray-700 transition-all outline-none text-slate-900 dark:text-white"
+                />
 
-  {/* Icône gauche */}
-  <Search
-    size={16}
-    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-  />
+                {/* Icône gauche */}
+                <Search
+                  size={16}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                />
 
-  {/* Bouton droit */}
-  <button
-    type="submit"
-    className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#e0692d] hover:bg-[#f07e40] text-white p-2 rounded-xl transition-all"
-  >
-    <Search size={16} />
-  </button>
-</form>
+                {/* Bouton droit */}
+                <button
+                  type="submit"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#e0692d] hover:bg-[#f07e40] text-white p-2 rounded-xl transition-all"
+                >
+                  <Search size={16} />
+                </button>
+              </form>
             </div>
           )}
           {/* RIGHT – ACTIONS */}

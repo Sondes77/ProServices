@@ -11,9 +11,6 @@ const nodemailer = require("nodemailer");
 
 require('dotenv').config();
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-console.log(process.env.GOOGLE_CLIENT_ID);
-
 // Récupérer l'adresse IP de l'utilisateur et sa localisation
 exports.getLocation = async (req, res) => {
   const userIp = req.headers['x-forwarded-for'];

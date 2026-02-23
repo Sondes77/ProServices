@@ -74,7 +74,7 @@ import GestionCookies from './profile/GestionCookies';
 import socket from './socket';
 import './style.css';
 import './tailwind.css';
-import { Settings } from 'lucide-react';
+import { urlBase } from './config.js';
 
 function App() {
   //const [currentUser, setCurrentUser] = useState<User>(user);
@@ -146,7 +146,7 @@ function App() {
 
   const handleDeleteService = async (serviceId: string) => {
     const userRes = await fetch(
-      `http://localhost:5000/api/utilisateurId?id=${currentUser.id}`,
+      `${urlBase}/api/utilisateurId?id=${currentUser.id}`,
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },

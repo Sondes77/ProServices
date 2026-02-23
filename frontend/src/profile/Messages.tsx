@@ -407,7 +407,7 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
   }
 
   function ImageGalleryBubble({ group, isMine, onOpen }) {
-    const urls = group.images.map(img => `http://localhost:5000${img.content}`);
+    const urls = group.images.map(img => `${window.location.origin}${img.content}`);
     const count = urls.length;
 
     const bubbleClass = `rounded-xl p-2 max-w-[70%] shadow ${
@@ -668,13 +668,13 @@ const Messages: React.FC<MessagesProps> = ({ user }) => {
                   {/* Bulle du message */}
                   <div className={`rounded-lg p-3 max-w-[70%] shadow ${isMine ? 'bg-[#e0692d] text-white' : 'bg-white text-gray-900'}`}>
                     {msg.type === "text" && msg.content}
-                    {msg.type === "file" && <a href={`http://localhost:5000${msg.content}`}>📎 Télécharger</a>}
+                    {msg.type === "file" && <a href={`${window.location.origin}${msg.content}`}>📎 Télécharger</a>}
                     {msg.type === "image" && (
                       <img
-                        src={`http://localhost:5000${msg.content}`}
+                        src={`${window.location.origin}${msg.content}`}
                         className="rounded-lg max-h-64 max-w-[260px] object-cover cursor-pointer hover:opacity-90 transition"
                         onClick={() => {
-                          setPreviewImages([`http://localhost:5000${msg.content}`]);
+                          setPreviewImages([`${window.location.origin}${msg.content}`]);
                           setPreviewIndex(0);
                         }}
                       />
