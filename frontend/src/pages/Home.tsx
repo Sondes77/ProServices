@@ -221,7 +221,7 @@ const popularSearches = [
               </form>
 
               {/* Tags SEO (Maillage interne immédiat) */}
-              <div className="mt-6 text-sm text-slate-500 flex flex-wrap justify-center gap-2 items-center">
+              <div className="mt-6 text-sm text-slate-500 flex flex-wrap md:mb-12 justify-center gap-2 items-center">
                 <TrendingUp className="w-4 h-4 text-[#e0692d]" />
                 <span className="text-white font-semibold">Recherches fréquentes :</span>
                 {popularSearches.map((item, idx) => (

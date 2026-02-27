@@ -102,7 +102,7 @@ const EmailConfirmation = () => {
       // 4️⃣ Ré-enregistrer l'objet modifié dans le localStorage
       localStorage.setItem("currentUser", JSON.stringify(currentUser));
       localStorage.removeItem("email");
-      console.log("Mise à jour effectuée :", currentUser);
+      //console.log("Mise à jour effectuée :", currentUser);
     }
     //setTimeout(() => navigate("/confirm-phone"), 2000);
     setTimeout(() => navigate("/personal-info"), 2000);

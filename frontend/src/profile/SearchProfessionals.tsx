@@ -529,7 +529,7 @@ const params = useParams<{
   };
 
   const handleProfileClick = (metier: string, region: string, nom: string, professionalId: string) => {
-    navigate(`/pro/${slugify(metier)}/${slugify(region)}/${slugify(nom)}/${professionalId}`);
+    window.location.href=`/pro/${slugify(metier)}/${slugify(region)}/${slugify(nom)}/${professionalId}`;
   };
       
   const resultatsSansDoublons = Array.from(
@@ -571,19 +571,35 @@ const params = useParams<{
       <>
         <Helmet>
           <title>
-          {isServicesPage
+            {isServicesPage
               ? `${params.metier} à ${params.ville || ""} | ServicePro`
               : isCategoriesPage
               ? `${params.categorie} | ServicePro`
               : "Rechercher des professionnels | ServicePro"}
           </title>
-          {shouldNoIndex ? (
-            <meta name="robots" content="noindex, follow" />
-          ) : (
-            <meta name="robots" content="index, follow" />
-          )}
+
+          {/* ✅ META DESCRIPTION SEO */}
+          <meta
+            name="description"
+            content={
+              isServicesPage
+                ? `Trouvez un ${params.metier} professionnel à ${
+                    params.ville || "proximité"
+                  } en Tunisie. Comparez les artisans, consultez les avis et recevez un devis gratuit sur ServicePro.`
+                : isCategoriesPage
+                ? `Découvrez les professionnels spécialisés en ${params.categorie} partout en Tunisie. ServicePro vous aide à trouver rapidement un expert près de chez vous.`
+                : "Recherchez facilement un artisan ou professionnel en Tunisie. Plombier, électricien, réparation, ménage et plus encore sur ServicePro."
+            }
+          />
+
+          {/* ✅ ROBOTS */}
+          <meta
+            name="robots"
+            content={shouldNoIndex ? "noindex, follow" : "index, follow"}
+          />
         </Helmet>
       </>
+
       {/* 1. TOP AD BANNER (FULL WIDTH) */}
       <div className="bg-white pt-8 -mt-8">
         <div className="max-w-7xl mx-auto p-6">

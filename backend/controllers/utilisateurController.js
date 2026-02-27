@@ -332,10 +332,13 @@ exports.googleAuth = async (req, res) => {
     }
 
     try {
+      console.log("GOOGLE_CLIENT_ID = "+ process.env.GOOGLE_CLIENT_ID);
       const ticket = await client.verifyIdToken({
         idToken: credential,
-        audience: '499733428288-8ccdcs9hj2f3sga7v1g674mamb6kbsoo.apps.googleusercontent.com',
+        audience: process.env.GOOGLE_CLIENT_ID,
       });
+      
+      console.log(ticket);
   
       const payload = ticket.getPayload();
   

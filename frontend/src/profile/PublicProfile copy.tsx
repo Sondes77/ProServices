@@ -25,6 +25,7 @@ import pubImage from '../img/Datavancia cover.png';
 import pubVideo from '../img/1000x300.mp4';
 import Swal from "sweetalert2";
 import { urlBase } from "../config.js";
+import { Helmet } from 'react-helmet-async';
 
 interface PublicProfileProps {
   user2: User;
@@ -583,6 +584,17 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
       setIsCheckingAuth(false);
     }
   }, []);
+  // Supposons que tu as ces props ou variables dans ton composant
+  const params = useParams<{
+    metier?: string;
+    ville?: string;
+    slug?: string;
+  }>();
+  const metier = params.metier || "Artisan";
+  const ville = params.ville || "";
+  const slug = params.slug || "ServicePro";
+  const telephone = user?.phone || "";
+  const description = user?.apropos || `Contactez ${slug}, ${metier} à ${ville} via ServicePro.`;
   
   if (isCheckingAuth) return null;
   // Affiche un message de chargement si le service n’est pas encore chargé
@@ -591,6 +603,51 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
   }
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      <>
+        <Helmet>
+          {/* Title dynamique avec métier, ville et nom */}
+          <title>{`${metier} à ${ville} – ${slug} | ServicePro`}</title>
+
+          {/* Description SEO */}
+          <meta name="description" content={description} />
+
+          {/* Robots : indexer la page et suivre les liens */}
+          <meta name="robots" content="index, follow" />
+
+          {/* Canonical URL pour éviter le contenu dupliqué */}
+          <link rel="canonical" href={`https://servicepro.tn/pro/${metier}/${ville}/${slug}/${user?.id}`} />
+
+          {/* Open Graph pour réseaux sociaux */}
+          <meta property="og:type" content="website" />
+          <meta property="og:title" content={`${metier} à ${ville} – ${slug}`} />
+          <meta property="og:description" content={description} />
+          <meta property="og:url" content={`https://servicepro.tn/pro/${metier}/${ville}/${slug}/${user?.id}`} />
+          <meta property="og:image" content={user?.avatar || "https://servicepro.tn/og-image.jpg"} />
+
+          {/* Twitter Card */}
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={`${metier} à ${ville} – ${slug}`} />
+          <meta name="twitter:description" content={description} />
+          <meta name="twitter:image" content={user?.avatar || "https://servicepro.tn/og-image.jpg"} />
+
+          {/* JSON-LD LocalBusiness pour le SEO local */}
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "LocalBusiness",
+              "name": slug,
+              "description": description,
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": ville,
+                "addressCountry": "TN"
+              },
+              "telephone": telephone,
+              "url": `https://servicepro.tn/pro/${metier}/${ville}/${slug}/${user?.id}`
+            })}
+          </script>
+        </Helmet>
+      </>
       {/* Top Advertisement Banner */}
       <div className="bg-gray-100 p-4 rounded-lg mb-8">
         <div className="bg-white p-3 rounded shadow-sm">
@@ -1028,107 +1085,107 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
         </div>
       </div>
     )}
-         
-      {/* Message Modal */}
-      {showMessageModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg w-full max-w-md mx-4">
-            <div className="bg-[#e0692d] p-4 rounded-t-lg">
-              <h3 className="text-xl font-semibold text-white">Contacter {user.fullName}</h3>
-            </div>
-            <form onSubmit={handleSendMessage} className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Votre message
-                  </label>
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#e0692d] focus:border-transparent"
-                    rows={4}
-                    placeholder="Décrivez votre besoin..."
-                    required
-                  />
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => {setShowMessageModal(false); setMessage('');}}
-                  className="thq-button-outline"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  className="thq-button-filled flex items-center"
-                >
-                  <Send size={16} />
-                  <span>Envoyer</span>
-                </button>
-              </div>
-            </form>
+        
+    {/* Message Modal */}
+    {showMessageModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-full max-w-md mx-4">
+          <div className="bg-[#e0692d] p-4 rounded-t-lg">
+            <h3 className="text-xl font-semibold text-white">Contacter {user.fullName}</h3>
           </div>
+          <form onSubmit={handleSendMessage} className="p-6">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Votre message
+                </label>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#e0692d] focus:border-transparent"
+                  rows={4}
+                  placeholder="Décrivez votre besoin..."
+                  required
+                />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => {setShowMessageModal(false); setMessage('');}}
+                className="thq-button-outline"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                className="thq-button-filled flex items-center"
+              >
+                <Send size={16} />
+                <span>Envoyer</span>
+              </button>
+            </div>
+          </form>
         </div>
-      )}
+      </div>
+    )}
 
-      {/* Review Modal */}
-      {showReviewModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg w-full max-w-md mx-4">
-            <div className="bg-[#e0692d] p-4 rounded-t-lg">
-              <h3 className="text-xl font-semibold text-white">Évaluer {user.fullName}</h3>
-            </div>
-            <form onSubmit={handleSubmitReview} className="p-6">
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Note
-                  </label>
-                  <div className="flex items-center space-x-2">
-                    {renderStars(rating, true)}
-                    {rating > 0 && (
-                      <span className="text-sm text-gray-600 ml-2">
-                        {rating}/5
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Votre avis
-                  </label>
-                  <textarea
-                    value={reviewComment}
-                    onChange={(e) => setReviewComment(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#e0692d] focus:border-transparent"
-                    rows={4}
-                    placeholder="Partagez votre expérience..."
-                    required
-                  />
-                </div>
-              </div>
-              <div className="mt-6 flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => {setShowReviewModal(false); setRating(0); setReviewComment('');}}
-                  className="thq-button-outline"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  className="thq-button-filled flex items-center"
-                >
-                  <Star size={16} className="mr-2" />
-                  Publier
-                </button>
-              </div>
-            </form>
+    {/* Review Modal */}
+    {showReviewModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-full max-w-md mx-4">
+          <div className="bg-[#e0692d] p-4 rounded-t-lg">
+            <h3 className="text-xl font-semibold text-white">Évaluer {user.fullName}</h3>
           </div>
+          <form onSubmit={handleSubmitReview} className="p-6">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Note
+                </label>
+                <div className="flex items-center space-x-2">
+                  {renderStars(rating, true)}
+                  {rating > 0 && (
+                    <span className="text-sm text-gray-600 ml-2">
+                      {rating}/5
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Votre avis
+                </label>
+                <textarea
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#e0692d] focus:border-transparent"
+                  rows={4}
+                  placeholder="Partagez votre expérience..."
+                  required
+                />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => {setShowReviewModal(false); setRating(0); setReviewComment('');}}
+                className="thq-button-outline"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                className="thq-button-filled flex items-center"
+              >
+                <Star size={16} className="mr-2" />
+                Publier
+              </button>
+            </div>
+          </form>
         </div>
-      )}
+      </div>
+    )}
       
     </div>
   );

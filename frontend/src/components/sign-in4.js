@@ -26,6 +26,7 @@ const SignIn4 = (props) => {
     e.preventDefault();
     setLoading(true);
     try {
+      alert(`${urlBase}/login`);
       const response = await fetch(`${urlBase}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -45,13 +46,7 @@ const SignIn4 = (props) => {
         const user = mapUserDataToUserModel(data.user);
         
         localStorage.setItem('currentUser', JSON.stringify(user));
-        
-        
-        //console.log('Utilisateur connecté :', data.user);
-        //console.log('Token :', data.token);
-        //alert('Bienvenue ' + data.user.nom);
-        
-        // Redirection possible ici :
+       
         window.location.href = '/dashboard';
       }
 

@@ -1,5 +1,5 @@
 // backend/server.js
-/*const express = require('express');
+const express = require('express');
 const dotenv = require('dotenv');
 const utilisateurRoutes = require('./routes/utilisateurRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
@@ -79,10 +79,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'routes/uploads')));
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Serveur en écoute sur le port ${PORT}`);
-});*/
+});
 
 // backend/server.js
-const express = require('express');
+/*const express = require('express');
 const dotenv = require('dotenv');
 const utilisateurRoutes = require('./routes/utilisateurRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
@@ -160,5 +160,5 @@ app.use('/uploads', express.static(path.join(__dirname, 'routes/uploads')));
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Serveur en écoute sur le port ${PORT}`);
-});
+});*/
 

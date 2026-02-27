@@ -38,7 +38,7 @@ const SignIn = (props) => {
   async function handleCredentialResponse(response) {
     const currentPath = location.pathname;
     const role = currentPath === "/business" ? "professional" : "user";
-    console.log("role = ", role);
+    //console.log("role = ", role);
   
     const res = await fetch(`${urlBase}/google`, {
       method: "POST",
@@ -47,6 +47,7 @@ const SignIn = (props) => {
     });
   
     const data = await res.json();
+    alert("data = ", data);
     const token = data.token;
   
     if (!res.ok) {
