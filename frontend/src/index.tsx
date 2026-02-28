@@ -4,9 +4,7 @@ import ReactDOM from 'react-dom/client';
 //import 'bootstrap/dist/css/bootstrap.min.css';
 import App from './App';
 import { UserProvider } from './context/UserContext';
-import { HelmetProvider as HelmetProviderBase } from "react-helmet-async";
-
-const HelmetProvider = HelmetProviderBase as any;
+import { HelmetProvider } from "react-helmet-async";
 
 //import './style.css';
 

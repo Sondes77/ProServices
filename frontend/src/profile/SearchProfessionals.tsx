@@ -547,6 +547,7 @@ const params = useParams<{
   const isArabic = (text: string) => {
     return /[\u0600-\u06FF]/.test(text);
   };
+
   // --- COMPOSANT PUB RÉUTILISABLE ---
   const AdBanner = ({ type }: { type: 'horizontal' | 'sidebar' | 'inline' }) => {
     const styles = {
@@ -554,7 +555,7 @@ const params = useParams<{
       sidebar: "w-full h-[300px] bg-slate-50 border border-dashed border-slate-300 rounded-[24px] flex flex-col items-center justify-center p-6 text-center group cursor-pointer hover:border-orange-300 transition-colors",
       inline: "w-full p-6 bg-orange-50/30 border border-dashed border-orange-200 rounded-[24px] flex items-center justify-between mb-4"
     };
-
+    
     return (
       <div className={styles[type]}>
         <div className="bg-white p-2 rounded-full mb-2 shadow-sm group-hover:scale-110 transition-transform">
@@ -565,6 +566,27 @@ const params = useParams<{
       </div>
     );
   };
+
+   const buildH1 =({ metier, ville }: {
+      metier?: string;
+      ville?: string;
+    }) => {
+
+      if (metier && ville) {
+        return `${decodeURIComponent(metier)} à ${decodeURIComponent(ville)} — Trouvez le meilleur artisan`;
+      }
+
+      if (metier) {
+        return `Trouvez un ${decodeURIComponent(metier)} professionnel en Tunisie`;
+      }
+
+      return "Trouvez le professionnel idéal en Tunisie";
+    }
+
+    const h1Title = buildH1({
+      metier: params.metier,
+      ville: params.ville,
+    });
 
   return (
     <div className="min-h-screen bg-[#f8fbfc] mx-auto py-8">
@@ -597,6 +619,10 @@ const params = useParams<{
             name="robots"
             content={shouldNoIndex ? "noindex, follow" : "index, follow"}
           />
+          <link
+            rel="canonical"
+            href={`https://servicepro.tn${window.location.pathname}`}
+          />
         </Helmet>
       </>
 
@@ -611,11 +637,26 @@ const params = useParams<{
       <section className="px-4 -mt-8 bg-white border-b border-slate-100 pt-12 pb-24">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
-            Trouvez le <span className="text-[#e0692d]">professionnel</span> idéal
-          </h1>
-          <p className="text-slate-500 max-w-2xl mx-auto text-lg">
-            Découvrez les meilleurs experts en Tunisie pour tous vos besoins de travaux et services.
-          </p>
+          {h1Title.split(" ").map((word, i) =>
+            word.toLowerCase() === "professionnel" ? (
+              <span key={i} className="text-[#e0692d]">
+                {word}{" "}
+              </span>
+            ) : (
+              word + " "
+            )
+          )}
+        </h1>
+          
+          {params.metier ? (
+            <p className="text-sm text-slate-400 mt-2">
+              Comparez les {params.metier} disponibles {params.ville && `à ${params.ville}`} et recevez rapidement un devis.
+            </p>
+          ) : (
+            <p className="text-slate-500 max-w-2xl mx-auto text-lg">
+              Découvrez les meilleurs experts en Tunisie pour tous vos besoins de travaux et services.
+            </p>
+          )}
         </div>
       </section>
 

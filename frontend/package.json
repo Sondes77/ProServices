@@ -47,7 +47,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "build:css": "npx tailwindcss -i ./src/index.css -o ./dist/output.css --watch"
+    "build:css": "npx tailwindcss -i ./src/index.css -o ./dist/output.css --watch",
+    "postbuild": "build-snap.js"
   },
   "eslintConfig": {
     "extends": [

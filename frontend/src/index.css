@@ -189,6 +189,32 @@ hr {
   /* 3 */
 }
 
+/* ===== Custom Scrollbar ===== */
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #fff7ed;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e0692d;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #c9561f;
+}
+
+/* Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #e0692d #fff7ed;
+}
+
 /*
 Add the correct text decoration in Chrome, Edge, and Safari.
 */

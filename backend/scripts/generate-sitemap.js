@@ -2,6 +2,9 @@ const fs = require("fs");
 const path = require("path");
 
 const BASE_URL = "https://servicepro.tn";
+const MAX_URLS_PER_FILE = 49000; // sécurité < 50k
+const OUTPUT_DIR = path.join(__dirname, "../../frontend/public");
+
 
 // ===== MÉTIERS PAR CATÉGORIE =====
 const metiers = [
@@ -128,35 +131,64 @@ const villes = {
   Kebili: ['Kébili','Souk Lahad','Kébili Sud','Kébili Nord','Faouar','Douz Sud','Douz Nord','Autre']
 };
 
+function slugify(str) {
+  return str
+    .toLowerCase()
+    .normalize("NFD")               // décompose accents
+    .replace(/[\u0300-\u036f]/g, "") // supprime accents
+    .replace(/[^a-z0-9]+/g, "-")   // remplace tout ce qui n’est pas alphanum par -
+    .replace(/^-+|-+$/g, "");      // supprime tirets en début/fin
+}
+
 // ===== Génération des URLs =====
 let urls = [];
 urls.push(BASE_URL); // homepage
 
 metiers.forEach(m => {
-  urls.push(`${BASE_URL}/services/${encodeURIComponent(m)}`);
+  const mSlug = slugify(m);
+  urls.push(`${BASE_URL}/services/${mSlug}`);
   Object.keys(villes).forEach(gouv => {
     villes[gouv].forEach(v => {
-      urls.push(`${BASE_URL}/services/${encodeURIComponent(m)}/${encodeURIComponent(v)}`);
+      const vSlug = slugify(v);
+      urls.push(`${BASE_URL}/services/${mSlug}/${vSlug}`);
     });
   });
 });
 
-// ===== Génération du XML =====
-const today = new Date().toISOString().split("T")[0];
+// ===== FRACTIONNER LES URLS =====
+const chunks = [];
+for (let i = 0; i < urls.length; i += MAX_URLS_PER_FILE) {
+  chunks.push(urls.slice(i, i + MAX_URLS_PER_FILE));
+}
 
-const xml = `<?xml version="1.0" encoding="UTF-8"?>
+// ===== GÉNÉRATION DES SITEMAPS =====
+let sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+
+chunks.forEach((chunk, idx) => {
+  const today = new Date().toISOString().split("T")[0];
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map(url => `
+${chunk.map(u => `
   <url>
-    <loc>${url}</loc>
+    <loc>${u}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>`).join("")}
 </urlset>`;
 
-// ===== Sauvegarde =====
-const outputPath = path.join(__dirname, "../../frontend/build/sitemap.xml");
-fs.writeFileSync(outputPath, xml);
+  const fileName = `sitemap_services_${idx + 1}.xml`;
+  fs.writeFileSync(path.join(OUTPUT_DIR, fileName), xml);
+  console.log(`✅ ${fileName} généré avec ${chunk.length} URLs`);
 
-console.log("✅ sitemap.xml généré avec tous les métiers et villes !");
+  sitemapIndex += `
+  <sitemap>
+    <loc>${BASE_URL}/${fileName}</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>`;
+});
+
+sitemapIndex += `\n</sitemapindex>`;
+fs.writeFileSync(path.join(OUTPUT_DIR, "sitemap_index.xml"), sitemapIndex);
+console.log("✅ sitemap_index.xml généré avec tous les fichiers secondaires !");

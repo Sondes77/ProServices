@@ -1,3 +1,18 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+
+# Sitemap
+Sitemap: https://servicepro.tn/sitemap.xml
+
+# Bloquer les dossiers internes sensibles (backend API si exposé)
+Disallow: /api/
+Disallow: /admin/
+Disallow: /config/
+Disallow: /node_modules/
+
+# Bloquer les pages inutiles pour Google
+Disallow: /login
+Disallow: /signup
+Disallow: /profile
+Disallow: /reset-password

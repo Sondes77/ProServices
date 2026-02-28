@@ -589,13 +589,18 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
     metier?: string;
     ville?: string;
     slug?: string;
+    id?: string;
   }>();
   const metier = params.metier || "Artisan";
   const ville = params.ville || "";
   const slug = params.slug || "ServicePro";
+  const _id = params.id;
   const telephone = user?.phone || "";
-  const description = user?.apropos || `Contactez ${slug}, ${metier} à ${ville} via ServicePro.`;
-  
+  const description = `Contactez ${slug}, ${metier} à ${ville} via ServicePro.`;
+  const averageRating = Number(
+    parseFloat(calculateAverageRating() || 0).toFixed(1)
+  );
+
   if (isCheckingAuth) return null;
   // Affiche un message de chargement si le service n’est pas encore chargé
   if (!user) {
@@ -605,50 +610,65 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
     <div className="max-w-7xl mx-auto px-4 py-8">
       <>
         <Helmet>
-          {/* Title dynamique avec métier, ville et nom */}
+          
           <title>{`${metier} à ${ville} – ${slug} | ServicePro`}</title>
 
-          {/* Description SEO */}
           <meta name="description" content={description} />
 
-          {/* Robots : indexer la page et suivre les liens */}
           <meta name="robots" content="index, follow" />
+          <link
+            rel="canonical"
+            href={`https://servicepro.tn/pro/${metier}/${ville}/${slug}/${_id}`}
+          />
 
-          {/* Canonical URL pour éviter le contenu dupliqué */}
           <link rel="canonical" href={`https://servicepro.tn/pro/${metier}/${ville}/${slug}/${user?.id}`} />
 
-          {/* Open Graph pour réseaux sociaux */}
           <meta property="og:type" content="website" />
           <meta property="og:title" content={`${metier} à ${ville} – ${slug}`} />
           <meta property="og:description" content={description} />
           <meta property="og:url" content={`https://servicepro.tn/pro/${metier}/${ville}/${slug}/${user?.id}`} />
           <meta property="og:image" content={user?.avatar || "https://servicepro.tn/og-image.jpg"} />
 
-          {/* Twitter Card */}
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content={`${metier} à ${ville} – ${slug}`} />
           <meta name="twitter:description" content={description} />
           <meta name="twitter:image" content={user?.avatar || "https://servicepro.tn/og-image.jpg"} />
-
-          {/* JSON-LD LocalBusiness pour le SEO local */}
+          
           <script type="application/ld+json">
             {JSON.stringify({
               "@context": "https://schema.org",
               "@type": "LocalBusiness",
-              "name": slug,
-              "description": description,
-              "address": {
+
+              name: user?.fullName,
+              image: user?.avatar,
+
+              description: `Contactez ${slug}, ${metier} professionnel à ${ville} en Tunisie via ServicePro.`,
+
+              address: {
                 "@type": "PostalAddress",
-                "addressLocality": ville,
-                "addressCountry": "TN"
+                addressLocality: ville,
+                addressCountry: "TN"
               },
-              "telephone": telephone,
-              "url": `https://servicepro.tn/pro/${metier}/${ville}/${slug}/${user?.id}`
+
+              areaServed: {
+                "@type": "City",
+                name: ville
+              },
+
+              url: `https://servicepro.tn/pro/${metier}/${ville}/${slug}/${_id}`,
+
+              telephone: telephone || "",
+
+              aggregateRating: user?.stats.reviewsPosted >0 ? {
+                "@type": "AggregateRating",
+                ratingValue: averageRating,
+                reviewCount: user?.stats.reviewsPosted
+              } : undefined
             })}
           </script>
         </Helmet>
       </>
-      {/* Top Advertisement Banner */}
+      
       <div className="bg-gray-100 p-4 rounded-lg mb-8">
         <div className="bg-white p-3 rounded shadow-sm">
           <div className="relative h-[300px] w-full overflow-hidden rounded-lg border border-dashed border-gray-300">
@@ -810,68 +830,106 @@ const PublicProfile: React.FC<PublicProfileProps> = ({ user2 }) => {
             </div>
           </div>
 
-          {/* Services Section */}
+         {/* Services Section */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
             <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-800 mb-6">Services proposés</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {services.filter(service => service.status === 'active').map(service => (
-                  <div 
-                    key={service.id} 
-                    className="group relative bg-white rounded-lg p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-orange-500/5 hover:border-orange-200 transition-all duration-300 cursor-pointer"
-                    onClick={() => handleServiceClick(service.category, service.metier,user.region,service.id)}
+
+              <h2 className="text-xl font-semibold text-gray-800 mb-6">
+                Services proposés
+              </h2>
+
+              {/** Services actifs */}
+              {(() => {
+                const activeServices = services.filter(
+                  service => service.status === "active"
+                );
+
+                const enableScroll = activeServices.length > 4;
+
+                return (
+                  <div
+                    className={`
+                      ${enableScroll ? "max-h-[650px] overflow-y-auto pr-2" : ""}
+                      custom-scrollbar
+                    `}
                   >
-                    {/* Badge de disponibilité discret */}
-                    <div className="flex justify-between items-start mb-4">
-                      {/* Catégorie à gauche */}
-                      
-                      <span className="inline-flex items-center gap-1 bg-orange-50 text-[#e0692d] text-xs font-bold px-2 py-1 rounded-full">
-                        <Briefcase size={12} />
-                        {service.metier}
-                      </span>
-                     
-                      <div className="text-gray-300 group-hover:text-[#e0692d] transition-colors">
-                        <ExternalLink size={18} />
-                      </div>
-                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {activeServices.map(service => (
+                        <div
+                          key={service.id}
+                          className="group relative bg-white rounded-lg p-6 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-orange-500/5 hover:border-orange-200 transition-all duration-300 cursor-pointer"
+                          onClick={() =>
+                            handleServiceClick(
+                              service.category,
+                              service.metier,
+                              user.region,
+                              service.id
+                            )
+                          }
+                        >
+                          {/* Header */}
+                          <div className="flex justify-between items-start mb-4">
+                            <span className="inline-flex items-center gap-1 bg-orange-50 text-[#e0692d] text-xs font-bold px-2 py-1 rounded-full">
+                              <Briefcase size={12} />
+                              {service.metier}
+                            </span>
 
-                    {/* Titre & Description */}
-                    <div className="flex justify-between items-start mb-4">
-                      <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-[#e0692d] transition-colors leading-tight">
-                        {service.title}
-                      </h3>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <CheckCircle size={12} className="mr-1" />
-                          {service.duration}
-                        </span>
-                    </div>
+                            <div className="text-gray-300 group-hover:text-[#e0692d] transition-colors">
+                              <ExternalLink size={18} />
+                            </div>
+                          </div>
 
-                    <p
-                      dir={isArabic(service.description) ? "rtl" : "ltr"}
-                      className={`text-gray-500 text-sm leading-relaxed line-clamp-2 ${
-                        isArabic(service.description) ? "text-right" : "text-left"
-                      }`}
-                    >{service.description}</p>
+                          {/* Title + duration */}
+                          <div className="flex justify-between items-start mb-4">
+                            <h3 className="text-xl font-bold text-slate-900 mb-2 group-hover:text-[#e0692d] transition-colors leading-tight">
+                              {service.title}
+                            </h3>
 
-                    {/* Footer de la carte : Catégorie & Prix */}
-                    <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-50">
-                      <div className="flex items-center text-gray-400 bg-gray-50 px-3 py-1.5 rounded-xl">
-                        <Tag  size={14} className="mr-2 text-[#e0692d]" />
-                        <span className="text-xs font-semibold">{service.category}</span>
-                      </div>
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              <CheckCircle size={12} className="mr-1" />
+                              {service.duration}
+                            </span>
+                          </div>
 
-                      {service.price && (
-                        <div className="text-right">
-                          <p className="text-[10px] text-gray-400 uppercase font-bold tracking-tighter mb-0.5">À partir de</p>
-                          <p className="text-lg font-black text-[#e0692d]">
-                            {service.price} <span className="text-xs font-bold">DT</span>
+                          {/* Description */}
+                          <p
+                            dir={isArabic(service.description) ? "rtl" : "ltr"}
+                            className={`text-gray-500 text-sm leading-relaxed line-clamp-2 ${
+                              isArabic(service.description)
+                                ? "text-right"
+                                : "text-left"
+                            }`}
+                          >
+                            {service.description}
                           </p>
+
+                          {/* Footer */}
+                          <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-50">
+                            <div className="flex items-center text-gray-400 bg-gray-50 px-3 py-1.5 rounded-xl">
+                              <Tag size={14} className="mr-2 text-[#e0692d]" />
+                              <span className="text-xs font-semibold">
+                                {service.category}
+                              </span>
+                            </div>
+
+                            {service.price && (
+                              <div className="text-right">
+                                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-tighter mb-0.5">
+                                  À partir de
+                                </p>
+                                <p className="text-lg font-black text-[#e0692d]">
+                                  {service.price}
+                                  <span className="text-xs font-bold"> DT</span>
+                                </p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      )}
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })()}
             </div>
           </div>
 
