@@ -3,6 +3,7 @@ import React, { Fragment, useState, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { mapUserDataToUserModel } from '../utils/mapper';
 import './sign-in4.css'
+import {urlBase} from '../config.js';
 
 const SignIn4 = (props) => {
   useEffect(() => {
@@ -18,7 +19,7 @@ const SignIn4 = (props) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      const response = await fetch(`${urlBase}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

@@ -41,7 +41,7 @@ router.post('/upload-avatar', upload.single('avatar'), (req, res) => {
     return res.status(400).json({ error: 'Fichier ou userId manquant' });
   }
 
-  const fileUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+  const fileUrl = `/uploads/${req.file.filename}`;
 
   db.query(
     'UPDATE utilisateurs SET photo = ? WHERE id = ?',
@@ -64,7 +64,7 @@ router.post('/upload-avatar', upload.single('avatar'), (req, res) => {
 router.post('/upload-gallery', upload.array('images', 5), (req, res) => {
 
   const imageUrls = req.files.map(file =>
-    `http://localhost:5000/uploads/${file.filename}`
+    `/uploads/${file.filename}`
   );
 
   res.json({

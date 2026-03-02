@@ -46,7 +46,7 @@ exports.creerUtilisateur = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10); // 🔐
     const source = 'formulaire'; // Source de l'inscription
     const email_verified = false;
-    const photo = "http://localhost:5000/uploads/ServicePro_Avatar.png"; // Avatar par défaut
+    const photo = "/uploads/ServicePro_Avatar.png"; // Avatar par défaut
     console.log("je suis role dans exports.creerUtilisateur = ", role);
 
     try{

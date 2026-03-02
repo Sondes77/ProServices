@@ -9,6 +9,7 @@ import "intl-tel-input/build/js/utils";
 import './sign-up6.css'
 import { User, Mail, Phone, Lock, Eye, EyeOff, Facebook, Chrome, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { urlBase } from '../config';
 
 const SignUp6 = (props) => {
   const location = useLocation();
@@ -83,7 +84,7 @@ const SignUp6 = (props) => {
     console.log('Données du formulaire:', formData);
   
     try {
-      const response = await fetch('http://localhost:5000/api/utilisateur', {
+      const response = await fetch(`${urlBase}/utilisateur`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,7 +101,7 @@ const SignUp6 = (props) => {
         console.log('Utilisateur créé avec succès');
   
         // Requête pour obtenir les infos complètes de l'utilisateur
-        const userRes = await fetch(`http://localhost:5000/api/utilisateur?email=${encodeURIComponent(formData.email)}`, {
+        const userRes = await fetch(`${urlBase}/utilisateur?email=${encodeURIComponent(formData.email)}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`
