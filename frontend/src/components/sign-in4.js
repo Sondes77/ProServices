@@ -26,7 +26,7 @@ const SignIn4 = (props) => {
     e.preventDefault();
     setLoading(true);
     try {
-      alert(`${urlBase}/login`);
+     
       const response = await fetch(`${urlBase}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

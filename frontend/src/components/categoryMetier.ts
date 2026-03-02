@@ -11,7 +11,17 @@ export type Categorie =
   | 'Services techniques spécialisés'
   | 'Énergie & Environnement'
   | 'Eau & Assainissement'
-  | 'Industrie & Chantier';
+  | 'Industrie & Chantier'
+  | 'Informatique & Digital'
+  | 'Beauté & Bien-être'
+  | 'Santé & Paramédical'
+  | 'Services à la personne'
+  | 'Business & Administratif'
+  | 'Éducation & Formation'
+  | 'Événementiel'
+  | 'Automobile & Moto'
+  | 'Audiovisuel & Création'
+  | 'Mode & Textile';
 
 export const Metier: Record<Categorie, string[]> = {
 
@@ -126,6 +136,145 @@ export const Metier: Record<Categorie, string[]> = {
 "Mécanicien industriel","Électricien industriel",
 "Monteur industriel","Levage","Grutage",
 "Conducteur engins","Opérateur nacelle"
+],
+
+"Informatique & Digital": [
+"Développeur web","Développeur React","Développeur Next.js",
+"Développeur mobile","Développeur Android","Développeur iOS",
+"Développeur backend","Développeur full stack",
+"Création site web","Création e-commerce",
+"Maintenance informatique","Dépannage informatique",
+"Technicien IT","Administrateur système",
+"Administrateur réseau","Cybersécurité",
+"Consultant IT","Support technique",
+"Réparation ordinateur","Réparation laptop",
+"Réparation Mac","Réparation imprimante",
+"Installation réseau","Configuration serveur",
+"Hébergement web","SEO","Consultant SEO",
+"Marketing digital","Community manager",
+"Gestion réseaux sociaux","Publicité Facebook Ads",
+"Google Ads specialist","UI UX Designer",
+"Graphiste","Web designer",
+"Montage vidéo","Créateur contenu",
+"Automatisation Make","Automatisation IA",
+"Intégrateur API","Data analyst"
+],
+
+"Beauté & Bien-être": [
+"Coiffeur","Coiffeuse","Barbier",
+"Coloriste","Coiffure mariage",
+"Maquilleur","Maquilleuse professionnelle",
+"Esthéticienne","Soins visage",
+"Épilation","Épilation laser",
+"Prothésiste ongulaire","Pose faux ongles",
+"Massage relaxant","Massage thérapeutique",
+"Spa","Soins corps",
+"Coach bien-être","Coach nutrition",
+"Coach fitness","Personal trainer",
+"Yoga coach","Coach sportif"
+],
+
+"Santé & Paramédical": [
+"Infirmier","Infirmière à domicile",
+"Aide-soignant","Kinésithérapeute",
+"Ostéopathe","Orthophoniste",
+"Psychologue","Psychothérapeute",
+"Diététicien","Nutritionniste",
+"Sage-femme","Assistant médical",
+"Podologue","Ergothérapeute",
+"Acupuncteur","Naturopathe"
+],
+
+"Services à la personne": [
+"Garde enfant","Baby-sitter",
+"Aide personnes âgées",
+"Auxiliaire de vie",
+"Femme de ménage",
+"Repassage domicile",
+"Cuisine à domicile",
+"Chef privé",
+"Garde animaux","Dog sitter",
+"Promeneur chien",
+"Soutien scolaire",
+"Aide devoirs",
+"Assistant personnel"
+],
+
+"Business & Administratif": [
+"Comptable","Expert-comptable",
+"Secrétaire indépendante",
+"Assistant administratif",
+"Consultant business",
+"Création entreprise",
+"Conseiller fiscal",
+"Gestion paie",
+"Juriste","Avocat",
+"Rédacteur professionnel",
+"Traducteur","Interprète",
+"Saisie de données"
+],
+
+"Éducation & Formation": [
+"Professeur particulier",
+"Formateur informatique",
+"Formateur langues",
+"Professeur anglais",
+"Professeur français",
+"Professeur mathématiques",
+"Coach carrière",
+"Coach entretien",
+"Formation bureautique",
+"Formation programmation"
+],
+
+"Événementiel": [
+"Organisateur événement",
+"Wedding planner",
+"DJ","Animateur",
+"Photographe événementiel",
+"Vidéaste mariage",
+"Décorateur événement",
+"Location matériel événement",
+"Traiteur","Serveur événement",
+"Location sono",
+"Location éclairage"
+],
+
+"Automobile & Moto": [
+"Mécanicien auto",
+"Électricien automobile",
+"Diagnostic auto",
+"Carrossier",
+"Peintre automobile",
+"Lavage auto",
+"Detailing auto",
+"Réparation moto",
+"Dépannage auto",
+"Remorquage",
+"Installation GPS",
+"Installation autoradio"
+],
+
+"Audiovisuel & Création": [
+"Photographe",
+"Vidéaste",
+"Monteur vidéo",
+"Motion designer",
+"Créateur logo",
+"Designer graphique",
+"Illustrateur",
+"Voix off",
+"Studio enregistrement"
+],
+
+"Mode & Textile": [
+"Couturier",
+"Couturière",
+"Styliste",
+"Retouche vêtements",
+"Créateur mode",
+"Broderie",
+"Impression textile"
 ]
 
 };
