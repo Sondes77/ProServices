@@ -145,6 +145,97 @@ exports.creerService = async (req, res) => {
   }
 };
 
+exports.creerServiceByAdmin = async (req, res) => {
+  try {
+  
+    const userId = req.body.userId;;
+
+    const { title, description, category, metier, price, status, duration, gallery, included, notIncluded } = req.body;
+    const date_creation = new Date();
+
+    // ✅ 1️⃣ Vérifier si un service existe déjà pour ce métier
+    const checkQuery = `
+      SELECT id FROM services 
+      WHERE professionnel_id = ? 
+      AND metier = ? 
+      LIMIT 1
+    `;
+
+    db.query(checkQuery, [userId, metier], (checkErr, checkResults) => {
+      if (checkErr) {
+        console.error('Erreur lors de la vérification :', checkErr);
+        return res.status(500).json({ message: 'Erreur serveur' });
+      }
+      
+      if (checkResults.length > 0) {
+        return res.status(200).json({
+          success: false,
+          message: "Vous avez déjà un service pour ce métier."
+        });
+      }
+
+      // 🔹 Vérifier même titre
+      const checkTitre = `
+        SELECT id FROM services 
+        WHERE professionnel_id = ? 
+        AND titre = ? 
+        LIMIT 1
+      `;
+
+      db.query(checkTitre, [userId, title], (errTitre, resultTitre) => {
+        if (errTitre) {
+          console.error('Erreur vérification titre :', errTitre);
+          return res.status(500).json({ message: 'Erreur serveur' });
+        }
+
+        if (resultTitre.length > 0) {
+          return res.status(200).json({
+            success: false,
+            message: "Vous avez déjà utilisé ce titre. Le titre doit être unique."
+          });
+        }  
+        // ✅ 2️⃣ Si aucun service trouvé → insertion
+        const insertQuery = `
+          INSERT INTO services 
+          (professionnel_id, titre, description, categorie, metier, prix, statut, availability, gallery, included, notIncluded, date_creation) 
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const values = [
+          userId,
+          title,
+          description,
+          category,
+          metier,
+          price,
+          status,
+          duration,
+          JSON.stringify(gallery),
+          JSON.stringify(included),
+          JSON.stringify(notIncluded),
+          date_creation
+        ];
+
+        db.query(insertQuery, values, (err, results) => {
+          if (err) {
+            console.error('Erreur lors de la création :', err);
+            return res.status(500).json({ message: 'Erreur serveur' });
+          }
+
+          res.status(200).json({
+            success:true,
+            userId: userId,
+            message: 'Service créé avec succès'
+          });
+        });
+      });
+    });
+  } catch (error) {
+    console.error('Erreur lors de la création du service:', error);
+    return res.status(500).json({ message: 'Erreur interne du serveur' });
+  }
+};
+
 exports.updateService = async (req, res) => {
   try {
     const authHeader = req.headers['authorization'];
@@ -188,7 +279,8 @@ exports.deleteService = async (req, res) => {
     const userId = decoded.id;
 
     const serviceId = req.params.id;
-
+    console.log("ID du service à supprimer:", serviceId);
+    console.log("ID de l'utilisateur connecté:", userId);
     // On supprime le service uniquement s’il appartient au user connecté (sécurité)
     const query = `DELETE FROM services WHERE id = ? AND professionnel_id = ?`;
 
@@ -209,6 +301,30 @@ exports.deleteService = async (req, res) => {
   }
 };
 
+exports.deleteServiceBySuperAdmin = async (req, res) => {
+  try {
+    const userId = req.body.userId; // ID du user ciblé envoyé dans le body de la requête
+    const serviceId = req.params.id;
+   
+    // On supprime le service uniquement s’il appartient au user connecté (sécurité)
+    const query = `DELETE FROM services WHERE id = ? AND professionnel_id = ?`;
+
+    const values = [serviceId, userId];
+
+    db.query(query, values, (err, results) => {
+      if (err) {
+        console.error('Erreur lors de la supression :', err);
+        return res.status(500).json({ message: 'Erreur serveur' });
+      }
+      
+      res.status(200).json({ message: 'Service supprimé avec succès' });
+    });
+
+  } catch (error) {
+    console.error('Erreur lors de la supression du Service:', error);
+    return res.status(500).json({ message: 'Erreur interne du serveur' });
+  }
+};
 // Récupérer un utilisateur par son mail
 exports.getUtilisateur = (req, res) => {
   const { email } = req.query;

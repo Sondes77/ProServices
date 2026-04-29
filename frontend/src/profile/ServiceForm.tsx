@@ -19,11 +19,11 @@ interface ServiceFormProps {
 
 const ServiceForm: React.FC<ServiceFormProps> = ({ service, onSubmit, onCancel}) => {
   const [formData, setFormData] = useState({
-    title: service?.title || '',
+    title: service?.title || service?.titre ||'',
     description: service?.description || '',
-    category: service?.category || '',
+    category: service?.category || service?.categorie || '',
     metier: service?.metier || '',
-    price: service?.price || '',
+    price: service?.price || service?.prix || '',
     status: service?.status || 'active',
     duration: service?.duration || 'Immédiat',
     //gallery: service?.gallery || [''],

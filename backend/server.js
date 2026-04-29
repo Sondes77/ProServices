@@ -8,6 +8,7 @@ const messageRoutes = require('./routes/messageRoutes');
 const reviewRoutes = require('./routes/reviewRoutes'); 
 const notificationsRoutes = require('./routes/notificationsRoutes'); 
 const devisRoutes = require('./routes/devisRoutes'); 
+const AminLogRoutes = require('./routes/AdminLogRoutes'); 
 const cors = require('cors');
 const path = require('path');
 const http = require('http');          // ⬅️ Nécessaire pour Socket.IO
@@ -73,6 +74,7 @@ app.use('/api', messageRoutes);
 app.use('/api', reviewRoutes); 
 app.use('/api', notificationsRoutes); 
 app.use('/api', devisRoutes);
+app.use('/api', AminLogRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'routes/uploads')));
 
 // Lancer le serveur

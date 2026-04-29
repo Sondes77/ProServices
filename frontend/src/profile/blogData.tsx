@@ -30,7 +30,7 @@ export interface BlogPost {
         
         <ul>
           <li>Le bouche-à-oreille : demandez des recommandations à vos amis, votre famille ou vos collègues</li>
-          <li>Les plateformes en ligne spécialisées comme ProFinder</li>
+          <li>Les plateformes en ligne spécialisées comme ServicePro</li>
           <li>Les annuaires professionnels</li>
           <li>Les réseaux sociaux et forums dédiés à la rénovation</li>
         </ul>
@@ -279,12 +279,12 @@ export interface BlogPost {
     },
     {
       id: 4,
-      title: 'Témoignage : Ma rénovation complète avec ProFinder',
-      excerpt: 'Découvrez comment j\'ai transformé ma maison ancienne grâce aux artisans trouvés sur ProFinder...',
+      title: 'Témoignage : Ma rénovation complète avec ServicePro',
+      excerpt: 'Découvrez comment j\'ai transformé ma maison ancienne grâce aux artisans trouvés sur ServicePro...',
       content: `
-        <h2>Témoignage : Ma rénovation complète avec ProFinder</h2>
+        <h2>Témoignage : Ma rénovation complète avec ServicePro</h2>
         
-        <p>Quand j'ai acheté ma maison de campagne datant des années 30, je savais que j'avais un véritable chantier devant moi. L'électricité était obsolète, la plomberie fuyait à plusieurs endroits, et l'isolation était quasi inexistante. Après quelques tentatives infructueuses pour trouver des artisans fiables via mon réseau, j'ai découvert la plateforme ProFinder. Voici mon expérience.</p>
+        <p>Quand j'ai acheté ma maison de campagne datant des années 30, je savais que j'avais un véritable chantier devant moi. L'électricité était obsolète, la plomberie fuyait à plusieurs endroits, et l'isolation était quasi inexistante. Après quelques tentatives infructueuses pour trouver des artisans fiables via mon réseau, j'ai découvert la plateforme ServicePro. Voici mon expérience.</p>
         
         <h3>Le début de l'aventure</h3>
         
@@ -305,7 +305,7 @@ export interface BlogPost {
           <li>L'entreprise ColorHome pour les peintures</li>
         </ul>
         
-        <p>La fonctionnalité de planning partagé de ProFinder nous a permis de coordonner les interventions de chacun, évitant ainsi les temps morts et les conflits entre corps de métier.</p>
+        <p>La fonctionnalité de planning partagé de ServicePro nous a permis de coordonner les interventions de chacun, évitant ainsi les temps morts et les conflits entre corps de métier.</p>
         
         <h3>Le déroulement des travaux</h3>
         
@@ -329,17 +329,17 @@ export interface BlogPost {
           <li>Des retards de livraison pour certains matériaux</li>
         </ul>
         
-        <p>Grâce à la messagerie intégrée de ProFinder, j'ai pu rapidement discuter de ces imprévus avec les artisans concernés et trouver des solutions, souvent le jour même. La fonctionnalité d'avenant au devis initial m'a permis de garder un contrôle total sur mon budget, même avec ces ajustements.</p>
+        <p>Grâce à la messagerie intégrée de ServicePro, j'ai pu rapidement discuter de ces imprévus avec les artisans concernés et trouver des solutions, souvent le jour même. La fonctionnalité d'avenant au devis initial m'a permis de garder un contrôle total sur mon budget, même avec ces ajustements.</p>
         
         <h3>Le résultat final</h3>
         
         <p>Six mois après le début des travaux, ma maison est méconnaissable. Elle conserve tout son charme d'antan, mais offre désormais le confort d'une construction moderne. Ma consommation énergétique a diminué de 60%, et la valeur de mon bien a considérablement augmenté.</p>
         
-        <p>Au-delà de la transformation physique, c'est la sérénité avec laquelle ce projet s'est déroulé qui m'a le plus marquée. La plateforme ProFinder a véritablement simplifié un processus qui aurait pu être extrêmement stressant.</p>
+        <p>Au-delà de la transformation physique, c'est la sérénité avec laquelle ce projet s'est déroulé qui m'a le plus marquée. La plateforme ServicePro a véritablement simplifié un processus qui aurait pu être extrêmement stressant.</p>
         
         <h3>Conclusion</h3>
         
-        <p>Si je devais résumer mon expérience, je dirais que ProFinder a transformé ce qui aurait pu être un parcours du combattant en une aventure maîtrisée et même agréable. La sélection rigoureuse des professionnels, la transparence des avis, et les outils de suivi ont fait toute la différence.</p>
+        <p>Si je devais résumer mon expérience, je dirais que ServicePro a transformé ce qui aurait pu être un parcours du combattant en une aventure maîtrisée et même agréable. La sélection rigoureuse des professionnels, la transparence des avis, et les outils de suivi ont fait toute la différence.</p>
         
         <p>Pour tous ceux qui envisagent des travaux de rénovation, je ne peux que recommander cette approche qui combine la qualité de l'artisanat traditionnel avec l'efficacité des outils numériques modernes.</p>
       `,

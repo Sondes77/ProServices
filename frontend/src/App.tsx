@@ -44,6 +44,9 @@ import PublicProfile2 from './profile/PublicProfile copy';
 import UserProfile from './profile/UserProfile';
 import SearchProfessionals from './profile/SearchProfessionals';
 import AdminDashboard from './admin/AdminDashboard';
+import AdminDash from './admin/AdminDash';
+import PrivateRoute from './admin/PrivateRoute';
+import Login from './admin/Login';
 import Home from './pages/Home';
 import About from './profile/About';
 import MetiersPage from './profile/MetierPage';
@@ -309,7 +312,12 @@ function App() {
             reviews={reviews}
           />
         }/>
-        {/*<Route path="/admin" element={<AdminDashboard />} />*/}
+        <Route path="/login" element={<Login />} />
+        <Route path="/admin-dashboard" element={
+          <PrivateRoute>
+            <AdminDash />
+          </PrivateRoute>
+        } />
         <Route path="/confirm-email" element={
           <div className="flex items-center justify-center min-h-screen" style={{ minHeight: '120vh' }}>
             <div className="w-full max-w-2xl mx-4">

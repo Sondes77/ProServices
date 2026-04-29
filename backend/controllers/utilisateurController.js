@@ -133,6 +133,36 @@ exports.updateUser = async (req, res) => {
   }
 };
 
+//Mettre à jour la section apropos d'utilisateur via AdminDash.tsx
+exports.updateAproposUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { apropos} = req.body;
+
+    const query = `
+        UPDATE utilisateurs 
+        SET apropos = ?, date_modification = NOW()
+        WHERE id = ?
+      `;
+
+      const values = [apropos, id];
+
+      db.query(query, values, (err, results) => {
+        if (err) {
+          console.error('Erreur lors de la mise à jour :', err);
+          return res.status(500).json({ message: 'Erreur serveur' });
+        }
+        
+        res.status(200).json({ message: 'Utilisateur mis à jour avec succès' });
+      });
+
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour de l\'utilisateur:', error);
+    return res.status(500).json({ message: 'Erreur interne du serveur' });
+  }
+};
+
 // Login un utilisateur
 // Login un utilisateur avec mot de passe
 //un endpoint de connexion POST /api/login
@@ -155,9 +185,6 @@ exports.login = (req, res) => {
       if (!user) return res.status(401).json({ error: "Utilisateur introuvable" });
   
       const match = await bcrypt.compare(password, user.mot_de_passe);
-      console.log("Mot de passe vérifié:", match); // Affiche le résultat de la comparaison
-      console.log("Mot de passe utilisateur:", user.mot_de_passe); // Affiche le mot de passe hashé
-      console.log("Mot de passe fourni:", password); // Affiche le mot de passe fourni
       if (!match) return res.status(401).json({ error: "Mot de passe incorrect" });
   
       // ✅ Génère un token
@@ -311,7 +338,7 @@ exports.getUtilisateurParamId = (req, res) => {
 };
 // Récupérer tous les utilisateurs
 exports.getUtilisateurs = (req, res) => {
-  db.query('SELECT * FROM utilisateurs', (err, result) => {
+  db.query('SELECT id, nom, prenom, email, email_verified, availability, date_creation, phone, ville, region, category, apropos FROM utilisateurs where role = ?', ['professional'], (err, result) => {
     if (err) {
       console.error('Erreur lors de la récupération des utilisateurs:', err);
       return res.status(500).send('Erreur serveur');

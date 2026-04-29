@@ -18,7 +18,8 @@ router.put('/update-user', verifyToken.verifyToken, utilisateurController.update
 //router.delete('/utilisateur', verifyToken.verifyToken, utilisateurController.deleteUtilisateur); // Route pour supprimer un utilisateur
 
 // Route pour récupérer tous les utilisateurs
-router.get('/utilisateurs', verifyToken.verifyToken, utilisateurController.getUtilisateurs);
+router.get('/utilisateurs', utilisateurController.getUtilisateurs);
+router.put('/users/:id', utilisateurController.updateAproposUser);
 
 //send email code pour vérifier mail & phone
 router.post('/send-verification-code', verifyToken.verifyToken, utilisateurController.sendVerificationCode);
